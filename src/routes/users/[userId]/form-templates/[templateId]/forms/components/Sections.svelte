@@ -7,12 +7,12 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import Icon from '@iconify/svelte';
 	import { formComponents } from './response.types/index';
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { deleteSectionById, findSectionById } from './localFunctions';
 	import { toast } from 'svelte-sonner';
 	import { deleteSection, fetchSectionData } from './apiFunctions';
 	import { DragAndDropFunctionality } from '$lib';
-
+	import { page } from '$app/state';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -40,6 +40,10 @@
 		closeSectionForm,
 		closeSubSectionForm
 	} = $props();
+
+	const templateId = $derived(page.params.templateId);
+	const userId = $derived(page.params.userId);
+	// const templateId = $derived(page.params.templateId);
 
 	console.log('this is uisection array');
 	$inspect(uiSections);
@@ -212,6 +216,12 @@
 			}
 		}
 	}
+
+	function sectionEditRoute(id){
+		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/edit`)
+	}
+	// const route = `/users/${userId}/form-templates/${templateId}/forms/${section.databaseId}/edit`;
+	// const editRoute = `/users/${userId}/assessment-templates/${templateId}/assessment-nodes/${nodeId}/edit`;
 </script>
 
 {#if showSheet}
@@ -250,17 +260,15 @@
 				</div>
 
 				<div class="flex h-full w-full flex-row">
-					<Button
-						variant="outline"
-						class="h-full w-full p-2"
-						onclick={() => openSectionForm(section.databaseId)}
-					>
-						<div class="flex-col">
-							{section.Title || section.name}
-							<p class="text-sm text-gray-300 dark:text-gray-500">
-								Drop the Subsection and response type cards here
-							</p>
-						</div>
+					<Button variant="outline" class="h-full w-full p-2" onclick={()=>sectionEditRoute(section.databaseId)}>
+				
+							<div class="flex-col">
+								{section.Title || section.name}
+								<p class="text-sm text-gray-300 dark:text-gray-500">
+									Drop the Subsection and response type cards here
+								</p>
+							</div>
+						
 					</Button>
 
 					<AlertDialog.Root>

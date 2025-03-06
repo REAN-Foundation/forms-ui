@@ -11,12 +11,15 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	// import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { columns } from '$lib/components/template/data.table/column';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	//////////////////////////////////////////////////////////////////////
 
 	// let data: PageServerData = $props();
 	let { data }: { data: PageServerData } = $props();
-	console.log(data)
+	
+	const userId = page.params.userId
 	let assessments = data.assessmentTemplate;
 
 	let expandedItem: string | null = $state();
@@ -99,6 +102,10 @@
 	function selectSubmenu(submenu: string) {
 		selectedSubmenu = submenu;
 	}
+
+		function templateEditRoute(){
+		goto(`/users/${userId}/form-templates/create`)
+	}
 </script>
 
 <div class="relative flex h-[95vh] w-full flex-row">
@@ -143,7 +150,8 @@
 								<h2 class="text-2xl font-bold tracking-tight">Welcome...!</h2>
 								<p class="text-muted-foreground">Here's a list of your Assessments!</p>
 							</div>
-							<Dialog.Root>
+							<Button class="{buttonVariants({ variant: 'default' })} ml-auto w-28"  onclick={()=>templateEditRoute}> Add New</Button>
+							<!-- <Dialog.Root>
 								<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
 									Add New
 								</Dialog.Trigger>
@@ -163,7 +171,7 @@
 										</Dialog.Footer>
 									</form>
 								</Dialog.Content>
-							</Dialog.Root>
+							</Dialog.Root> -->
 						</div>
 
 						<DataTable data={assessments} {columns} />
