@@ -15,6 +15,7 @@
 
 	import * as Card from '$lib/components/ui/card/index.js';
 	import InfoIcon from '../common/InfoIcon.svelte';
+	import Question from '../preview/Question.svelte';
 	//////////////////////////////////////////////////////////////////////////////
 
 	// interface Props {
@@ -26,53 +27,58 @@
 	// }
 
 	// Destructure props
-	let { data, responseType, id, questionCard, handleSubmit } = $props();
+	let { formDataForForm }: { data: { form: SuperValidated<Infer<QuestionSchema>> } } = $props();
 
+console.log(formDataForForm.form.data,"This is data form editor");
 	// Initialize superForm
-	const form = superForm(data.form, {
+	const form = superForm(formDataForForm.form, {
 		validators: zodClient(questionSchema),
 		applyAction: true,
 		dataType: 'json'
 	});
 
+
+
 	const { form: formData } = form;
 
-	$effect(() => {
-		const form = formData as {
-			id?: string;
-			parentSectionId?: string;
-			title?: string;
-			description?: string;
-			responseType?: string;
-			options?: string[];
-			score?: number;
-			correctAnswer?: string;
-			hint?: string;
-			questionImageUrl?: string;
-			rangeMin?: number;
-			rangeMax?: number;
-		};
+	// $effect(() => {
+	// 	const form = formData as {
+	// 		id?: string;
+	// 		parentSectionId?: string;
+	// 		title?: string;
+	// 		description?: string;
+	// 		responseType?: string;
+	// 		options?: string[];
+	// 		score?: number;
+	// 		correctAnswer?: string;
+	// 		hint?: string;
+	// 		questionImageUrl?: string;
+	// 		rangeMin?: number;
+	// 		rangeMax?: number;
+	// 	};
 
-		form.description = questionCard.Description;
-		form.title = questionCard.Title;
-		form.score = questionCard.Score;
-		form.correctAnswer = questionCard.CorrectAnswer;
-		form.hint = questionCard.Hint;
-		form.questionImageUrl = questionCard.QuestionImageUrl;
-		form.rangeMin = questionCard.RangeMin;
-		form.rangeMax = questionCard.RangeMax;
-	});
+	// 	form.description = questionCard.Description;
+	// 	form.title = questionCard.Title;
+	// 	form.score = questionCard.Score;
+	// 	form.correctAnswer = questionCard.CorrectAnswer;
+	// 	form.hint = questionCard.Hint;
+	// 	form.questionImageUrl = questionCard.QuestionImageUrl;
+	// 	form.rangeMin = questionCard.RangeMin;
+	// 	form.rangeMax = questionCard.RangeMax;
+	// });
 
-	let options = questionCard.Options ? [...questionCard.Options] : [];
+	let options = $state()
+	options = formDataForForm.form.data.options ? [...formDataForForm.form.data.options] : [];
 
 	const hardcodedImageUrl = 'https://example.com/default';
 
 	function addOption() {
-		if (responseType === 'Boolean' && options.length >= 2) return;
+		if (formDataForForm.form.data.responseType === '"MultiChoiceSelection"' && options.length >= 2) return;
 		options = [
 			...options,
 			{ Sequence: (options.length + 1).toString(), Data: '', ImageUrl: hardcodedImageUrl }
 		];
+		console.log(options);
 	}
 
 	function updateOption(index: number, key: string, value: string) {
@@ -105,21 +111,13 @@
 		action="?/createQuestion"
 		method="post"
 		use:enhance
-		onsubmit={(event: Event) => {
-			event.preventDefault();
-			formData.options = options;
-			// handleSubmit({ formData });
-			submit(event);
-			handleSubmit({ formData });
-	
-		}}
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-5 py-4"
 	>
 		<Form.Field {form} name="id" class="hidden">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Id</Form.Label>
-					<Input {...props} bind:value={id} />
+					<Input {...props} bind:value={$formData.id} />
 				{/snippet}
 			</Form.Control>
 			<Form.Description>This is id of section.</Form.Description>
@@ -147,7 +145,7 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Type</Form.Label>
-					<Input {...props} bind:value={responseType} class="w-full" />
+					<Input {...props} bind:value={$formData.responseType} class="w-full" />
 				{/snippet}
 			</Form.Control>
 			<!-- <Form.Description>This is your question title.</Form.Description> -->
@@ -179,16 +177,16 @@
 			<div class="text-center text-red-500">No type selected.</div>
 		{/if} -->
 
-		{#if responseType === 'Range' || responseType === 'Rating'}
-			<svelte:component this={fields[responseType]} {data} />
-		{:else if responseType === 'Boolean'}
-			<!-- Options Section -->
+		<!-- Options Section -->
+		{#if formDataForForm.form.data.responseType === 'Range' || formDataForForm.form.data.responseType === 'Rating'}
+			<!-- <svelte:component this={fields[formDataForForm.responseType]} {formDataForForm} /> -->
+		{:else if formDataForForm.form.data.responseType === 'Boolean'}
 			<div class="mt-4">
 				<Button
 					type="button"
 					onclick={addOption}
 					class="btn btn-primary mb-4"
-					disabled={responseType === 'Boolean' && options.length >= 2}
+					disabled={formDataForForm.responseType === 'Boolean' && options.length >= 2}
 				>
 					Add Option
 				</Button>
@@ -225,11 +223,10 @@
 					</div>
 				{/each}
 
-				<!-- Hidden input field to store the options array -->
 				<input type="hidden" name="options" value={JSON.stringify(options)} />
 			</div>
-		{:else if responseType === 'SingleChoiceSelection' || responseType === 'MultiChoiceSelection'}
-			<!-- Options Section -->
+		{:else if formDataForForm.form.data.responseType === 'SingleChoiceSelection' || formDataForForm.form.data.responseType === 'MultiChoiceSelection'}
+
 			<div class="mt-4">
 				<Button type="button" onclick={addOption} class="btn btn-primary mb-4">Add Option</Button>
 
@@ -265,7 +262,7 @@
 					</div>
 				{/each}
 
-				<!-- Hidden input field to store the options array -->
+		
 				<input type="hidden" name="options" value={JSON.stringify(options)} />
 			</div>
 		{/if}

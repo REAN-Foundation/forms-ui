@@ -3,31 +3,35 @@
 	import { Button } from '$lib/components/ui/button';
 	import { getQuestionById } from '../../apiFunctions';
 
-	//////////////////////////////////////////////////////////////////////////////
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+
+	////////////////////////////////////////////////////////////////
 
 	let { close, submit, open, responseType, id, card } = $props();
+	const templateId = $derived(page.params.templateId);
+	const userId = $derived(page.params.userId);
 
+	function questionEditRoute(id) {
+		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
+	}
 	let optionsArray = $state([]);
 
-	if (card?.Options && Array.isArray(card.Options)) {
+	if (card.Options && Array.isArray(card.Options) && card.Options.length > 0) {
 		optionsArray = card.Options.map((option) => option.Text);
 	} else {
 		optionsArray = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
 	}
 
 	// async function openSheetFunction() {
-	// 	// console.log(id, 'this is id');
-	// 	const card = await getQuestionById(id);
-	// 	dispatch('openSheet', { responseType: responseType, id: id, card: card });
+	// 	const fetchedCard = await getQuestionById(id);
+	// 	dispatch('openSheet', { responseType, id, card: fetchedCard });
 	// }
 </script>
 
 <Button
-	class="flex h-fit w-full flex-col space-y-4 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => {
-		const questionCard = await getQuestionById(id);
-		open({ responseType: responseType, id: id, card: questionCard });
-	}}
+	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
+	onclick={async () => questionEditRoute(id)}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

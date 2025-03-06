@@ -1,43 +1,25 @@
 <script lang="ts">
-
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { getQuestionById } from '../../apiFunctions';
-	
+
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+
 	////////////////////////////////////////////////////////////////
+	
 	let { close, submit, open, responseType, id, card } = $props();
+	const templateId = $derived(page.params.templateId);
+	const userId = $derived(page.params.userId);
 
-	// // const dispatch = createEventDispatcher();
-
-	// // export let responseType: string;
-	// // export let id: string;
-	// // export let card;
-
-	// async function openSheetFunction() {
-	// 	// console.log(id, 'this is id');
-	// 	const card = await getQuestionById(id);
-	// 	// dispatch('openSheet', { responseType: responseType, id: id, card: card });
-	// 	open({ responseType: responseType, id: id, card: card });
-	// }
-
-	// function closeSheetFunction() {
-	// 	console.log('this is from text component');
-	// 	// dispatch('closeSheet');
-	// 	close();
-	// }
-
-	// function handleSubmitFunction(event: any) {
-	// 	// dispatch('handleSubmitForm', event);
-	// 	submit(event);
-	// }
+	function questionEditRoute(id) {
+		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
+	}
 </script>
 
 <Button
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => {
-		const questionCard = await getQuestionById(id);
-		open({ responseType: responseType, id: id, card: questionCard });
-	}}
+	onclick={async () => questionEditRoute(id)}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

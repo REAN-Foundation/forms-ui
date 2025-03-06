@@ -320,10 +320,6 @@
 								{#if card.name !== 'None'}
 									<svelte:component
 										this={formComponents[card.name]}
-										open={(temp: { detail: { responseType: any; id: any; card: any } }) =>
-											openSheet(temp)}
-										close={(temp: any) => closeSheet(temp)}
-										submit={(temp: { preventDefault: () => void }) => handleSubmit(temp)}
 										responseType={selected}
 										id={card.id}
 										{card}
