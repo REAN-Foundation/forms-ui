@@ -18,8 +18,8 @@
 
 	// let data: PageServerData = $props();
 	let { data }: { data: PageServerData } = $props();
-	
-	const userId = page.params.userId
+
+	const userId = page.params.userId;
 	let assessments = data.assessmentTemplate;
 
 	let expandedItem: string | null = $state();
@@ -59,7 +59,7 @@
 				// 	action: () => selectSubmenu('importForm')
 				// }
 			]
-		},
+		}
 
 		// {
 		// 	name: 'Responses',
@@ -103,8 +103,9 @@
 		selectedSubmenu = submenu;
 	}
 
-		function templateEditRoute(){
-		goto(`/users/${userId}/form-templates/create`)
+	function templateEditRoute() {
+		console.log(userId,"This is template edit router");
+		goto(`/users/${userId}/form-templates/create`);
 	}
 </script>
 
@@ -150,7 +151,12 @@
 								<h2 class="text-2xl font-bold tracking-tight">Welcome...!</h2>
 								<p class="text-muted-foreground">Here's a list of your Assessments!</p>
 							</div>
-							<Button class="{buttonVariants({ variant: 'default' })} ml-auto w-28"  onclick={()=>templateEditRoute}> Add New</Button>
+							<Button
+								class="{buttonVariants({ variant: 'default' })} ml-auto w-28"
+								onclick={templateEditRoute}
+							>
+								Add New</Button
+							>
 							<!-- <Dialog.Root>
 								<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
 									Add New

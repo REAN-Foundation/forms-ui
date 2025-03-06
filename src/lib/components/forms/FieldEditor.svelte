@@ -67,7 +67,7 @@ console.log(formDataForForm.form.data,"This is data form editor");
 	// 	form.rangeMax = questionCard.RangeMax;
 	// });
 
-	let options = $state()
+	let options = $state([]);
 	options = formDataForForm.form.data.options ? [...formDataForForm.form.data.options] : [];
 
 	const hardcodedImageUrl = 'https://example.com/default';
@@ -106,12 +106,12 @@ console.log(formDataForForm.form.data,"This is data form editor");
 	};
 </script>
 
-<Card.Root class="rounded-lg border p-4">
+<!-- <Card.Root class="rounded-lg border p-4"> -->
 	<form
 		action="?/createQuestion"
 		method="post"
 		use:enhance
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-5 py-4"
+		class="custom-scrollbar h-[calc(screen-2rem)] mx-auto w-[100vh] overflow-y-hidden px-5 py-4"
 	>
 		<Form.Field {form} name="id" class="hidden">
 			<Form.Control>
@@ -397,7 +397,7 @@ console.log(formDataForForm.form.data,"This is data form editor");
 
 		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
 	</form>
-</Card.Root>
+<!-- </Card.Root> -->
 
 <style>
 	.custom-scrollbar::-webkit-scrollbar {

@@ -475,7 +475,7 @@
 	/>
 {/if} -->
 
-{#if sectionForm}
+<!-- {#if sectionForm}
 	<div
 		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
 	>
@@ -499,7 +499,7 @@
 			on:close={closeSubSectionForm}
 		/>
 	</div>
-{/if}
+{/if} -->
 
 <div class="bg-green-5 flex min-h-screen flex-row">
 	<div class="flex flex-1 overflow-hidden">
@@ -588,18 +588,6 @@
 </div>
 
 <style>
-	.delete-button {
-		@apply absolute -right-7 top-[40%] hidden border p-1 text-white;
-	}
-
-	.hover-container:hover .delete-button {
-		@apply block;
-	}
-
-	.highlight {
-		border: 2px solid blue; /* You can change the border style and color */
-	}
-
 	:global(.dialog-content.dialog-content) {
 		scrollbar-width: none;
 		-ms-overflow-style: none;

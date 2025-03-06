@@ -9,16 +9,20 @@
 
 	/////////////////////////////////////////////////////////////////////////////
 
-	let { data }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
+	let { formDataForForm }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
 
-	const form = superForm(data.form, {
-		validators: zodClient(assessmentSchema)
+	console.log(formDataForForm.form,"This is data from section form editor");
+		// Initialize superForm
+	const form = superForm(formDataForForm.form,{
+		validators: zodClient(assessmentSchema),
+		applyAction: true,
+		dataType: 'json'
 	});
 
 	const { form: formData, enhance } = form;
 </script>
 
-<!-- <form method="POST" action="?/newAssessment" use:enhance> -->
+<form method="post" action="?/newAssessment" use:enhance>
 <Form.Field {form} name="title">
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
@@ -146,10 +150,10 @@
 		<input name="defaultSectionNumbering" value={$formData.defaultSectionNumbering} hidden />
 	</Form.Control>
 </Form.Field>
-
+	<Form.Button type="submit" class="mx-auto mt-5 w-full">Submit</Form.Button>
 <!-- <Form.Description>This is title of section.</Form.Description> -->
 <!-- <Form.Description>This is Description for section.</Form.Description> -->
 <!-- <Form.Description>This is parent section for section.</Form.Description> -->
 <!-- <Form.Description>This is tenantCode for this assessment.</Form.Description> -->
 <!-- <Form.Description>This is current version.</Form.Description> -->
-<!-- </form>	 -->
+</form>	
