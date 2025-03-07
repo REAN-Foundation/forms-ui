@@ -9,11 +9,11 @@
 
 	/////////////////////////////////////////////////////////////////////////////
 
-	let { formDataForForm }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
+	let { data }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
 
-	console.log(formDataForForm.form,"This is data from section form editor");
+	console.log(data.form,"This is data from section form editor");
 		// Initialize superForm
-	const form = superForm(formDataForForm.form,{
+	const form = superForm(data.form,{
 		validators: zodClient(assessmentSchema),
 		applyAction: true,
 		dataType: 'json'

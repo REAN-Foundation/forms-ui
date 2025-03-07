@@ -151,13 +151,13 @@
 								<h2 class="text-2xl font-bold tracking-tight">Welcome...!</h2>
 								<p class="text-muted-foreground">Here's a list of your Assessments!</p>
 							</div>
-							<Button
+							<!-- <Button
 								class="{buttonVariants({ variant: 'default' })} ml-auto w-28"
 								onclick={templateEditRoute}
 							>
 								Add New</Button
-							>
-							<!-- <Dialog.Root>
+							> -->
+							<Dialog.Root>
 								<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
 									Add New
 								</Dialog.Trigger>
@@ -177,7 +177,7 @@
 										</Dialog.Footer>
 									</form>
 								</Dialog.Content>
-							</Dialog.Root> -->
+							</Dialog.Root>
 						</div>
 
 						<DataTable data={assessments} {columns} />

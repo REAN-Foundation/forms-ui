@@ -19,13 +19,13 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 		const assessmentTemplate = response?.Data?.Items ?? []; 
 
-		// const initialData = {
-		// 	defaultSectionNumbering: true 
-		// };
+		const initialData = {
+			defaultSectionNumbering: true 
+		};
 		return {
 			assessmentTemplate,
 			message: response.Message,
-			// form: await superValidate(initialData, zod(assessmentSchema)),
+			form: await superValidate(initialData, zod(assessmentSchema)),
 		};
 
 	} catch (error) {
