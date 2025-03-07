@@ -8,7 +8,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
     event.depends('app:allNodes')
     try {
-        const assessmentTemplateId = event.params.assessmentId;
+        const assessmentTemplateId = event.params.templateId;
         const response = await getFormTemplatePreviewById(assessmentTemplateId);
 
         if (response.Status === 'failure' || response.HttpCode !== 200) {
