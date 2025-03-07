@@ -3,8 +3,10 @@ import type { PageServerLoad } from "./$types.js";
 import { superValidate } from "sveltekit-superforms";
 // import { assessmentSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
-import { fail, redirect, type Actions, type RequestEvent } from "@sveltejs/kit";
+import { fail, type Actions, type RequestEvent } from "@sveltejs/kit";
 import { createFormTemplate } from "../../../../api/services/form-template.js";
+import { redirect } from 'sveltekit-flash-message/server';
+import { successMessage } from "$lib/components/toast/message.utils.js";
 /////////////////////////////////////////////////
 
 export const load: PageServerLoad = async () => {
@@ -49,10 +51,16 @@ export const actions = {
             );
         }
 
+        // throw redirect(
+        //     303,
+        //     `/users/${userId}/form-templates/${templateId}/forms`,
+
+        // );
         throw redirect(
             303,
             `/users/${userId}/form-templates/${templateId}/forms`,
-
+            successMessage(`Profile updated successfully!`),
+            event
         );
     },
 } satisfies Actions;
