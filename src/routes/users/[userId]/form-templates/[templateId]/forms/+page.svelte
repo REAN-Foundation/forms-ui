@@ -35,12 +35,12 @@
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	let data: PageServerData = $props();
-	let sections = $state(data.data.assessmentTemplate.Sections);
-	let questions = $state(data.data.assessmentTemplate.Questions);
-	let templateInfo = $state(data.data.assessmentTemplate.Template); //data.assessmentTemplate.Template;
+	let { data }: { data: PageServerData } = $props();
+	let sections = $state(data.assessmentTemplate.Sections);
+	let questions = $state(data.assessmentTemplate.Questions);
+	let templateInfo = $state(data.assessmentTemplate.Template); //data.assessmentTemplate.Template;
 	const parentFormTemplateId = $derived(page.params.templateId);
-	let result = findSectionByTitle(data.data.assessmentTemplate.Sections, 'Assessment Root Section');
+	let result = findSectionByTitle(data.assessmentTemplate.Sections, 'Assessment Root Section');
 	const rootSectionId: string = result.id;
 	let showSheet = $state(false); // false;
 	let responseType = $state();
@@ -62,13 +62,13 @@
 	const userId = $derived(page.params.userId);
 
 	uiSections = mapSectionsAndQuestions(
-		data.data.assessmentTemplate.Sections,
+		data.assessmentTemplate.Sections,
 		[],
 		rootSectionId,
-		data.data.assessmentTemplate.Questions
+		data.assessmentTemplate.Questions
 	);
 
-	// console.log(uiSections);
+	console.log(uiSections);
 	$inspect(uiSections);
 
 	async function handleDragAndDrop(
