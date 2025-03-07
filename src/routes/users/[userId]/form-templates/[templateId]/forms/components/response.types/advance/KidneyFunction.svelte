@@ -21,7 +21,6 @@
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
 	onclick={async () => questionEditRoute(id)}
 	variant="ghost"
->variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
 		<h1 class="text-md font-bold text-slate-400">
