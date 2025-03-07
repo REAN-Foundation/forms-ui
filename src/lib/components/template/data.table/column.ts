@@ -5,7 +5,7 @@ import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import DataTableActions from "./DataTableActions.svelte";
 import DataTableCheckbox from "./DataTableCheckbox.svelte";
 // import DataTableEmailButton from "./data-table/data-table-email-button.svelte";
-
+// import * as Dialog from "$lib/components/ui/dialog/index.js";
 /////////////////////////////////////////////////////////////////
 
 export type DataTableProps<TData, TValue> = {
@@ -29,6 +29,7 @@ export type Template = {
   id: string;
 };
 
+const data ={}
 export const columns: ColumnDef<Template>[] = [
   {
     id: 'select',
@@ -49,6 +50,39 @@ export const columns: ColumnDef<Template>[] = [
     enableHiding: false
   },
   {
+    accessorKey: 'id',
+    header: 'Edit',
+    cell: ({ row }) => {
+      const TenantCodeSnippet = createRawSnippet<[string]>((getTenantCode) => {
+        const TenantCode = getTenantCode();
+        return {
+          render: () => `<Dialog.Root>
+			<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
+				${Add New}
+			</Dialog.Trigger>
+			<Dialog.Content class="sm:max-w-[100vh]">
+				<Dialog.Header>
+					<Dialog.Title>Add New</Dialog.Title>
+					<Dialog.Description>
+						Make changes to your Assessment Template here. Click save when you're done.
+					</Dialog.Description>
+				</Dialog.Header>
+				<form method="POST" action="?/newAssessment" use:enhance>
+					<div class="">
+						<AssessmentForm {data} />
+					</div>
+					<Dialog.Footer>
+						<Button type="submit">Save changes</Button>
+					</Dialog.Footer>
+				</form>
+			</Dialog.Content>
+		</Dialog.Root>`
+        };
+      });
+      return renderSnippet(TenantCodeSnippet, row.getValue('TenantCode'));
+    }
+  },
+  {
     accessorKey: 'Title',
     header: 'Title',
     cell: ({ row }) => {
@@ -61,6 +95,7 @@ export const columns: ColumnDef<Template>[] = [
       return renderSnippet(titleSnippet, row.getValue('Title'));
     }
   },
+  
   {
     accessorKey: 'TenantCode',
     header: 'TenantCode',
@@ -154,7 +189,7 @@ export const columns: ColumnDef<Template>[] = [
   {
     id: 'actions',
     enableHiding: false,
-    cell: ({ row }) => renderComponent(DataTableActions, { id: row.original.id })
+    cell: ({ row }) => renderComponent(DataTableActions, { id: row.original.id,data})
   }
 ];
 

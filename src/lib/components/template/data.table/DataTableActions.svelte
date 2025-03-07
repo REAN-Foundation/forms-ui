@@ -9,9 +9,17 @@
 	import { toast } from 'svelte-sonner';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+
+  import { Label } from "$lib/components/ui/label/index.js";
+	import { enhance } from '$app/forms';
+	import { AssessmentForm } from '$lib';
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	let { id }: { id: string } = $props();
+	let { id,data } = $props();
+
+	console.log(data,"this is data from table")
+	// let { data } = $props();
 	const userId = $page.params.userId;
 	let response;
 	let submissionId: string = '';
@@ -149,6 +157,29 @@
 
 		<DropdownMenu.Separator />
 
+		<Dialog.Root>
+			<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
+				Add New
+			</Dialog.Trigger>
+			<Dialog.Content class="sm:max-w-[100vh]">
+				<Dialog.Header>
+					<Dialog.Title>Add New</Dialog.Title>
+					<Dialog.Description>
+						Make changes to your Assessment Template here. Click save when you're done.
+					</Dialog.Description>
+				</Dialog.Header>
+				<form method="POST" action="?/newAssessment" use:enhance>
+					<div class="">
+						<AssessmentForm {data} />
+					</div>
+					<Dialog.Footer>
+						<Button type="submit">Save changes</Button>
+					</Dialog.Footer>
+				</form>
+			</Dialog.Content>
+		</Dialog.Root>
+
+		
 		<AlertDialog.Root>
 			<AlertDialog.Trigger class="{buttonVariants({ variant: 'ghost' })} w-full ">
 				<Button variant="ghost" class="h-8 w-full justify-start pl-6">Delete</Button>
