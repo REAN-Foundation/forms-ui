@@ -7,12 +7,13 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import Icon from '@iconify/svelte';
 	import { formComponents } from './response.types/index';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { deleteSectionById, findSectionById } from './localFunctions';
 	import { toast } from 'svelte-sonner';
 	import { deleteSection, fetchSectionData } from './apiFunctions';
 	import { DragAndDropFunctionality } from '$lib';
 	import { page } from '$app/state';
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -43,10 +44,7 @@
 
 	const templateId = $derived(page.params.templateId);
 	const userId = $derived(page.params.userId);
-	// const templateId = $derived(page.params.templateId);
 
-	console.log('this is uisection array');
-	$inspect(uiSections);
 	// Initialize selected component (default to first component in the list)
 	const componentKeys = Object.keys(formComponents);
 	let selected = $state(componentKeys[0]);
@@ -217,8 +215,8 @@
 		}
 	}
 
-	function sectionEditRoute(id){
-		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/edit`)
+	function sectionEditRoute(id) {
+		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/edit`);
 	}
 	// const route = `/users/${userId}/form-templates/${templateId}/forms/${section.databaseId}/edit`;
 	// const editRoute = `/users/${userId}/assessment-templates/${templateId}/assessment-nodes/${nodeId}/edit`;
@@ -252,28 +250,40 @@
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
 					>
-						<Button variant="ghost" size="sm" class="w-9 p-0">
-							<Icon icon="fluent:chevron-up-down-24-regular" width="16" height="16" />
-							<span class="sr-only">Toggle</span>
-						</Button>
+						<Tooltip.Provider>
+							<Tooltip.Root>
+								<Tooltip.Trigger>
+									<Button variant="ghost" size="sm" class="w-9 p-0">
+										<Icon icon="fluent:chevron-up-down-24-regular" width="16" height="16" />
+
+										<span class="sr-only">Toggle</span>
+									</Button>
+								</Tooltip.Trigger>
+								<Tooltip.Content>
+									<p>Collaps to see</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</Tooltip.Provider>
 					</Collapsible.Trigger>
 				</div>
 
 				<div class="flex h-full w-full flex-row">
-					<Button variant="outline" class="h-full w-full p-2" onclick={()=>sectionEditRoute(section.databaseId)}>
-				
-							<div class="flex-col">
-								{section.Title || section.name}
-								<p class="text-sm text-gray-300 dark:text-gray-500">
-									Drop the Subsection and response type cards here
-								</p>
-							</div>
-						
+					<Button
+						variant="outline"
+						class="h-full w-full p-2"
+						onclick={() => sectionEditRoute(section.databaseId)}
+					>
+						<div class="flex-col">
+							{section.Title || section.name}
+							<p class="text-sm text-gray-300 dark:text-gray-500">
+								Drop the Subsection and response type cards here
+							</p>
+						</div>
 					</Button>
 
 					<AlertDialog.Root>
 						<AlertDialog.Trigger class="{buttonVariants({ variant: 'outline' })} bg-red400">
-							<Button variant="ghost" class="ml-1 h-full w-full bg-green-400 py-6"
+							<Button variant="ghost" class="ml-1 h-full w-full "
 								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 							</Button>
 						</AlertDialog.Trigger>
@@ -418,22 +428,24 @@
 												class: 'w-9 p-0'
 											})}
 										>
-											<!-- <Tooltip.Root>
-																	<Tooltip.Trigger>
-																		<Button variant="ghost" size="sm" class="w-9 p-0">
-																			<Icon
-																				icon="fluent:chevron-up-down-24-regular"
-																				width="16"
-																				height="16"
-																			/>
+											<Tooltip.Provider>
+												<Tooltip.Root>
+													<Tooltip.Trigger>
+														<Button variant="ghost" size="sm" class="w-9 p-0">
+															<Icon
+																icon="fluent:chevron-up-down-24-regular"
+																width="16"
+																height="16"
+															/>
 
-																			<span class="sr-only">Toggle</span>
-																		</Button>
-																	</Tooltip.Trigger>
-																	<Tooltip.Content>
-																		<p>Collaps to see</p>
-																	</Tooltip.Content>
-																</Tooltip.Root> -->
+															<span class="sr-only">Toggle</span>
+														</Button>
+													</Tooltip.Trigger>
+													<Tooltip.Content>
+														<p>Collaps to see</p>
+													</Tooltip.Content>
+												</Tooltip.Root>
+											</Tooltip.Provider>
 										</Collapsible.Trigger>
 									</div>
 									<div class="flex h-fit w-full flex-row">
@@ -503,30 +515,12 @@
 											>
 												<div class="relative flex w-[95%]">
 													{#if subcard.name !== 'None'}
-														<!-- <svelte:component
-																				this={formComponents[subcard.name]}
-																				on:openSheet={openSheet}
-																				on:closeSheet={closeSheet}
-																				on:handleSubmitForm={handleSubmit}
-																				responseType={subcard.name}
-																				id={subcard.id}
-																				card={subcard}
-																			/> -->
-														<select bind:value={selected}>
-															{#each componentKeys as key}
-																<option value={key}>{key}</option>
-															{/each}
-														</select>
-
-														{#if selected}
-															{@const SelectedComponent = formComponents[selected]}
-															<SelectedComponent
-																on:openSheet={openSheet}
-																on:closeSheet={closeSheet}
-																on:handleSubmitForm={handleSubmit}
-																responseType={selected}
-															/>
-														{/if}
+														<svelte:component
+															this={formComponents[subcard.name]}
+															responseType={subcard.name}
+															id={subcard.id}
+															card={subcard}
+														/>
 													{:else}
 														<div class="relative"></div>
 													{/if}

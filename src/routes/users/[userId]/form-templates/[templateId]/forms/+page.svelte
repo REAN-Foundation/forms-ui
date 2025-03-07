@@ -68,7 +68,8 @@
 		data.data.assessmentTemplate.Questions
 	);
 
-	console.log(uiSections);
+	// console.log(uiSections);
+	$inspect(uiSections);
 
 	async function handleDragAndDrop(
 		dropData,
@@ -124,14 +125,20 @@
 				};
 				uiSections = [...uiSections, newSection];
 				toast.success('Section added successfully! Please add section details.');
-			} else {
+			} else{
+				// console.log("sectionId", sectionId);
+				// console.log(uiSections,"This is UI SECTION Array")
 				// Handling subsection addition
 				const parentSection = findSectionById(uiSections, sectionId);
+				// console.log("*****parentSection", parentSection);
 				if (parentSection) {
 					const newSubsectionId = await getSectionData(
 						parentFormTemplateId,
 						parentSection.databaseId
 					);
+					invalidateAll();
+					console.log(newSubsectionId, 'this is newSubsectionId====================');
+					
 					const newSubsection = {
 						...dropData,
 						id: newSubsectionId.id,
@@ -144,6 +151,8 @@
 					updateSectionWithSubsection(uiSections, sectionId, newSubsection);
 					parentSection.subsectionCount++;
 					uiSections = [...uiSections];
+					console.log('Updated UI Sections:', uiSections);	
+					
 					toast.success('Subsection added successfully! Please add subsection details.');
 				}
 			}

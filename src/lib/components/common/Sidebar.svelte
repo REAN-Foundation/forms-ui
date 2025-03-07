@@ -50,9 +50,9 @@
 					/>
 					Add Section
 				</Button>
-			</div>
+			</div> 
 			<!-- Sub Section selection -->
-			<div
+			<!-- <div
 				class="flex cursor-grab items-center justify-center mt-2"
 				use:draggable={{ ...SubSectionTemplate, type: 'SubSection' }}
 				role="button"
@@ -67,7 +67,7 @@
 					/>
 					Add SubSection
 				</Button>
-			</div>
+			</div> -->
 		</Card.Root>
 
 		<!-- Layout selection -->

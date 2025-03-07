@@ -1,18 +1,8 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
-import { updateQuestion } from '../../../../../api/services/question';
-// import type { PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
+import type {  ServerLoadEvent } from '@sveltejs/kit';
 import { getFormTemplateDetails } from '../../../../../api/services/form-template';
-import chalk from 'chalk';
-// import { createSection, getSectionByTemplateId } from '../../../../../api/services/section';
-import { sectionSchema } from "$lib/components/forms/section-schema";
-import { questionSchema } from "$lib/components/forms/question-schema";
-import { superValidate } from "sveltekit-superforms";
-import { fail } from "@sveltejs/kit";
-import { zod } from "sveltekit-superforms/adapters";
-import { updateSection } from '../../../../../api/services/section';
 import type { PageServerLoad } from './$types';
-import { toast } from 'svelte-sonner';
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
@@ -32,8 +22,8 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		return {
 			assessmentTemplateId,
 			assessmentTemplate,
-			sectionForm: await superValidate(zod(sectionSchema)),
-			questionForm: await superValidate(zod(questionSchema)),
+			// sectionForm: await superValidate(zod(sectionSchema)),
+			// questionForm: await superValidate(zod(questionSchema)),
 			message: response.Message
 		};
 	} catch (error) {

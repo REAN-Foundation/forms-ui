@@ -32,6 +32,25 @@ export type Section = {
     ParentFormTemplateId: string;
 };
 
+// export type SubSection = {
+//     id: string;
+//     SectionIdentifier: string | null;
+//     Title: string | null;
+//     Description: string | null;
+//     DisplayCode: string;
+//     Sequence: string | null;
+//     ParentSectionId: string;
+//     CreatedAt: string;
+//     UpdatedAt: string | null;
+//     localId: number;
+//     title: string;
+//     databaseId: string;
+//     name: string;
+//     type: string;
+//     cards: Card[];
+//     ParentFormTemplateId: string;
+// };
+
 export type newSectionTemplate = {
     id: string
     localId: number,
@@ -44,26 +63,29 @@ export type newSectionTemplate = {
 
 export function findSectionById(
     sections: Section[],
-    sectionId: number | string,
-    parentSectionId: string | number = null
+    sectionId: number,
+    parentSectionId: string = null
 ): Section | null {
-    for (const section of sections) {
-        // Check if the current section matches the ID and optional parent ID
-        if (section.localId === sectionId && (parentSectionId === null || section.ParentSectionId === parentSectionId)) {
-            // console.log("Found section:", section);
-            return section;
-        }
-        if (section.subsections) {
-            for (const subsection of section.subsections) {
-                // Check if the subsection matches the ID and parent ID
-                if (subsection.localId === sectionId) {
-                    console.log("Found subsection:", subsection);
-                    return subsection;
-                }
-            }
-        }
-    }
-    return null;
+    const selectedSction = sections.filter((section) => section.localId == sectionId);
+    return selectedSction.length > 0 ? selectedSction[0] : null;
+    // for (const section of sections) {
+    //     // Check if the current section matches the ID and optional parent ID
+    //     // if (section.localId == sectionId && (parentSectionId === null || section.ParentSectionId === parentSectionId)) {
+    //         if (section.localId == sectionId) {
+    //         console.log("Found section:", section);
+    //         return section;
+    //     }
+    //     if (section.subsections) {
+    //         for (const subsection of section.subsections) {
+    //             // Check if the subsection matches the ID and parent ID
+    //             if (subsection.localId == sectionId) {
+    //                 console.log("Found subsection:", subsection);
+    //                 return subsection;
+    //             }
+    //         }
+    //     }
+    // }
+    // return null;
 }
 
 export function updateSectionWithSubsection(
@@ -80,6 +102,7 @@ export function updateSectionWithSubsection(
                 subsections: [...section.subsections, subsection]
             };
         }
+        
         // Recursively call the function if subsections exist.
         if (section.subsections.length > 0) {
             return {
@@ -260,7 +283,7 @@ export function mapSectionsAndQuestions(
             .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
 
         let sectionNameCounter = 1;
-        let sectionIdCounter = 1;
+        let         sectionIdCounter = 1;
 
         // Map each child subsection to the parent section
         const mappedSubsections = childSubsections.map((subsection) => {
