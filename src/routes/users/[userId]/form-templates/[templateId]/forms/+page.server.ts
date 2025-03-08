@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type {  ServerLoadEvent } from '@sveltejs/kit';
-import { getFormTemplateDetails } from '../../../../../api/services/form-template';
 import type { PageServerLoad } from './$types';
+import { getFormTemplatePreviewById } from '../../../../../api/services/form-template';
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	event.depends('app:allNodes')
 	try {
 		const assessmentTemplateId = event.params.templateId;
-		const response = await getFormTemplateDetails(assessmentTemplateId);
+		const response = await getFormTemplatePreviewById(assessmentTemplateId);
 		// console.log(response);
 		if (response.Status === 'failure' || response.HttpCode !== 200) {
 			throw error(response.HttpCode, response.Message);
@@ -18,7 +18,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 		const assessmentTemplate = response.Data;
 
-		// console.log("This is load method", assessmentTemplate.Sections)
+		// console.log("This is load method", assessmentTemplate);
 		return {
 			assessmentTemplateId,
 			assessmentTemplate,

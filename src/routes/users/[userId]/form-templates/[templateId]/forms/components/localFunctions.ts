@@ -135,9 +135,9 @@ export function deleteSectionById(sections: Section[], sectionId: number, isSubs
 }
 
 
-export const findSectionByTitle = (sections: Section[], title: string): Section | undefined => {
-    return sections.find(section => section.Title === title);
-};
+// export const findSectionByTitle = (sections: Section[], title: string): Section | undefined => {
+//     return sections.find(section => section.Title === title);
+// };
 
 // export function mapSectionsAndQuestions(
 //     sections: any[],
@@ -250,115 +250,113 @@ export const findSectionByTitle = (sections: Section[], title: string): Section 
 
 export function mapSectionsAndQuestions(
     sections: any[],
-    uiSections: Section[],
+    uiSections: any[],
     rootSectionId: string,
-    questions: any[]
 ) {
     if (!sections || !Array.isArray(sections)) {
         console.error('mapSections: sections is undefined or not an array', sections);
         return;
     }
 
-    let cardLocalIdCounter = 1;
-
     // 1) Exclude the root section
     const nonRootSections = sections.filter((section) => section.ParentSectionId !== rootSectionId);
 
-    // 2) Separate out parent sections (sections with ParentSectionId as rootSectionId)
-    const parentSections = sections.filter((section) => section.ParentSectionId === rootSectionId);
+    console.log('nonRootSections', nonRootSections);
+    // // 2) Separate out parent sections (sections with ParentSectionId as rootSectionId)
+    // const parentSections = sections.filter((section) => section.ParentSectionId === rootSectionId);
 
-    // 3) Separate the remaining sections as subsections
-    const subsections = nonRootSections.filter(
-        (section) => section.ParentSectionId !== rootSectionId
-    );
+    // // 3) Separate the remaining sections as subsections
+    // const subsections = nonRootSections.filter(
+    //     (section) => section.ParentSectionId !== rootSectionId
+    // );
 
-    // 4) Sort parent sections by Sequence
-    parentSections.sort((a, b) => a.Sequence.localeCompare(b.Sequence));
+    // // 4) Sort parent sections by Sequence
+    // parentSections.sort((a, b) => a.Sequence.localeCompare(b.Sequence));
 
-    // 5) Map subsections to their corresponding parent sections
-    const mappedParentSections = parentSections.map((parentSection, index) => {
-        // Assign subsections to the parent section and sort them by Sequence
-        const childSubsections = subsections
-            .filter((subsection) => subsection.ParentSectionId === parentSection.id)
-            .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
+    // // 5) Map subsections to their corresponding parent sections
+    // const mappedParentSections = parentSections.map((parentSection, index) => {
+    //     // Assign subsections to the parent section and sort them by Sequence
+    //     const childSubsections = subsections
+    //         .filter((subsection) => subsection.ParentSectionId === parentSection.id)
+    //         .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
 
-        let sectionNameCounter = 1;
-        let         sectionIdCounter = 1;
+    //     let sectionNameCounter = 1;
+    //     let         sectionIdCounter = 1;
 
-        // Map each child subsection to the parent section
-        const mappedSubsections = childSubsections.map((subsection) => {
-            // Assign questions to subsections and sort them by Sequence
-            const subsectionQuestions = questions
-                .filter((question) => question.ParentFormSection.id === subsection.id)
-                .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
+    //     // Map each child subsection to the parent section
+    //     const mappedSubsections = childSubsections.map((subsection) => {
+    //         // Assign questions to subsections and sort them by Sequence
+    //         const subsectionQuestions = questions
+    //             .filter((question) => question.ParentFormSection.id === subsection.id)
+    //             .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
 
-            // Create card objects for questions with localIds
-            const mappedCards = subsectionQuestions.map((question) => ({
-                id: question.id,
-                name: question.ResponseType,
-                type: question.ResponseType,
-                Title: question.Title,
-                Description: question.Description,
-                Options: question.Options,
-                value: null,
-                icon: null,
-                localId: cardLocalIdCounter++
-            }));
+    //         // Create card objects for questions with localIds
+    //         const mappedCards = subsectionQuestions.map((question) => ({
+    //             id: question.id,
+    //             name: question.ResponseType,
+    //             type: question.ResponseType,
+    //             Title: question.Title,
+    //             Description: question.Description,
+    //             Options: question.Options,
+    //             value: null,
+    //             icon: null,
+    //             localId: cardLocalIdCounter++
+    //         }));
 
-            return {
-                ...subsection,
-                cards: mappedCards,
-                subsections: [],
-                subsectionCount: 0,
-                name: `SubSection ${sectionNameCounter++}`,
-                localId: sectionIdCounter++
-            };
-        });
+    //         return {
+    //             ...subsection,
+    //             cards: mappedCards,
+    //             subsections: [],
+    //             subsectionCount: 0,
+    //             name: `SubSection ${sectionNameCounter++}`,
+    //             localId: sectionIdCounter++
+    //         };
+    //     });
 
-        // Assign questions to parent sections and sort them by Sequence
-        const parentSectionQuestions = questions
-            .filter((question) => question.ParentFormSection.id === parentSection.id)
-            .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
+    //     // Assign questions to parent sections and sort them by Sequence
+    //     const parentSectionQuestions = questions
+    //         .filter((question) => question.ParentFormSection.id === parentSection.id)
+    //         .sort((a, b) => a.Sequence.localeCompare(b.Sequence));
 
-        // Create card objects for questions with localIds
-        const parentSectionCards = parentSectionQuestions.map((question) => ({
-            id: question.id,
-            name: question.ResponseType,
-            type: question.ResponseType,
-            Title: question.Title,
-            Description: question.Description,
-            Options: question.Options,
-            value: null,
-            icon: null,
-            localId: cardLocalIdCounter++
-        }));
+    //     // Create card objects for questions with localIds
+    //     const parentSectionCards = parentSectionQuestions.map((question) => ({
+    //         id: question.id,
+    //         name: question.ResponseType,
+    //         type: question.ResponseType,
+    //         Title: question.Title,
+    //         Description: question.Description,
+    //         Options: question.Options,
+    //         value: null,
+    //         icon: null,
+    //         localId: cardLocalIdCounter++
+    //     }));
 
-        return {
-            ...parentSection,
-            localId: index + 1,
-            title: `Section ${index + 1}`,
-            databaseId: parentSection.id,
-            id: (index + 1).toString(),
-            name: `Section ${index + 1}`,
-            type: 'section',
-            cards: parentSectionCards,
-            subsections: mappedSubsections,
-            subsectionCount: mappedSubsections.length,
-            SectionIdentifier: parentSection.SectionIdentifier,
-            Title: parentSection.Title,
-            Description: parentSection.Description,
-            DisplayCode: parentSection.DisplayCode,
-            Sequence: parentSection.Sequence,
-            ParentSectionId: parentSection.ParentSectionId,
-            ParentFormTemplateId: parentSection.ParentFormTemplate.id,
-            CreatedAt: parentSection.CreatedAt,
-            UpdatedAt: parentSection.UpdatedAt
-        };
-    });
+    //     return {
+    //         ...parentSection,
+    //         localId: index + 1,
+    //         title: `Section ${index + 1}`,
+    //         databaseId: parentSection.id,
+    //         id: (index + 1).toString(),
+    //         name: `Section ${index + 1}`,
+    //         type: 'section',
+    //         cards: parentSectionCards,
+    //         subsections: mappedSubsections,
+    //         subsectionCount: mappedSubsections.length,
+    //         SectionIdentifier: parentSection.SectionIdentifier,
+    //         Title: parentSection.Title,
+    //         Description: parentSection.Description,
+    //         DisplayCode: parentSection.DisplayCode,
+    //         Sequence: parentSection.Sequence,
+    //         ParentSectionId: parentSection.ParentSectionId,
+    //         ParentFormTemplateId: parentSection.ParentFormTemplate.id,
+    //         CreatedAt: parentSection.CreatedAt,
+    //         UpdatedAt: parentSection.UpdatedAt
+    //     };
+    // });
 
-    // Append the sorted and mapped sections to uiSections
-    uiSections.push(...mappedParentSections);
-    return uiSections;
+    // // Append the sorted and mapped sections to uiSections
+    // uiSections.push(...mappedParentSections);
+    // return uiSections;
 }
 
 // async function handleDragAndDrop(
