@@ -1,12 +1,14 @@
-// import { redirect, type Actions, type RequestEvent, type ServerLoadEvent } from "@sveltejs/kit";
+import { type Actions, type RequestEvent, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { getFormTemplateById } from '../../../api/services/form-template';
+import { createFormTemplate, getFormTemplateById } from '../../../api/services/form-template';
 
 import { superValidate } from "sveltekit-superforms";
-// import { fail } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { zod } from "sveltekit-superforms/adapters";
 import { assessmentSchema } from '$lib/components/template/assessment-schema';
-import type { ServerLoadEvent } from "@sveltejs/kit";
+import { redirect } from 'sveltekit-flash-message/server';
+import { successMessage } from "$lib/components/toast/message.utils.js";
+
 ////////////////////////////////////////////////////////
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
@@ -40,43 +42,44 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 };
 
 
-// export const actions = {
-// 	newAssessment: async (event: RequestEvent) => {
+export const actions = {
+	newAssessment: async (event: RequestEvent) => {
 
-// 		const form = await superValidate(event, zod(assessmentSchema));
-// 		if (!form.valid) {
-// 			return fail(400, {
-// 				form,
-// 			});
-// 		}
-// 		// const request = event.request;
-// 		const userId = event.params.userId
+		const form = await superValidate(event, zod(assessmentSchema));
+		if (!form.valid) {
+			return fail(400, {
+				form,
+			});
+		}
+		// const request = event.request;
+		const userId = event.params.userId
 
-// 		const response = await createFormTemplate(
-// 			form.data.title,
-// 			form.data.description,
-// 			form.data.currentVersion,
-// 			form.data.tenantCode,
-// 			form.data.itemsPerPage,
-// 			form.data.type,
-// 			userId,
-// 			form.data.defaultSectionNumbering
-// 		);
+		const response = await createFormTemplate(
+			form.data.title,
+			form.data.description,
+			form.data.currentVersion,
+			form.data.tenantCode,
+			form.data.itemsPerPage,
+			form.data.type,
+			userId,
+			form.data.defaultSectionNumbering
+		);
 
-// 		const templateId = response.Data.id;
+		const templateId = response.Data.id;
 
-// 		if (response.Status === 'failure' || response.HttpCode !== 201) {
-// 			throw redirect(
-// 				303,
-// 				`/users/${userId}/form-templates`,
-// 			);
-// 		}
+		if (response.Status === 'failure' || response.HttpCode !== 201) {
+			throw redirect(
+				303,
+				`/users/${userId}/form-templates`,
+			);
+		}
 
-// 		throw redirect(
-// 			303,
-// 			`/users/${userId}/form-templates/${templateId}/forms`,
-
-// 		);
-// 	},
-// } satisfies Actions;
+		 throw redirect(
+			303,
+			`/users/${userId}/form-templates/${templateId}/forms`,
+			successMessage(`Form template created successfully!`),
+			event
+		);
+	},
+} satisfies Actions;
 

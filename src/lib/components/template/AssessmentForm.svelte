@@ -22,7 +22,7 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<form method="post" action="?/newAssessment" use:enhance>
+<!-- <form method="post" action="?/newAssessment" use:enhance> -->
 <Form.Field {form} name="title">
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
@@ -56,7 +56,7 @@
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
 		{#snippet children({ props })}
-			<Form.Label>Tenant Code <span class="text-red-600">*</span></Form.Label>
+			<Form.Label>Tenant Code</Form.Label>
 			<Input {...props} bind:value={$formData.tenantCode} />
 		{/snippet}
 		<!-- <Form.Label class="text-right">Tenant Code <span class="text-red-600">*</span></Form.Label>
@@ -128,7 +128,7 @@
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
 		{#snippet children({ props })}
-			<Form.Label>currentVersion <span class="text-red-600">*</span></Form.Label>
+			<Form.Label>currentVersion</Form.Label>
 			<Input {...props} bind:value={$formData.currentVersion} />
 		{/snippet}
 		<!-- <Form.Label class="text-right">Current Version</Form.Label>
@@ -138,22 +138,25 @@
 	<Form.FieldErrors />
 </Form.Field>
 
-<Form.Field {form} name="defaultSectionNumbering" class="flex flex-row">
+<Form.Field {form} name="defaultSectionNumbering">
 	<Form.Control>
-		<Checkbox bind:checked={$formData.defaultSectionNumbering} />
-		<div class="space-y-1 leading-none">
-			<!-- <Form.Label>Default Section Numbering <span class="text-red-600">*</span></Form.Label>
-			<Form.Description>This is for adding the default Numbering to sections</Form.Description> -->
-			<Form.Label>Default Section Numbering <span class="text-red-600">*</span></Form.Label>
-			<!-- <Input {...props} bind:value={$formData.title} /> -->
+		<div class="flex flex-row gap-2">
+			<Checkbox bind:checked={$formData.defaultSectionNumbering} />
+			<div class="space-y-1 leading-none">
+				<!-- <Form.Label>Default Section Numbering <span class="text-red-600">*</span></Form.Label>
+				<Form.Description>This is for adding the default Numbering to sections</Form.Description> -->
+				<Form.Label>Default Section Numbering </Form.Label>
+				<!-- <Input {...props} bind:value={$formData.title} /> -->
+			</div>
 		</div>
+
 		<input name="defaultSectionNumbering" value={$formData.defaultSectionNumbering} hidden />
 	</Form.Control>
 </Form.Field>
-	<Form.Button type="submit" class="mx-auto mt-5 w-full">Submit</Form.Button>
+	<!-- <Form.Button type="submit" class="mx-auto mt-5 w-full">Submit</Form.Button> -->
 <!-- <Form.Description>This is title of section.</Form.Description> -->
 <!-- <Form.Description>This is Description for section.</Form.Description> -->
 <!-- <Form.Description>This is parent section for section.</Form.Description> -->
 <!-- <Form.Description>This is tenantCode for this assessment.</Form.Description> -->
 <!-- <Form.Description>This is current version.</Form.Description> -->
-</form>	
+<!-- </form>	 -->
