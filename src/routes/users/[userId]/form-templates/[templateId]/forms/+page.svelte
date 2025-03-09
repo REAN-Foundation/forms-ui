@@ -9,7 +9,7 @@
 
 	import { measurements, cards } from '$lib/components/common/questionTypes';
 
-		import {
+	import {
 		deleteSectionById,
 		findSectionById,
 		// findSectionByTitle,
@@ -17,11 +17,7 @@
 		updateSectionWithSubsection,
 		type Section
 	} from './components/localFunctions';
-	import {
-		createNewQuestion,
-		createNewSection,
-		deleteQuestion,
-	} from './components/apiFunctions';
+	import { createNewQuestion, createNewSection, deleteQuestion } from './components/apiFunctions';
 
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
@@ -29,17 +25,18 @@
 	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	////////////////////////////////////////////////////////////////////////////////////
-	
+
 	let { data }: { data: PageServerData } = $props();
-	
-	
+
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
-	
-	let uiSections = $state(data.assessmentTemplate[0].Subsections);
+
+	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
+	const rootSectionId = data.templateInfo.FormSections[0].id;
 
-console.log(data.assessmentTemplate[0].id, 'this is id');	
+	// console.log(data.templateInfo.FormSections[0].id, 'this is id');
+	// console.log(data.templateInfo.FormSections[0].Subsections, 'this is id');
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -134,7 +131,7 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 		// 			);
 		// 			invalidateAll();
 		// 			console.log(newSubsectionId, 'this is newSubsectionId====================');
-					
+
 		// 			const newSubsection = {
 		// 				...dropData,
 		// 				id: newSubsectionId.id,
@@ -147,8 +144,8 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 		// 			updateSectionWithSubsection(uiSections, sectionId, newSubsection);
 		// 			parentSection.subsectionCount++;
 		// 			uiSections = [...uiSections];
-		// 			console.log('Updated UI Sections:', uiSections);	
-					
+		// 			console.log('Updated UI Sections:', uiSections);
+
 		// 			toast.success('Subsection added successfully! Please add subsection details.');
 		// 		}
 		// 	}
@@ -242,8 +239,6 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 		closeSheet(event);
 	}
 
-
-
 	async function getSectionData(parentFormTemplateId: string, parentSectionId: string) {
 		console.log(parentFormTemplateId, 'parentFormTemplateId');
 		const sectionData = await createNewSection({ parentFormTemplateId, parentSectionId });
@@ -309,8 +304,8 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 	// 	closeDeleteModal();
 	// }
 
-	function handleDeleteCard(sectionId: string, questionId: string) {
-		console.log(sectionId, questionId,"card to delete");
+	function handleDeleteCard(questionId: string) {
+		console.log(questionId, 'card to delete');
 		// const section = findSectionById(uiSections, sectionId);
 		// if (section) {
 		// 	section.cards = section.cards.filter((card) => card.localId !== cardId);
@@ -318,7 +313,7 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 		// } else {
 		// 	toast.error('Cannot find section. Try Again');
 		// }
-		// handleQuestionDelete(questionId);
+		handleQuestionDelete(questionId);
 		deleteButtonClicked = !deleteButtonClicked;
 		// toast.success('Question deleted successful');
 	}
@@ -534,8 +529,8 @@ console.log(data.assessmentTemplate[0].id, 'this is id');
 						{subSectionForm}
 						{handleDeleteCard}
 						{handleQuestionDelete}
-						/>
-						<!-- {data}
+					/>
+					<!-- {data}
 						{responseType}
 						{questionId}
 						{questionCard}

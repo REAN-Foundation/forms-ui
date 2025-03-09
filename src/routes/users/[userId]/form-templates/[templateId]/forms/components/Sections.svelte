@@ -48,7 +48,7 @@
 	// Initialize selected component (default to first component in the list)
 	const componentKeys = Object.keys(formComponents);
 	let selected = $state(componentKeys[0]);
-	let cardToDelete = $state();
+	let cardToDelete = $state('');
 
 	// function openSheet(e: { detail: { responseType: any; id: any; card: any } }) {
 	// 	showSheet = true;
@@ -87,35 +87,28 @@
 		highlightedSubSection = subSectionId;
 	}
 
-	function openDeleteModal(card) {
-		console.log(card,"this is card to delete")
+	// -----------------------------------------------------------------------------------------------------------------
+	function openDeleteModal(card: string) {
+		// console.log(card, 'this is card to delete');
 		deleteButtonClicked = true;
 		cardToDelete = card;
-		console.log(cardToDelete,"this is card to delete inside");
-		
+		// console.log(cardToDelete, 'this is card to delete inside');
 	}
-		console.log(cardToDelete,"this is card to delete outside");
 
 	function closeDeleteModal() {
 		deleteButtonClicked = false;
 		cardToDelete = null;
 	}
-	function confirmDeleteCard(sectionId: string, cardId: string) {
-		console.log(sectionId, cardId);
-		handleDeleteCard(sectionId, cardId);
+	function confirmDeleteCard(cardId: string) {
+		console.log(cardId);
+		handleDeleteCard(cardId);
 		closeDeleteModal();
 	}
 
-	function openDeleteSubModal({
-		sectionLocalId,
-		subsectionLocalId,
-		cardLocalId,
-		cardId,
-		isSubsection
-	}) {
+	function openDeleteSubModal(cardId) {
 		deleteSubButtonClicked = true;
-		console.log('Deleting:', sectionLocalId, subsectionLocalId, cardLocalId, cardId, isSubsection);
-		cardToDelete = { sectionLocalId, subsectionLocalId, cardLocalId, cardId, isSubsection };
+		console.log('Deleting:', cardId);
+		cardToDelete = cardId;
 	}
 
 	function closeDeleteSubModal() {
@@ -123,64 +116,55 @@
 		cardToDelete = null;
 	}
 
-	function confirmDeleteSubcard(
-		sectionLocalId: number,
-		subsectionLocalId: number,
-		cardLocalId: number,
-		cardId: string
-	) {
-		console.log(sectionLocalId, subsectionLocalId, cardLocalId, cardId);
-		handleDeleteSubcard(sectionLocalId, subsectionLocalId, cardLocalId, cardId);
+	function confirmDeleteSubcard(cardId: string) {
+		console.log(cardId);
+		handleDeleteSubcard(cardId);
 		closeDeleteModal();
 	}
 
-	function handleDeleteSubcard(
-		sectionId: number,
-		subsectionId: number,
-		subcardId: number,
-		subcardDatabaseId: string
-	) {
-		console.log('Deleting subcard:', sectionId, subsectionId, subcardId, subcardDatabaseId);
+	function handleDeleteSubcard(cardId: string) {
+		console.log('Deleting subcard:', cardId);
 
-		const section = findSectionById(uiSections, sectionId);
-		if (section) {
-			const subsection = section.subsections.find((sub) => sub.localId === subsectionId);
-			if (subsection) {
-				subsection.cards = subsection.cards.filter((card) => card.localId !== subcardId); // Delete subcard from subsection
-				uiSections = [...uiSections]; // Update the UI
-			} else {
-				toast.error('Subsection not found.');
-			}
-		} else {
-			toast.error('Section not found.');
-		}
+		// const section = findSectionById(uiSections, sectionId);
+		// if (section) {
+		// 	const subsection = section.subsections.find((sub) => sub.localId === subsectionId);
+		// 	if (subsection) {
+		// 		subsection.cards = subsection.cards.filter((card) => card.localId !== subcardId); // Delete subcard from subsection
+		// 		uiSections = [...uiSections]; // Update the UI
+		// 	} else {
+		// 		toast.error('Subsection not found.');
+		// 	}
+		// } else {
+		// 	toast.error('Section not found.');
+		// }
 
 		// Deleting the actual question related to the subcard (if applicable)
-		handleQuestionDelete(subcardDatabaseId);
+		// handleQuestionDelete(cardId);
 		deleteSubButtonClicked = !deleteSubButtonClicked;
 		// toast.success('Subcard deleted successfully');
 	}
-	const handleDeleteSectionById = async (localId: string) => {
+	const handleDeleteSectionById = async (sectionId: string) => {
 		try {
-			const res = await deleteSection({ sectionId: localId });
+			const res = await deleteSection({ sectionId: sectionId });
 			console.log('Delete successful:', res);
 		} catch (error) {
 			console.error('Error in handleDeleteSectionById:', error);
 		}
 	};
 
-	function handleDeleteSection(sectionId: number, databaseId: string) {
-		uiSections = deleteSectionById(uiSections, sectionId);
+	function handleDeleteSection(databaseId: string) {
+		// uiSections = deleteSectionById(uiSections, sectionId);
 		handleDeleteSectionById(databaseId);
 		toast.success('Section deleted successful');
 	}
 
-	function handleDeleteSubsection(subsectionId: number, sectionId: number, databaseId: string) {
-		uiSections = deleteSectionById(uiSections, subsectionId, true);
-		handleDeleteSectionById(databaseId);
+	function handleDeleteSubsection(sectionId: string) {
+		// uiSections = deleteSectionById(uiSections, subsectionId, true);
+		handleDeleteSectionById(sectionId);
 		toast.success('Subsection deleted successfully');
 	}
 
+	//-----------------------------------------------------------------------------------------------------------------
 	async function openSectionForm(id: string) {
 		sectionDataFromDatabase = await fetchSectionData(id);
 		sectionForm = true;
@@ -237,7 +221,7 @@
 		handleSubmitForm={handleSubmit}
 	/>
 {/if} -->
-{#each uiSections as section (section.id)}
+{#each uiSections as section, index (section.id)}
 	<div
 		class="my-4 border p-3 {highlightedSection === section.id ? 'highlight' : ''}"
 		ondragenter={() => handleDragEnter(section.id)}
@@ -279,7 +263,11 @@
 						onclick={() => sectionEditRoute(section.id)}
 					>
 						<div class="flex-col">
-							{section.Title || section.id}
+							{#if section.Title}
+								<p>{section.Title}</p>
+							{:else}
+								<p>{`Section ${index + 1}`}</p>
+							{/if}
 							<p class="text-sm text-gray-300 dark:text-gray-500">
 								Drop the Subsection and response type cards here
 							</p>
@@ -302,12 +290,10 @@
 							</AlertDialog.Header>
 							<AlertDialog.Footer>
 								<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-								<!-- <AlertDialog.Action
+								<AlertDialog.Action
 									class="bg-destructive hover:bg-destructive dark:text-white"
-									onclick={() => handleDeleteSection(section.localId, section.id)}
-									>Delete</AlertDialog.Action
-								> -->
-								<AlertDialog.Action>Delete</AlertDialog.Action>
+									onclick={() => handleDeleteSection(section.id)}>Delete</AlertDialog.Action
+								>
 							</AlertDialog.Footer>
 						</AlertDialog.Content>
 					</AlertDialog.Root>
@@ -360,12 +346,7 @@
 								{/if}
 								<button
 									class="delete-button"
-									onclick={() =>
-										openDeleteModal({
-											sectionId: section.id,
-											cardId: card.id,
-											
-										})}
+									onclick={() => openDeleteModal(card.id)}
 									aria-label="Delete card"
 								>
 									<Icon icon="weui:delete-outlined" width="18" height="18" style="color: red" />
@@ -393,12 +374,7 @@
 									<Button variant="outline" onclick={closeDeleteModal}>Cancel</Button>
 									<Button
 										class="bg-destructive hover:bg-destructive dark:text-white"
-										onclick={() =>
-											confirmDeleteCard(
-												cardToDelete.sectionlId,
-												cardToDelete.cardlId,
-											
-											)}
+										onclick={() => confirmDeleteCard(cardToDelete)}
 									>
 										Delete
 									</Button>
@@ -408,21 +384,20 @@
 					{/if}
 				</div>
 
-				<!-- {#if section.subsections.length > 0}
-					{#each section.subsections as subsection (subsection.localId)}
+				{#if section.Subsections.length > 0}
+					{#each section.Subsections as subsection, index (subsection.id)}
 						<div
-							class="my-2 h-fit w-full p-1 {highlightedSubSection === subsection.localId
+							class="my-2 h-fit w-full p-1 {highlightedSubSection === subsection.id
 								? 'highlight'
 								: ''} "
-							ondragenter={() => handleDragEnterSubsection(subsection.localId)}
-							ondragleave={() => handleDragLeaveSubsection(subsection.localId)}
-							ondragover={(event) => handleDragOverSubsection(subsection.localId, event)}
+							ondragenter={() => handleDragEnterSubsection(subsection.id)}
+							ondragleave={() => handleDragLeaveSubsection(subsection.id)}
+							ondragover={(event) => handleDragOverSubsection(subsection.id, event)}
 							use:dropzone={{
-								on_dropzone: (data, e) =>
-									handleDragAndDrop(data, e, section.localId, subsection.localId)
+								on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id, subsection.id)
 							}}
 							role="region"
-							aria-label={`Subsection ${subsection.name}`}
+							aria-label={`Subsection ${subsection.Title}`}
 						>
 							<Collapsible.Root class=" space-y-2">
 								<div class="flex flex-row">
@@ -461,7 +436,11 @@
 											onclick={() => openSubSectionForm(subsection.id, section.databaseId)}
 										>
 											<div class="flex-col">
-												{subsection.Title || subsection.name}
+												{#if subsection.Title}
+													<p>{subsection.Title}</p>
+												{:else}
+													<p>{`Subsection ${index + 1}`}</p>
+												{/if}
 												<p class=" text-gray-300">Drag cards into this section</p>
 											</div>
 										</Button>
@@ -489,12 +468,8 @@
 													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 													<AlertDialog.Action
 														class="bg-destructive hover:bg-destructive dark:text-white"
-														onclick={() =>
-															handleDeleteSubsection(
-																subsection.localId,
-																section.localId,
-																subsection.id
-															)}>Delete</AlertDialog.Action
+														onclick={() => handleDeleteSubsection(subsection.id)}
+														>Delete</AlertDialog.Action
 													>
 												</AlertDialog.Footer>
 											</AlertDialog.Content>
@@ -505,24 +480,24 @@
 									<div
 										class="h-fit w-full"
 										role="list"
-										aria-label={`Cards in Subsection: ${subsection.name}`}
+										aria-label={`Cards in Subsection: ${subsection.Title}`}
 									>
-										{#each subsection.cards as subcard, index (subcard.localId)}
+										{#each subsection.Questions as subcard, index (subcard.id)}
 											<div
 												class="hover-container my-1 items-center justify-between"
 												ondragstart={(event) =>
-													handleCardDragStart(subsection.localId, subcard.localId, event)}
+													handleCardDragStart(subsection.id, subcard.id, event)}
 												ondragover={(event) => {
 													event.preventDefault();
 												}}
-												ondrop={(event) => handleCardDrop(subsection.localId, index, event)}
+												ondrop={(event) => handleCardDrop(subsection.id, index, event)}
 												role="listitem"
-												aria-label={`Draggable subcard: ${subcard.name}`}
+												aria-label={`Draggable subcard: ${subcard.Title}`}
 											>
 												<div class="relative flex w-[95%]">
 													{#if subcard.name !== 'None'}
 														<svelte:component
-															this={formComponents[subcard.name]}
+															this={formComponents[subcard.ResponseType]}
 															responseType={subcard.name}
 															id={subcard.id}
 															card={subcard}
@@ -533,14 +508,7 @@
 
 													<button
 														class="delete-button"
-														onclick={() =>
-															openDeleteSubModal({
-																sectionLocalId: section.localId,
-																subsectionLocalId: subsection.localId,
-																cardLocalId: subcard.localId,
-																cardId: subcard.id,
-																isSubsection: true 
-															})}
+														onclick={() => openDeleteSubModal(subcard.id)}
 														aria-label="Delete subcard"
 													>
 														<Icon
@@ -575,13 +543,7 @@
 														<Button variant="outline" onclick={closeDeleteSubModal}>Cancel</Button>
 														<Button
 															class="bg-destructive hover:bg-destructive dark:text-white"
-															onclick={() =>
-																confirmDeleteSubcard(
-																	cardToDelete.sectionLocalId,
-																	cardToDelete.subsectionLocalId,
-																	cardToDelete.cardLocalId,
-																	cardToDelete.cardId
-																)}
+															onclick={() => confirmDeleteSubcard(cardToDelete)}
 														>
 															Delete
 														</Button>
@@ -594,7 +556,7 @@
 							</Collapsible.Root>
 						</div>
 					{/each}
-				{/if} -->
+				{/if}
 				<!-- </div> -->
 			</Collapsible.Content>
 		</Collapsible.Root>

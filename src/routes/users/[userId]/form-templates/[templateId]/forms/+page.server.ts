@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type {  ServerLoadEvent } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getFormTemplatePreviewById } from '../../../../../api/services/form-template';
+import { getFormTemplateDetails } from '../../../../../api/services/form-template';
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10,18 +10,18 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	event.depends('app:allNodes')
 	try {
 		const assessmentTemplateId = event.params.templateId;
-		const response = await getFormTemplatePreviewById(assessmentTemplateId);
+		const response = await getFormTemplateDetails(assessmentTemplateId);
 		// console.log(response);
 		if (response.Status === 'failure' || response.HttpCode !== 200) {
 			throw error(response.HttpCode, response.Message);
 		}
 
-		const assessmentTemplate = response.Data;
+		const templateInfo = response.Data;
 
 		// console.log("This is load method", assessmentTemplate);
 		return {
 			assessmentTemplateId,
-			assessmentTemplate,
+			templateInfo,
 			// sectionForm: await superValidate(zod(sectionSchema)),
 			// questionForm: await superValidate(zod(questionSchema)),
 			message: response.Message
