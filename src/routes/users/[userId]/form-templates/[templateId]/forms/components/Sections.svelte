@@ -11,7 +11,7 @@
 	import { deleteSectionById, findSectionById } from './localFunctions';
 	import { toast } from 'svelte-sonner';
 	import { deleteSection, fetchSectionData } from './apiFunctions';
-	import { DragAndDropFunctionality } from '$lib';
+	import { FormHelper } from '$lib';
 	import { page } from '$app/state';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	////////////////////////////////////////////////////////////////////////////
@@ -21,10 +21,10 @@
 		// data,
 		highlightedSection,
 		highlightedSubSection,
-		showSheet = $bindable(),
+		// showSheet = $bindable(),
 		// responseType,
 		// questionId,
-		// questionCard,
+		questionCard,
 		deleteButtonClicked,
 		deleteSubButtonClicked,
 		sectionDataFromDatabase,
@@ -36,9 +36,9 @@
 
 		handleDeleteCard,
 		handleQuestionDelete,
-		handleDragAndDrop
-		// closeSheet,
-		// handleSubmit,
+		handleDragAndDrop,
+		closeSheet,
+		handleSubmitForm
 		// closeSectionForm,
 		// closeSubSectionForm
 	} = $props();
@@ -51,11 +51,23 @@
 	let selected = $state(componentKeys[0]);
 	let cardToDelete = $state('');
 
+	// let showSheet = $state(false); // false;
 	// function openSheet(e: { detail: { responseType: any; id: any; card: any } }) {
 	// 	showSheet = true;
 	// 	responseType = e.detail.responseType;
 	// 	questionId = e.detail.id;
 	// 	questionCard = e.detail.card;
+	// }
+
+	// function openSheet() {
+	// 	console.log('this is function call');
+	// 	// console.log('this is function call', card);
+
+	// 	showSheet = true;
+	// 	console.log(showSheet, 'this is showSheet');
+	// 	// responseType = e.detail.responseType;
+	// 	// questionId = e.detail.id;
+	// 	// questionCard = e.detail.card;
 	// }
 
 	function handleDragEnter(sectionId: number) {
@@ -222,6 +234,11 @@
 		handleSubmitForm={handleSubmit}
 	/>
 {/if} -->
+<!-- {#if showSheet}
+	<FormHelper {handleSubmitForm} {closeSheet} {questionCard} />
+{/if} -->
+
+<!-- <Button onclick={()=>{showSheet=true}}>Click me</Button> -->
 {#each uiSections as section, index (section.id)}
 	<div
 		class="my-4 border p-3 {highlightedSection === section.id ? 'highlight' : ''}"
@@ -321,10 +338,7 @@
 						>
 							<div class="relative mt-1 flex w-[95%]">
 								{#if card.ResponseType !== 'None'}
-									<svelte:component
-										this={formComponents[card.ResponseType]}
-										{card}
-									/>
+									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 									<!-- <select bind:value={selected}>
 										{#each componentKeys as key}
 											<option value={key}>{key}</option>

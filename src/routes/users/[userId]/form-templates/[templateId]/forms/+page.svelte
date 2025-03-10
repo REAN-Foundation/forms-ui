@@ -3,10 +3,10 @@
 
 	import { page } from '$app/state';
 
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Sidebar } from '$lib/index';
-
+	import { FormHelper } from '$lib';
 	import { measurements, cards } from '$lib/components/common/questionTypes';
 
 	import {
@@ -24,14 +24,16 @@
 	import { dropzone } from '$lib/components/common/dnd';
 	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import { show } from '$lib/components/toast/message.utils';
 	////////////////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
-
-	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
-
-	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
+	const formDataForForm = data;
 	
+	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
+	
+	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
+
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
@@ -222,12 +224,20 @@
 		highlightedSection = null;
 		highlightedSubSection = null;
 	}
+	console.log('this is showSheet');
 
-	function openSheet(e: { detail: { responseType: any; id: any; card: any } }) {
+	let cardToOpen;
+	$inspect(showSheet);
+	function openSheet(card) {
+		console.log('this is function call');
+		console.log('this is function call', card);
+
 		showSheet = true;
-		responseType = e.detail.responseType;
-		questionId = e.detail.id;
-		questionCard = e.detail.card;
+		cardToOpen = card;
+		// console.log(showSheet, 'this is showSheet');
+		// responseType = e.detail.responseType;
+		// questionId = e.detail.id;
+		// questionCard = e.detail.card;
 	}
 
 	function closeSheet(event?: any) {
@@ -235,7 +245,7 @@
 		invalidateAll();
 	}
 
-	function handleSubmit(event: { preventDefault: () => void }) {
+	function handleSubmitForm(event: { preventDefault: () => void }) {
 		event.preventDefault();
 		closeSheet(event);
 	}
@@ -460,6 +470,10 @@
 	// let selected = $state(componentKeys[0]);
 </script>
 
+{#if showSheet}
+	<FormHelper formDataForForm={data} {handleSubmitForm} {closeSheet} questionCard={cardToOpen} />
+{/if}
+
 <div class="bg-green-5 flex min-h-screen flex-row">
 	<div class="flex flex-1 overflow-hidden">
 		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} />
@@ -521,7 +535,6 @@
 						{handleDragAndDrop}
 						{highlightedSection}
 						{highlightedSubSection}
-						{showSheet}
 						{deleteButtonClicked}
 						{deleteSubButtonClicked}
 						{sectionDataFromDatabase}
@@ -530,15 +543,16 @@
 						{subSectionForm}
 						{handleDeleteCard}
 						{handleQuestionDelete}
+						{questionCard}
+						{handleSubmitForm}
+						{closeSheet}
 						{openSheet}
 					/>
 					<!-- {data}
+						{showSheet}
 						{responseType}
 						{questionId}
-						{questionCard}
 						{parentSection}
-						{closeSheet}
-						{handleSubmit}
 						{closeSectionForm}
 						{closeSubSectionForm} -->
 				</div>

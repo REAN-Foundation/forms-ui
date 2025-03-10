@@ -8,7 +8,7 @@
 
 	////////////////////////////////////////////////////////////////
 	
-	let { close, submit, open, responseType, id, card } = $props();
+	let { openSheet, card } = $props();
 	const templateId = $derived(page.params.templateId);
 	const userId = $derived(page.params.userId);
 
@@ -19,7 +19,7 @@
 
 <Button
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => questionEditRoute(id)}
+	onclick={()=>{openSheet(card)}}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

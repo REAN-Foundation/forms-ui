@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import QuestionForm from '../forms/FieldEditor.svelte';
+	import FielEditorForm from '../forms/FieldEditor.svelte';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
 
-	let { data, responseType, id, questionCard, closeSheet, handleSubmitForm } = $props();
+	let { formDataForForm, questionCard, closeSheet, handleSubmitForm } = $props();
+	console.log(formDataForForm, 'this is pageData');
 </script>
 
 <div class="relative">
@@ -28,21 +29,19 @@
 				<Icon icon="hugeicons:cancel-01" width="15" height="15" />
 			</Button>
 		</div>
+		<!-- {JSON.stringify(questionCard)} -->
 
+		<FielEditorForm
+	handleSubmit={handleSubmitForm}
+			{questionCard}
+			formDataForForm={formDataForForm}
+		/>
 		<!-- <QuestionForm
 			{id}
-			data={data.questionForm}
-			onhandleSubmit={handleSubmitFunction}
-			{responseType}
-			{questionCard}
-		/> -->
-		<QuestionForm
-			{id}
-			data={data?.questionForm}
 			{responseType}
 			{questionCard}
 			handleSubmit={handleSubmitForm}
-		/>
+		/> -->
 	</div>
 </div>
 
