@@ -31,6 +31,7 @@
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
+	
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
@@ -222,12 +223,12 @@
 		highlightedSubSection = null;
 	}
 
-	// function openSheet(e: { detail: { responseType: any; id: any; card: any } }) {
-	// 	showSheet = true;
-	// 	responseType = e.detail.responseType;
-	// 	questionId = e.detail.id;
-	// 	questionCard = e.detail.card;
-	// }
+	function openSheet(e: { detail: { responseType: any; id: any; card: any } }) {
+		showSheet = true;
+		responseType = e.detail.responseType;
+		questionId = e.detail.id;
+		questionCard = e.detail.card;
+	}
 
 	function closeSheet(event?: any) {
 		showSheet = false;
@@ -529,6 +530,7 @@
 						{subSectionForm}
 						{handleDeleteCard}
 						{handleQuestionDelete}
+						{openSheet}
 					/>
 					<!-- {data}
 						{responseType}

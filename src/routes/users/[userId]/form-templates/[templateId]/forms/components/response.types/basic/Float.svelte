@@ -9,18 +9,20 @@
 
 	////////////////////////////////////////////////////////////////
 	
-	let { close, submit, open, responseType, id, card } = $props();
+	let { card } = $props();
 	const templateId = $derived(page.params.templateId);
 	const userId = $derived(page.params.userId);
 
-	function questionEditRoute(id) {
-		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
+	console.log(card)
+	function questionEditRoute(card) {
+		// goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
+		console.log(card)
 	}
 </script>
 
 <Button
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => questionEditRoute(id)}
+	onclick={async () => questionEditRoute(card.id)}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

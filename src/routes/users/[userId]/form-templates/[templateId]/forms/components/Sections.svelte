@@ -31,6 +31,7 @@
 		subSectionDataFromDatabase,
 		sectionForm,
 		subSectionForm,
+		openSheet,
 		// parentSection,
 
 		handleDeleteCard,
@@ -322,8 +323,6 @@
 								{#if card.ResponseType !== 'None'}
 									<svelte:component
 										this={formComponents[card.ResponseType]}
-										responseType={selected}
-										id={card.id}
 										{card}
 									/>
 									<!-- <select bind:value={selected}>
