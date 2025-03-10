@@ -33,7 +33,7 @@
 		subSectionForm,
 		// parentSection,
 
-		handleDeleteCard,
+		handleDeleteCard1,
 		handleQuestionDelete,
 		handleDragAndDrop1
 		// closeSheet,
@@ -98,9 +98,9 @@
 		deleteButtonClicked = false;
 		cardToDelete = null;
 	}
-	function confirmDeleteCard(cardId: string) {
+	function confirmDeleteCard(cardId: string, type: string) {
 		console.log(cardId);
-		handleDeleteCard(cardId);
+		handleDeleteCard1(cardId, type);
 		closeDeleteModal();
 	}
 
@@ -262,7 +262,7 @@
 								<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 								<AlertDialog.Action
 									class="bg-destructive hover:bg-destructive dark:text-white"
-									onclick={() => handleDeleteSection(section.id)}>Delete</AlertDialog.Action
+									onclick={() => confirmDeleteCard(section.id, 'Section')}>Delete</AlertDialog.Action
 								>
 							</AlertDialog.Footer>
 						</AlertDialog.Content>
@@ -342,7 +342,7 @@
 									<Button variant="outline" onclick={closeDeleteModal}>Cancel</Button>
 									<Button
 										class="bg-destructive hover:bg-destructive dark:text-white"
-										onclick={() => confirmDeleteCard(cardToDelete)}
+										onclick={() => confirmDeleteCard(cardToDelete, 'Card')}
 									>
 										Delete
 									</Button>

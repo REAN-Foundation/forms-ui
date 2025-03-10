@@ -413,6 +413,45 @@
 		// toast.success('Question deleted successful');
 	}
 
+    async function handleDeleteCard1(id: string, type: 'Section' | 'Card') {
+        console.log('Inside parent handle delete card');
+        console.log(id, type);
+        switch (type) {
+            case 'Section':
+                try {
+                    const response = await fetch(`/api/server/section/${id}`, {
+                        method: 'DELETE',
+                    });
+
+                    const res = await response.json();
+                    console.log('res: ', res);
+                    invalidate('app:allNodes');
+
+                } catch (error) {
+                    console.error('Error deleting section:', error);
+                    invalidate('app:allNodes');
+                }
+                break;
+
+            case 'Card':
+                try {
+                    const response = await fetch(`/api/server/question/${id}`, {
+                        method: 'DELETE',
+                    });
+                    const res = await response.json();
+                    console.log('res: ', res);
+                    invalidate('app:allNodes');
+                } catch (error) {
+                    console.error('Error deleting card:', error);
+                    invalidate('app:allNodes');
+                }
+                break;
+        }
+		// handleQuestionDelete(questionId);
+		// deleteButtonClicked = !deleteButtonClicked;
+		// // toast.success('Question deleted successful');
+	}
+
 	const handleQuestionDelete = async (questionId: string) => {
 		try {
 			await deleteQuestion({ questionId: questionId });
@@ -622,7 +661,7 @@
 						{subSectionDataFromDatabase}
 						{sectionForm}
 						{subSectionForm}
-						{handleDeleteCard}
+						{handleDeleteCard1}
 						{handleQuestionDelete}
 					/>
 					<!-- {data}
