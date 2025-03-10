@@ -35,8 +35,12 @@
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
 
+	$effect(() => {
+		uiSections = data.templateInfo.FormSections[0].Subsections;
+	});
 	// console.log(data.templateInfo.FormSections[0].id, 'this is id');
-	// console.log(data.templateInfo.FormSections[0].Subsections, 'this is id');
+	$inspect(uiSections)
+	console.log(data.templateInfo.FormSections[0].Subsections, 'this is form template data');
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -313,7 +317,7 @@
             console.log('questionData: ', questionData);
             }
         }
-        invalidateAll();
+       	await invalidateAll();
         // uiSections = [...data.templateInfo.FormSections[0].Subsections];
         // invalidate('app:allNodes');
         highlightedSection = null;

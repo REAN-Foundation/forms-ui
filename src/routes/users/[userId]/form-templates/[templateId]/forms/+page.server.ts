@@ -7,8 +7,8 @@ import { getFormTemplateDetails } from '../../../../../api/services/form-templat
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	// const { userId } = event.params;
-    console.log("This is load method of form page----------------");
-	event.depends('app:allNodes')
+    // console.log("This is load method of form page----------------");
+	// event.depends('app:allNodes')
 	try {
 		const assessmentTemplateId = event.params.templateId;
 		const response = await getFormTemplateDetails(assessmentTemplateId);
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 		const templateInfo = response.Data;
         console.log('templateInfo',JSON.stringify(templateInfo));
-		// console.log("This is load method", assessmentTemplate);
+		console.log("This is load method", templateInfo.FormSections[0].Subsections);
 		return {
 			assessmentTemplateId,
 			templateInfo,
