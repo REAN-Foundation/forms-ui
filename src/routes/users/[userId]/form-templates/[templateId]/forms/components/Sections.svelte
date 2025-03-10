@@ -175,35 +175,6 @@
 		subSectionForm = true;
 	}
 
-	function handleCardDragStart(sectionId: number, cardId: number, event: DragEvent) {
-		event.dataTransfer.setData('text/plain', JSON.stringify({ sectionId, cardId }));
-	}
-
-	function handleCardDrop(sectionId: number, cardIndex: number, event: DragEvent) {
-		event.preventDefault();
-
-		const data = JSON.parse(event.dataTransfer.getData('text/plain'));
-		const { sectionId: fromSectionId, cardId: fromCardId } = data;
-
-		// Find the source section and ensure we have a card to move
-		const fromSection = findSectionById(uiSections, fromSectionId);
-		if (fromSection) {
-			const fromIndex = fromSection.cards.findIndex((c) => c.localId === fromCardId);
-
-			// Find the target section and ensure it exists
-			const targetSection = findSectionById(uiSections, sectionId);
-			if (targetSection && fromIndex !== -1 && cardIndex !== -1) {
-				const [movedCard] = fromSection.cards.splice(fromIndex, 1);
-
-				// Insert the card into the target position in the same section
-				targetSection.cards.splice(cardIndex, 0, movedCard);
-
-				// Trigger UI update
-				uiSections = [...uiSections];
-			}
-		}
-	}
-
 	function sectionEditRoute(id) {
 		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/edit`);
 	}
@@ -309,8 +280,6 @@
 						<div
 							class="hover-container items-center justify-between"
 							draggable="true"
-							ondragstart={(event) => handleCardDragStart(section.id, card.id, event)}
-							ondrop={(event) => handleCardDrop(section.id, index, event)}
 							ondragover={(event) => {
 								event.preventDefault();
 							}}
@@ -484,12 +453,9 @@
 										{#each subsection.Questions as subcard, index (subcard.id)}
 											<div
 												class="hover-container my-1 items-center justify-between"
-												ondragstart={(event) =>
-													handleCardDragStart(subsection.id, subcard.id, event)}
 												ondragover={(event) => {
 													event.preventDefault();
 												}}
-												ondrop={(event) => handleCardDrop(subsection.id, index, event)}
 												role="listitem"
 												aria-label={`Draggable subcard: ${subcard.Title}`}
 											>
