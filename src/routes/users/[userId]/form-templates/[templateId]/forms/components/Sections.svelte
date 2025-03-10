@@ -35,7 +35,7 @@
 
 		handleDeleteCard,
 		handleQuestionDelete,
-		handleDragAndDrop
+		handleDragAndDrop1
 		// closeSheet,
 		// handleSubmit,
 		// closeSectionForm,
@@ -44,7 +44,6 @@
 
 	const templateId = $derived(page.params.templateId);
 	const userId = $derived(page.params.userId);
-
 	// Initialize selected component (default to first component in the list)
 	const componentKeys = Object.keys(formComponents);
 	let selected = $state(componentKeys[0]);
@@ -228,7 +227,7 @@
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
 		use:dropzone={{
-			on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id)
+			on_dropzone: (data, e) => handleDragAndDrop1(data, e, section.id)
 		}}
 		role="region"
 		aria-label={`Section ${section.Title}`}
@@ -394,7 +393,7 @@
 							ondragleave={() => handleDragLeaveSubsection(subsection.id)}
 							ondragover={(event) => handleDragOverSubsection(subsection.id, event)}
 							use:dropzone={{
-								on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id, subsection.id)
+								on_dropzone: (data, e) => handleDragAndDrop1(data, e, section.id, subsection.id)
 							}}
 							role="region"
 							aria-label={`Subsection ${subsection.Title}`}
