@@ -473,7 +473,7 @@
 
 													<button
 														class="delete-button"
-														onclick={() => openDeleteSubModal(subcard.id)}
+														onclick={() => openDeleteModal(subcard.id)}
 														aria-label="Delete subcard"
 													>
 														<Icon
@@ -508,7 +508,7 @@
 														<Button variant="outline" onclick={closeDeleteSubModal}>Cancel</Button>
 														<Button
 															class="bg-destructive hover:bg-destructive dark:text-white"
-															onclick={() => confirmDeleteSubcard(cardToDelete)}
+															onclick={() => confirmDeleteCard(cardToDelete,'Card')}
 														>
 															Delete
 														</Button>
