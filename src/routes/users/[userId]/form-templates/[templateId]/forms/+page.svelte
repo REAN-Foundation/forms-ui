@@ -9,15 +9,8 @@
 	import { FormHelper } from '$lib';
 	import { measurements, cards } from '$lib/components/common/questionTypes';
 
-	import {
-		deleteSectionById,
-		findSectionById,
-		// findSectionByTitle,
-		mapSectionsAndQuestions,
-		updateSectionWithSubsection,
-		type Section
-	} from './components/localFunctions';
-	import { createNewQuestion, createNewSection, deleteQuestion } from './components/apiFunctions';
+
+	// import { createNewQuestion, createNewSection, deleteQuestion } from './components/apiFunctions';
 
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
@@ -355,25 +348,25 @@
 		closeSheet(event);
 	}
 
-	async function getSectionData(parentFormTemplateId: string, parentSectionId: string) {
-		console.log(parentFormTemplateId, 'parentFormTemplateId');
-		const sectionData = await createNewSection({ parentFormTemplateId, parentSectionId });
-		console.log(sectionData, 'sectionData');
-		return sectionData;
-	}
+	// async function getSectionData(parentFormTemplateId: string, parentSectionId: string) {
+	// 	console.log(parentFormTemplateId, 'parentFormTemplateId');
+	// 	const sectionData = await createNewSection({ parentFormTemplateId, parentSectionId });
+	// 	console.log(sectionData, 'sectionData');
+	// 	return sectionData;
+	// }
 
-	async function getQuestionData(
-		parentFormTemplateId: string,
-		parentSectionId: string,
-		responseType: string
-	) {
-		const questionData = await createNewQuestion({
-			parentFormTemplateId,
-			parentSectionId,
-			responseType
-		});
-		return questionData;
-	}
+	// async function getQuestionData(
+	// 	parentFormTemplateId: string,
+	// 	parentSectionId: string,
+	// 	responseType: string
+	// ) {
+	// 	const questionData = await createNewQuestion({
+	// 		parentFormTemplateId,
+	// 		parentSectionId,
+	// 		responseType
+	// 	});
+	// 	return questionData;
+	// }
 
 	// function handleDragEnter(sectionId: number) {
 	// 	highlightedSection = sectionId;
@@ -420,19 +413,19 @@
 	// 	closeDeleteModal();
 	// }
 
-	function handleDeleteCard(questionId: string) {
-		console.log(questionId, 'card to delete');
-		// const section = findSectionById(uiSections, sectionId);
-		// if (section) {
-		// 	section.cards = section.cards.filter((card) => card.localId !== cardId);
-		// 	uiSections = [...uiSections];
-		// } else {
-		// 	toast.error('Cannot find section. Try Again');
-		// }
-		handleQuestionDelete(questionId);
-		deleteButtonClicked = !deleteButtonClicked;
-		// toast.success('Question deleted successful');
-	}
+	// function handleDeleteCard(questionId: string) {
+	// 	console.log(questionId, 'card to delete');
+	// 	// const section = findSectionById(uiSections, sectionId);
+	// 	// if (section) {
+	// 	// 	section.cards = section.cards.filter((card) => card.localId !== cardId);
+	// 	// 	uiSections = [...uiSections];
+	// 	// } else {
+	// 	// 	toast.error('Cannot find section. Try Again');
+	// 	// }
+	// 	handleQuestionDelete(questionId);
+	// 	deleteButtonClicked = !deleteButtonClicked;
+	// 	// toast.success('Question deleted successful');
+	// }
 
 	async function handleDeleteCard1(id: string, type: 'Section' | 'Card') {
 		console.log('Inside parent handle delete card');
@@ -472,15 +465,15 @@
 		// // toast.success('Question deleted successful');
 	}
 
-	const handleQuestionDelete = async (questionId: string) => {
-		try {
-			await deleteQuestion({ questionId: questionId });
-			toast.success('Question deleted successfully');
-		} catch (error) {
-			console.error('Error deleting question:', error);
-			toast.error('Failed to delete question. Please try again.');
-		}
-	};
+	// const handleQuestionDelete = async (questionId: string) => {
+	// 	try {
+	// 		await deleteQuestion({ questionId: questionId });
+	// 		toast.success('Question deleted successfully');
+	// 	} catch (error) {
+	// 		console.error('Error deleting question:', error);
+	// 		toast.error('Failed to delete question. Please try again.');
+	// 	}
+	// };
 
 	// function openDeleteSubModal({
 	// 	sectionLocalId,
@@ -680,24 +673,12 @@
 						{highlightedSubSection}
 						{deleteButtonClicked}
 						{deleteSubButtonClicked}
-						{sectionDataFromDatabase}
-						{subSectionDataFromDatabase}
 						{sectionForm}
 						{subSectionForm}
 						{handleDeleteCard1}
-						{handleQuestionDelete}
-						{questionCard}
-						{handleSubmitForm}
 						{closeSheet}
 						{openSheet}
 					/>
-					<!-- {data}
-						{showSheet}
-						{responseType}
-						{questionId}
-						{parentSection}
-						{closeSectionForm}
-						{closeSubSectionForm} -->
 				</div>
 			</div>
 		</div>
