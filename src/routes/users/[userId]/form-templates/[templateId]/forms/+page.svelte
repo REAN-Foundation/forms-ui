@@ -22,7 +22,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { show } from '$lib/components/toast/message.utils';
 	////////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +38,12 @@
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
 
+	$effect(() => {
+		uiSections = data.templateInfo.FormSections[0].Subsections;
+	});
 	// console.log(data.templateInfo.FormSections[0].id, 'this is id');
-	// console.log(data.templateInfo.FormSections[0].Subsections, 'this is id');
+	$inspect(uiSections)
+	console.log(data.templateInfo.FormSections[0].Subsections, 'this is form template data');
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -239,6 +243,97 @@
 		// questionId = e.detail.id;
 		// questionCard = e.detail.card;
 	}
+
+    const handleDragAndDrop1 = async (dropData, event, sectionId = null, subsectionId = null) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log('dropData: ', dropData);
+        console.log('sectionId: ', sectionId);
+        console.log('subsectionId: ', subsectionId);
+        console.log('parentFormTemplateId: ', parentFormTemplateId);
+        if (sectionId === null && subsectionId === null) {
+            // To create section in root section
+            // Required data: parentFormTemplateId, parentSectionId that is rootSectionId
+            if (dropData.type === 'section') {
+                const response = await fetch(`/api/server/section`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    parentFormTemplateId,
+                    parentSectionId: rootSectionId,
+                }),
+                headers: { 'content-type': 'application/json' }
+            });
+            const sectionData = await response.json();
+            console.log('sectionData: ', sectionData);
+            }
+        }
+
+        if (sectionId !== null && subsectionId === null) {
+            if (dropData.type === 'card') {
+                const model = {
+                    parentFormTemplateId, 
+                    parentSectionId: sectionId, 
+                    responseType: dropData.value
+                    }
+                const response = await fetch(`/api/server/question`, {
+                method: 'POST',
+                body: JSON.stringify(model),
+                headers: { 'content-type': 'application/json' },
+            });
+            const questionData = await response.json();
+            console.log('questionData: ', questionData);
+            }
+
+            if (dropData.type === 'section') {
+                const response = await fetch(`/api/server/section`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    parentFormTemplateId,
+                    parentSectionId: sectionId,
+                }),
+                headers: { 'content-type': 'application/json' }
+            });
+            const sectionData = await response.json();
+            console.log('SubsectionData: ', sectionData);
+            }
+        }
+
+        if (sectionId !== null && subsectionId !== null) {
+            // if (dropData.type === 'section') {
+            //     const response = await fetch(`/api/server/section`, {
+            //     method: 'POST',
+            //     body: JSON.stringify({
+            //         parentFormTemplateId,
+            //         parentSectionId: subsectionId,
+            //     }),
+            //     headers: { 'content-type': 'application/json' }
+            // });
+            // const sectionData = await response.json();
+            // console.log('sectionData: ', sectionData);
+            // }
+
+            if (dropData.type === 'card') {
+                const model = {
+                    parentFormTemplateId, 
+                    parentSectionId: subsectionId, 
+                    responseType: dropData.value
+                    }
+                const response = await fetch(`/api/server/question`, {
+                method: 'POST',
+                body: JSON.stringify(model),
+                headers: { 'content-type': 'application/json' },
+            });
+            const questionData = await response.json();
+            console.log('questionData: ', questionData);
+            }
+        }
+       	await invalidateAll();
+        // uiSections = [...data.templateInfo.FormSections[0].Subsections];
+        // invalidate('app:allNodes');
+        highlightedSection = null;
+		highlightedSubSection = null;
+    }
 
 	function closeSheet(event?: any) {
 		showSheet = false;
@@ -526,13 +621,13 @@
 						event.preventDefault();
 					}}
 					class="flex h-full w-full flex-col"
-					use:dropzone={{ on_dropzone: handleDragAndDrop }}
+					use:dropzone={{ on_dropzone: handleDragAndDrop1 }}
 					role="region"
 					aria-label="Drop Area"
 				>
 					<Sections
 						bind:uiSections
-						{handleDragAndDrop}
+						{handleDragAndDrop1}
 						{highlightedSection}
 						{highlightedSubSection}
 						{deleteButtonClicked}

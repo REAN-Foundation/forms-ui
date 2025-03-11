@@ -14,7 +14,8 @@ import { sectionSchema } from '$lib/components/forms/section-schema';
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	// const { userId } = event.params;
-	event.depends('app:allNodes')
+    // console.log("This is load method of form page----------------");
+	// event.depends('app:allNodes')
 	try {
 		const assessmentTemplateId = event.params.templateId;
 		const response = await getFormTemplateDetails(assessmentTemplateId);
@@ -24,8 +25,8 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		}
 
 		const templateInfo = response.Data;
-
-		// console.log("This is load method", assessmentTemplate);
+        console.log('templateInfo',JSON.stringify(templateInfo));
+		console.log("This is load method", templateInfo.FormSections[0].Subsections);
 		return {
 			assessmentTemplateId,
 			templateInfo,
