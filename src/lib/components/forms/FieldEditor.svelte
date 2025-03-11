@@ -52,11 +52,11 @@
 	// 	form.rangeMax = questionCard.RangeMax;
 	// });
 
-	console.log(existingObject, 'This is data form editor');
+	console.log(formDataForForm, 'This is data form editor');
 	// Initialize superForm
 	const form = superForm(existingObject, {
 		validators: zodClient(questionSchema),
-		applyAction: true,
+		applyAction: false,
 		dataType: 'json'
 	});
 
@@ -132,7 +132,14 @@
 						</div>
 					</div>
 
-					<Input {...props} bind:value={$formData.title} class="w-full" />
+					<Input
+						{...props}
+						bind:value={$formData.title}
+						class="w-full"
+						maxlength="100"
+						minlength="8"
+						required
+					/>
 				{/snippet}
 			</Form.Control>
 			<!-- <Form.Description>This is your question title.</Form.Description> -->

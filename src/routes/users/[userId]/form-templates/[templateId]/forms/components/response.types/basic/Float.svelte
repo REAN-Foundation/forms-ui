@@ -1,29 +1,17 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { getQuestionById } from '../../apiFunctions';
-
-	////////////////////////////////////////////////////////////////
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 
 	////////////////////////////////////////////////////////////////
 
-	let { card, openSheet } = $props();
-
-	const templateId = $derived(page.params.templateId);
-	const userId = $derived(page.params.userId);
-
-	console.log(card, 'This is card from float file');
-	function questionEditRoute(card) {
-		// goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
-		// console.log(card);
-	}
+	let { openSheet, card } = $props();
 </script>
 
 <Button
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={()=>{openSheet(card)}}
+	onclick={() => {
+		openSheet(card);
+	}}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

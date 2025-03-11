@@ -1,25 +1,18 @@
 <script lang="ts">
-	import Input from '$lib/components/ui/input/input.svelte';
+	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { getQuestionById } from '../../apiFunctions';
-
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import { Input } from '$lib/components/ui/input';
 
 	////////////////////////////////////////////////////////////////
-	
-	let { close, submit, open, responseType, id, card } = $props();
-	const templateId = $derived(page.params.templateId);
-	const userId = $derived(page.params.userId);
 
-	function questionEditRoute(id) {
-		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
-	}
+	let { openSheet, card } = $props();
 </script>
 
 <Button
 	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => questionEditRoute(id)}
+	onclick={() => {
+		openSheet(card);
+	}}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">

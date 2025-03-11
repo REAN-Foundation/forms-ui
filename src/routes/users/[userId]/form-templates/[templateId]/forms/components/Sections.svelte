@@ -475,12 +475,7 @@
 											>
 												<div class="relative flex w-[95%]">
 													{#if subcard.name !== 'None'}
-														<svelte:component
-															this={formComponents[subcard.ResponseType]}
-															responseType={subcard.name}
-															id={subcard.id}
-															card={subcard}
-														/>
+														<svelte:component this={formComponents[subcard.ResponseType]} {subcard} {openSheet} />
 													{:else}
 														<div class="relative"></div>
 													{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageServerData } from './$types';
+	import type { ActionData, PageServerData } from './$types';
 
 	import { page } from '$app/state';
 
@@ -24,11 +24,15 @@
 	import { dropzone } from '$lib/components/common/dnd';
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { show } from '$lib/components/toast/message.utils';
+	import { errorMessage } from '$lib/components/toast/message.utils';
 	////////////////////////////////////////////////////////////////////////////////////
 
-	let { data }: { data: PageServerData } = $props();
-	const formDataForForm = data;
+	let { data, form }: { data: PageServerData, form: ActionData } = $props();
+	console.log(form,"page form")
+	$inspect(form);
+
+
+	// const formDataForForm = data;
 
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 
@@ -42,8 +46,8 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 	// console.log(data.templateInfo.FormSections[0].id, 'this is id');
-	$inspect(uiSections);
-	console.log(data.templateInfo.FormSections[0].Subsections, 'this is form template data');
+	// $inspect(uiSections);
+	// console.log(data.templateInfo.FormSections[0].Subsections, 'this is form template data');
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -70,6 +74,12 @@
 	let sectionDataFromDatabase = $state();
 	let subSectionDataFromDatabase = $state();
 	let parentSection = $state();
+
+
+	if(form){
+		showSheet = true;
+		errorMessage('Unable to update form. Please try again.');
+	}
 
 	async function handleDragAndDrop(
 		dropData,
@@ -231,7 +241,7 @@
 	console.log('this is showSheet');
 
 	let cardToOpen;
-	$inspect(showSheet);
+	// $inspect(showSheet);
 	function openSheet(card) {
 		console.log('this is function call');
 		console.log('this is function call', card);

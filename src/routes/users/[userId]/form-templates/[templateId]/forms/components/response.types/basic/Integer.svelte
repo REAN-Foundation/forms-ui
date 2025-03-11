@@ -1,24 +1,17 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { getQuestionById } from '../../apiFunctions';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 
 	////////////////////////////////////////////////////////////////
 
-	const templateId = $derived(page.params.templateId);
-	const userId = $derived(page.params.userId);
-
-	let { close, submit, open, responseType, id, card } = $props();
-	function questionEditRoute(id) {
-		goto(`/users/${userId}/form-templates/${templateId}/forms/${id}/question-edit`);
-	}
+	let { openSheet, card } = $props();
 </script>
 
 <Button
-	class="flex h-fit w-full flex-col space-y-4 p-4 hover:border hover:border-dashed hover:border-gray-500"
-	onclick={async () => questionEditRoute(id)}
+	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
+	onclick={() => {
+		openSheet(card);
+	}}
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
@@ -27,7 +20,7 @@
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
 			<Icon icon="carbon:string-integer" width="20" height="20" />
-			<p class="ml-1">Integer / Numbers {id}</p>
+			<p class="ml-1">Integer / Numbers</p>
 		</div>
 	</div>
 
