@@ -17,8 +17,8 @@
 		deleteButtonClicked,
 		deleteSubButtonClicked,
 		openSheet,
-		handleDeleteCard1,
-		handleDragAndDrop1,
+		handleDeleteCard,
+		handleDragAndDrop,
 		sectionForm,
 		subSectionForm,
 		closeSheet
@@ -35,6 +35,7 @@
 	function handleDragLeave(sectionId: number) {
 		if (highlightedSection === sectionId) {
 			highlightedSection = null;
+            highlightedSubSection = null;
 		}
 	}
 
@@ -53,6 +54,7 @@
 	function handleDragLeaveSubsection(subSectionId: number) {
 		if (highlightedSubSection === subSectionId) {
 			highlightedSubSection = null;
+            highlightedSection = null;
 		}
 	}
 
@@ -77,7 +79,7 @@
 	// For confirming the deletion
 	function confirmDeleteCard(cardId: string, type: string) {
 		console.log(cardId);
-		handleDeleteCard1(cardId, type);
+		handleDeleteCard(cardId, type);
 		closeDeleteModal();
 	}
 
@@ -95,7 +97,7 @@
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
 		use:dropzone={{
-			on_dropzone: (data, e) => handleDragAndDrop1(data, e, section.id)
+			on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id)
 		}}
 		role="region"
 		aria-label={`Section ${section.Title}`}
@@ -235,7 +237,7 @@
 							ondragleave={() => handleDragLeaveSubsection(subsection.id)}
 							ondragover={(event) => handleDragOverSubsection(subsection.id, event)}
 							use:dropzone={{
-								on_dropzone: (data, e) => handleDragAndDrop1(data, e, section.id, subsection.id)
+								on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id, subsection.id)
 							}}
 							role="region"
 							aria-label={`Subsection ${subsection.Title}`}

@@ -17,22 +17,15 @@ export const POST = async (event: RequestEvent) => {
         );
 
         console.log('Response from createQuestion:', response);
-        return json({
-            status: 'success',
-            message: response.message || 'Question created successfully!',
-            data: response,
-        });
+        return new Response(JSON.stringify(response));
     } catch (err) {
         const error = err as Error; // Ensures type safety for error
         console.error(`Error creating question: ${error.message}`);
-
-        return json(
-            {
-                status: 'error',
-                message: error.message || 'An error occurred while creating the question.',
-            },
-            { status: 500 }
-        );
+        return new Response(JSON.stringify({
+            Status: 'failure',
+            HttpCode: 500,
+            Message: error.message || 'An error occurred while creating the question.',
+        }));
     }
 };
 
