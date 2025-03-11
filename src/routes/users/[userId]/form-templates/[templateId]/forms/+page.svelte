@@ -29,9 +29,9 @@
 
 	let { data }: { data: PageServerData } = $props();
 	const formDataForForm = data;
-	
+
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
-	
+
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 
 	const userId = $derived(page.params.userId);
@@ -42,7 +42,7 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 	// console.log(data.templateInfo.FormSections[0].id, 'this is id');
-	$inspect(uiSections)
+	$inspect(uiSections);
 	console.log(data.templateInfo.FormSections[0].Subsections, 'this is form template data');
 
 	function changeTypes(event: Event) {
@@ -244,96 +244,96 @@
 		// questionCard = e.detail.card;
 	}
 
-    const handleDragAndDrop1 = async (dropData, event, sectionId = null, subsectionId = null) => {
-        event.preventDefault();
-        event.stopPropagation();
+	const handleDragAndDrop1 = async (dropData, event, sectionId = null, subsectionId = null) => {
+		event.preventDefault();
+		event.stopPropagation();
 
-        console.log('dropData: ', dropData);
-        console.log('sectionId: ', sectionId);
-        console.log('subsectionId: ', subsectionId);
-        console.log('parentFormTemplateId: ', parentFormTemplateId);
-        if (sectionId === null && subsectionId === null) {
-            // To create section in root section
-            // Required data: parentFormTemplateId, parentSectionId that is rootSectionId
-            if (dropData.type === 'section') {
-                const response = await fetch(`/api/server/section`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    parentFormTemplateId,
-                    parentSectionId: rootSectionId,
-                }),
-                headers: { 'content-type': 'application/json' }
-            });
-            const sectionData = await response.json();
-            console.log('sectionData: ', sectionData);
-            }
-        }
+		console.log('dropData: ', dropData);
+		console.log('sectionId: ', sectionId);
+		console.log('subsectionId: ', subsectionId);
+		console.log('parentFormTemplateId: ', parentFormTemplateId);
+		if (sectionId === null && subsectionId === null) {
+			// To create section in root section
+			// Required data: parentFormTemplateId, parentSectionId that is rootSectionId
+			if (dropData.type === 'section') {
+				const response = await fetch(`/api/server/section`, {
+					method: 'POST',
+					body: JSON.stringify({
+						parentFormTemplateId,
+						parentSectionId: rootSectionId
+					}),
+					headers: { 'content-type': 'application/json' }
+				});
+				const sectionData = await response.json();
+				console.log('sectionData: ', sectionData);
+			}
+		}
 
-        if (sectionId !== null && subsectionId === null) {
-            if (dropData.type === 'card') {
-                const model = {
-                    parentFormTemplateId, 
-                    parentSectionId: sectionId, 
-                    responseType: dropData.value
-                    }
-                const response = await fetch(`/api/server/question`, {
-                method: 'POST',
-                body: JSON.stringify(model),
-                headers: { 'content-type': 'application/json' },
-            });
-            const questionData = await response.json();
-            console.log('questionData: ', questionData);
-            }
+		if (sectionId !== null && subsectionId === null) {
+			if (dropData.type === 'card') {
+				const model = {
+					parentFormTemplateId,
+					parentSectionId: sectionId,
+					responseType: dropData.value
+				};
+				const response = await fetch(`/api/server/question`, {
+					method: 'POST',
+					body: JSON.stringify(model),
+					headers: { 'content-type': 'application/json' }
+				});
+				const questionData = await response.json();
+				console.log('questionData: ', questionData);
+			}
 
-            if (dropData.type === 'section') {
-                const response = await fetch(`/api/server/section`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    parentFormTemplateId,
-                    parentSectionId: sectionId,
-                }),
-                headers: { 'content-type': 'application/json' }
-            });
-            const sectionData = await response.json();
-            console.log('SubsectionData: ', sectionData);
-            }
-        }
+			if (dropData.type === 'section') {
+				const response = await fetch(`/api/server/section`, {
+					method: 'POST',
+					body: JSON.stringify({
+						parentFormTemplateId,
+						parentSectionId: sectionId
+					}),
+					headers: { 'content-type': 'application/json' }
+				});
+				const sectionData = await response.json();
+				console.log('SubsectionData: ', sectionData);
+			}
+		}
 
-        if (sectionId !== null && subsectionId !== null) {
-            // if (dropData.type === 'section') {
-            //     const response = await fetch(`/api/server/section`, {
-            //     method: 'POST',
-            //     body: JSON.stringify({
-            //         parentFormTemplateId,
-            //         parentSectionId: subsectionId,
-            //     }),
-            //     headers: { 'content-type': 'application/json' }
-            // });
-            // const sectionData = await response.json();
-            // console.log('sectionData: ', sectionData);
-            // }
+		if (sectionId !== null && subsectionId !== null) {
+			// if (dropData.type === 'section') {
+			//     const response = await fetch(`/api/server/section`, {
+			//     method: 'POST',
+			//     body: JSON.stringify({
+			//         parentFormTemplateId,
+			//         parentSectionId: subsectionId,
+			//     }),
+			//     headers: { 'content-type': 'application/json' }
+			// });
+			// const sectionData = await response.json();
+			// console.log('sectionData: ', sectionData);
+			// }
 
-            if (dropData.type === 'card') {
-                const model = {
-                    parentFormTemplateId, 
-                    parentSectionId: subsectionId, 
-                    responseType: dropData.value
-                    }
-                const response = await fetch(`/api/server/question`, {
-                method: 'POST',
-                body: JSON.stringify(model),
-                headers: { 'content-type': 'application/json' },
-            });
-            const questionData = await response.json();
-            console.log('questionData: ', questionData);
-            }
-        }
-       	await invalidateAll();
-        // uiSections = [...data.templateInfo.FormSections[0].Subsections];
-        // invalidate('app:allNodes');
-        highlightedSection = null;
+			if (dropData.type === 'card') {
+				const model = {
+					parentFormTemplateId,
+					parentSectionId: subsectionId,
+					responseType: dropData.value
+				};
+				const response = await fetch(`/api/server/question`, {
+					method: 'POST',
+					body: JSON.stringify(model),
+					headers: { 'content-type': 'application/json' }
+				});
+				const questionData = await response.json();
+				console.log('questionData: ', questionData);
+			}
+		}
+		await invalidateAll();
+		// uiSections = [...data.templateInfo.FormSections[0].Subsections];
+		// invalidate('app:allNodes');
+		highlightedSection = null;
 		highlightedSubSection = null;
-    }
+	};
 
 	function closeSheet(event?: any) {
 		showSheet = false;
@@ -422,6 +422,44 @@
 		handleQuestionDelete(questionId);
 		deleteButtonClicked = !deleteButtonClicked;
 		// toast.success('Question deleted successful');
+	}
+
+	async function handleDeleteCard1(id: string, type: 'Section' | 'Card') {
+		console.log('Inside parent handle delete card');
+		console.log(id, type);
+		switch (type) {
+			case 'Section':
+				try {
+					const response = await fetch(`/api/server/section/${id}`, {
+						method: 'DELETE'
+					});
+
+					const res = await response.json();
+					console.log('res: ', res);
+					invalidate('app:allNodes');
+				} catch (error) {
+					console.error('Error deleting section:', error);
+					invalidate('app:allNodes');
+				}
+				break;
+
+			case 'Card':
+				try {
+					const response = await fetch(`/api/server/question/${id}`, {
+						method: 'DELETE'
+					});
+					const res = await response.json();
+					console.log('res: ', res);
+					invalidate('app:allNodes');
+				} catch (error) {
+					console.error('Error deleting card:', error);
+					invalidate('app:allNodes');
+				}
+				break;
+		}
+		// handleQuestionDelete(questionId);
+		// deleteButtonClicked = !deleteButtonClicked;
+		// // toast.success('Question deleted successful');
 	}
 
 	const handleQuestionDelete = async (questionId: string) => {
@@ -636,7 +674,7 @@
 						{subSectionDataFromDatabase}
 						{sectionForm}
 						{subSectionForm}
-						{handleDeleteCard}
+						{handleDeleteCard1}
 						{handleQuestionDelete}
 						{questionCard}
 						{handleSubmitForm}

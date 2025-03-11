@@ -10,7 +10,7 @@
 
 <div class="relative">
 	<button
-		class="blur-background fixed inset-0 z-10 bg-black bg-opacity-5 backdrop-blur-sm"
+		class="blur-background fixed inset-0 z-40 bg-black bg-opacity-10 backdrop-blur-sm"
 		onclick={() => closeSheet()}
 		onkeydown={(e) => e.key === 'Escape' && closeSheet()}
 		aria-label="Close sheet"

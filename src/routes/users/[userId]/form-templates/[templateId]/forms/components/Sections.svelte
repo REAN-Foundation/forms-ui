@@ -34,11 +34,11 @@
 		openSheet,
 		// parentSection,
 
-		handleDeleteCard,
+		handleDeleteCard1,
 		handleQuestionDelete,
 		handleDragAndDrop1,
 		closeSheet,
-		handleSubmitForm,
+		handleSubmitForm
 		// closeSectionForm,
 		// closeSubSectionForm
 	} = $props();
@@ -111,9 +111,9 @@
 		deleteButtonClicked = false;
 		cardToDelete = null;
 	}
-	function confirmDeleteCard(cardId: string) {
+	function confirmDeleteCard(cardId: string, type: string) {
 		console.log(cardId);
-		handleDeleteCard(cardId);
+		handleDeleteCard1(cardId, type);
 		closeDeleteModal();
 	}
 
@@ -280,7 +280,8 @@
 								<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 								<AlertDialog.Action
 									class="bg-destructive hover:bg-destructive dark:text-white"
-									onclick={() => handleDeleteSection(section.id)}>Delete</AlertDialog.Action
+									onclick={() => confirmDeleteCard(section.id, 'Section')}
+									>Delete</AlertDialog.Action
 								>
 							</AlertDialog.Footer>
 						</AlertDialog.Content>
@@ -355,7 +356,7 @@
 									<Button variant="outline" onclick={closeDeleteModal}>Cancel</Button>
 									<Button
 										class="bg-destructive hover:bg-destructive dark:text-white"
-										onclick={() => confirmDeleteCard(cardToDelete)}
+										onclick={() => confirmDeleteCard(cardToDelete, 'Card')}
 									>
 										Delete
 									</Button>
@@ -449,7 +450,7 @@
 													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
 													<AlertDialog.Action
 														class="bg-destructive hover:bg-destructive dark:text-white"
-														onclick={() => handleDeleteSubsection(subsection.id)}
+														onclick={() => confirmDeleteCard(subsection.id, 'Section')}
 														>Delete</AlertDialog.Action
 													>
 												</AlertDialog.Footer>
@@ -500,7 +501,7 @@
 											</div>
 										{/each}
 
-										{#if deleteSubButtonClicked}
+										{#if deleteButtonClicked}
 											<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
 
 											<div class="fixed inset-0 z-50 flex items-center justify-center border">
@@ -521,7 +522,7 @@
 														<Button variant="outline" onclick={closeDeleteSubModal}>Cancel</Button>
 														<Button
 															class="bg-destructive hover:bg-destructive dark:text-white"
-															onclick={() => confirmDeleteSubcard(cardToDelete)}
+															onclick={() => confirmDeleteCard(cardToDelete, 'Card')}
 														>
 															Delete
 														</Button>

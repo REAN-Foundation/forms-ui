@@ -1,5 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import type {  RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
+import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getFormTemplateDetails } from '../../../../../api/services/form-template';
 import { superValidate } from 'sveltekit-superforms';
@@ -14,8 +14,8 @@ import { sectionSchema } from '$lib/components/forms/section-schema';
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	// const { userId } = event.params;
-    // console.log("This is load method of form page----------------");
-	// event.depends('app:allNodes')
+	// console.log("This is load method of form page----------------");
+	event.depends('app:allNodes');
 	try {
 		const assessmentTemplateId = event.params.templateId;
 		const response = await getFormTemplateDetails(assessmentTemplateId);
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		}
 
 		const templateInfo = response.Data;
-        console.log('templateInfo',JSON.stringify(templateInfo));
+		console.log('templateInfo', JSON.stringify(templateInfo));
 		console.log("This is load method", templateInfo.FormSections[0].Subsections);
 		return {
 			assessmentTemplateId,
@@ -137,7 +137,7 @@ export const actions = {
 	},
 
 
-	createSection: async (event: RequestEvent) => {
+	updateSection: async (event: RequestEvent) => {
 		// const request = event.request;
 		const userId = event.params.userId;
 		const assessmentId = event.params.assessmentId;
