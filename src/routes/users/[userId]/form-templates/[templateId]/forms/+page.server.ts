@@ -30,7 +30,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		return {
 			assessmentTemplateId,
 			templateInfo,
-			// sectionForm: await superValidate(zod(sectionSchema)),
+			sectionForm: await superValidate(zod(sectionSchema)),
 			questionForm: await superValidate(zod(questionSchema)),
 			message: response.Message
 		};
@@ -138,9 +138,8 @@ export const actions = {
 
 
 	updateSection: async (event: RequestEvent) => {
-		// const request = event.request;
 		const userId = event.params.userId;
-		const assessmentId = event.params.assessmentId;
+		const templateId = event.params.templateId;
 
 		const form = await superValidate(event, zod(sectionSchema));
 		if (!form.valid) {
@@ -164,7 +163,7 @@ export const actions = {
 			throw redirect(303, `preview`);
 		}
 		// toast.success("Form section Added succeccsfully !")
-		throw redirect(303, `/users/${userId}/assessments/${assessmentId}/question`,);
+		throw redirect(303, `/users/${userId}/form-templates/${templateId}/forms`,);
 	}
 };
 

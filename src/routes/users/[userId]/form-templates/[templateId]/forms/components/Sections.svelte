@@ -19,7 +19,7 @@
 		openSheet,
 		handleDeleteCard,
 		handleDragAndDrop,
-		sectionForm,
+		openSectionForm,
 		subSectionForm,
 		closeSheet
 	} = $props();
@@ -126,7 +126,7 @@
 				</div>
 
 				<div class="flex h-full w-full flex-row">
-					<Button variant="outline" class="h-full w-full p-2">
+					<Button variant="outline" class="h-full w-full p-2"onclick={()=>openSectionForm(section)}>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
 						<div class="flex-col">
 							{#if section.Title}
@@ -273,7 +273,7 @@
 										</Collapsible.Trigger>
 									</div>
 									<div class="flex h-fit w-full flex-row">
-										<Button variant="outline" class="h-full w-full p-2">
+										<Button variant="outline" class="h-full w-full p-2" onclick={()=>openSectionForm(subsection)}>
 											<!-- onclick={() => openSubSectionForm(subsection.id, section.databaseId)} -->
 											<div class="flex-col">
 												{#if subsection.Title}

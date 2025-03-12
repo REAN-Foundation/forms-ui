@@ -3,8 +3,7 @@
 	import { page } from '$app/state';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Sidebar } from '$lib/index';
-	import { FormHelper } from '$lib';
+	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
 	import { measurements, cards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
@@ -12,10 +11,10 @@
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
-    
+
 	////////////////////////////////////////////////////////////////////////////////////
 
-	let { data, form }: { data: PageServerData, form: ActionData } = $props();
+	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 
@@ -43,7 +42,7 @@
 	let sectionForm = $state(false);
 	let subSectionForm = $state(false);
 
-	if(form){
+	if (form) {
 		showSheet = true;
 		errorMessage('Unable to update form. Please try again.');
 	}
@@ -76,7 +75,7 @@
 					headers: { 'content-type': 'application/json' }
 				});
 				const sectionData = await response.json();
-                toastMessage(sectionData);
+				toastMessage(sectionData);
 				console.log('sectionData: ', sectionData);
 			}
 		}
@@ -94,7 +93,7 @@
 					headers: { 'content-type': 'application/json' }
 				});
 				const questionData = await response.json();
-                toastMessage(questionData);
+				toastMessage(questionData);
 				console.log('questionData: ***', questionData);
 			}
 
@@ -108,13 +107,12 @@
 					headers: { 'content-type': 'application/json' }
 				});
 				const sectionData = await response.json();
-                toastMessage(sectionData);
+				toastMessage(sectionData);
 				console.log('SubsectionData: ', sectionData);
 			}
 		}
 
 		if (sectionId !== null && subsectionId !== null) {
-
 			if (dropData.type === 'card') {
 				const model = {
 					parentFormTemplateId,
@@ -127,34 +125,35 @@
 					headers: { 'content-type': 'application/json' }
 				});
 				const questionData = await response.json();
-                toastMessage(questionData);
+				toastMessage(questionData);
 				console.log('questionData: ', questionData);
 			}
 		}
 		await invalidate('app:allNodes');
 	};
 
-    const toastMessage = (response = null) => {
-        if (!response) {
-            addToast({
-                message: 'Something went wrong',
-                type: 'error',
-                timeout: 3000
-            });
-            return;
-        }
+	const toastMessage = (response = null) => {
+		if (!response) {
+			addToast({
+				message: 'Something went wrong',
+				type: 'error',
+				timeout: 3000
+			});
+			return;
+		}
 
-        (response?.HttpCode === 201 || response?.HttpCode === 200) ? 
-            addToast({
-                message: response?.Message,
-                type: 'success',
-                timeout: 3000}) : 
-                addToast({
-                    message: response?.Message,
-                    type: 'error',
-                    timeout: 3000})
-        
-    }
+		response?.HttpCode === 201 || response?.HttpCode === 200
+			? addToast({
+					message: response?.Message,
+					type: 'success',
+					timeout: 3000
+				})
+			: addToast({
+					message: response?.Message,
+					type: 'error',
+					timeout: 3000
+				});
+	};
 
 	function closeSheet(event?: any) {
 		showSheet = false;
@@ -178,11 +177,11 @@
 
 					const res = await response.json();
 					console.log('res: ', res);
-                    toastMessage(res);
+					toastMessage(res);
 					invalidate('app:allNodes');
 				} catch (error) {
 					console.error('Error deleting section:', error);
-                    toastMessage();
+					toastMessage();
 					invalidate('app:allNodes');
 				}
 				break;
@@ -194,23 +193,49 @@
 					});
 					const res = await response.json();
 					console.log('res: ', res);
-                    toastMessage(res);
+					toastMessage(res);
 					invalidate('app:allNodes');
 				} catch (error) {
 					console.error('Error deleting card:', error);
-                    toastMessage();
+					toastMessage();
 					invalidate('app:allNodes');
 				}
 				break;
 
-            default:
-                toastMessage();
-                break;
+			default:
+				toastMessage();
+				break;
 		}
 	}
 
+	let sectionToOpen = $state();
+	async function openSectionForm(section) {
+		sectionToOpen = section;
+		sectionForm = true;
+	}
+
+	function closeSectionForm() {
+		sectionForm = false;
+	}
+
+	function closeSubSectionForm() {
+		subSectionForm = false;
+	}
 </script>
 
+
+{#if sectionForm}
+	<div
+		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
+	>
+		<SectionEditorForm
+			handleCancel={closeSectionForm}
+			sectionData={sectionToOpen}
+			data={data.sectionForm}
+		/>
+
+	</div>
+{/if}
 {#if showSheet}
 	<FormHelper formDataForForm={data} {handleSubmitForm} {closeSheet} questionCard={cardToOpen} />
 {/if}
@@ -271,7 +296,7 @@
 					role="region"
 					aria-label="Drop Area"
 				>
-                <!-- This componet is used to render all the sections/subsections/question cards -->
+					<!-- This componet is used to render all the sections/subsections/question cards -->
 					<Sections
 						bind:uiSections
 						{handleDragAndDrop}
@@ -279,7 +304,7 @@
 						{highlightedSubSection}
 						{deleteButtonClicked}
 						{deleteSubButtonClicked}
-						{sectionForm}
+						{openSectionForm}
 						{subSectionForm}
 						{handleDeleteCard}
 						{closeSheet}

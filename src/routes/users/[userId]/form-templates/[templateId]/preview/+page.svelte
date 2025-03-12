@@ -9,9 +9,12 @@
 	let { data }: { data: PageServerData } = $props();
 	// export let data: PageServerData;
 
-	let sections = $state(data.assessmentTemplate.RootSection);
+	let sections = $state(data.assessmentTemplate[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 
+	$inspect(data);
+	console.log("this is page data");
+	
 	// data.assessmentTemplate.RootSection.forEach((element) => {
 	// 	// console.log(element.Sections)
 	// 	element.Sections.forEach((element) => {
@@ -29,11 +32,11 @@
 	<Breadcrumb.Root>
 		<Breadcrumb.List class="flex">
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/users/{userId}/assessments">Assessment</Breadcrumb.Link>
+				<Breadcrumb.Link href="/users/{userId}/form-templates">Form Template</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>Question</Breadcrumb.Page>
+				<Breadcrumb.Page>Form</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
