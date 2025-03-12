@@ -1,6 +1,6 @@
 import { error, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import {  getFormTemplatePreviewById } from "../../../../../api/services/form-template";
+import { getFormTemplatePreviewById } from "../../../../../api/services/form-template";
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

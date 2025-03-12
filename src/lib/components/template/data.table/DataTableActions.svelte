@@ -14,11 +14,17 @@
 	let { id }: { id: string } = $props();
 	const userId = $page.params.userId;
 	let response;
-	let submissionId: string = '';
-	let createdLink: string = '';
+	let submissionId = $state();
+	let createdLink = $state();
 	let link: string = $state();
-	link = createdLink + `/${submissionId}`;
+	// link = createdLink + `/${submissionId}`;
 
+	// let openLinkToNew =$state()
+	// console.log(response);
+	// console.log(submissionId);
+	// console.log(createdLink);
+
+	$inspect(link);
 	function addQuestions(templateId: string) {
 		goto(`/users/${userId}/form-templates/${templateId}/forms`);
 	}
@@ -30,12 +36,14 @@
 
 	const createLink = async (templateId: string) => {
 		response = await submission({ templateId });
-		submissionId = response?.Data?.id;
+		submissionId = response.Data.id;
 		createdLink = response.Data.FormUrl;
 		submissionId && createdLink
 			? toast.success('Link has been generated')
 			: toast.error('Error in creating the link');
 		invalidate('app:assessmentTemplate');
+
+		link = createdLink + `/${submissionId}`;
 	};
 
 	async function submission(model: { templateId: string }) {
