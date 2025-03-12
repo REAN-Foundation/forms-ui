@@ -6,7 +6,9 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
+	
 	/////////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
@@ -22,13 +24,13 @@
 	const { form: formData, enhance } = form;
 </script>
 
-<!-- <form method="post" action="?/newAssessment" use:enhance> -->
+<form method="post" action="?/newAssessment" use:enhance>
 <Form.Field {form} name="title">
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
 		{#snippet children({ props })}
 			<Form.Label>Title <span class="text-red-600">*</span></Form.Label>
-			<Input {...props} bind:value={$formData.title} />
+			<Input {...props} bind:value={$formData.title} required/>
 		{/snippet}
 		<!-- <Form.Label class="text-right">Title <span class="text-red-600">*</span></Form.Label>
 			<Input class="col-span-3" {...attrs} bind:value={$formData.title} required /> -->
@@ -66,14 +68,14 @@
 	<Form.FieldErrors />
 </Form.Field>
 
-<Form.Field {form} name="itemsPerPage">
+<Form.Field {form} name="itemsPerPage" >
 	<Form.Control>
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
 		{#snippet children({ props })}
 			<Form.Label class="text-right"
 				>Select Items per page <span class="text-red-600">*</span></Form.Label
 			>
-			<Select.Root type="single" bind:value={$formData.itemsPerPage} name="itemsPerPage">
+			<Select.Root type="single" bind:value={$formData.itemsPerPage} name="itemsPerPage" required>
 				<Select.Trigger class="col-span-3" {...props}>
 					{$formData.itemsPerPage
 						? $formData.itemsPerPage
@@ -102,7 +104,7 @@
 		<!-- <div class="grid grid-cols-4 items-center gap-4"> -->
 		{#snippet children({ props })}
 			<Form.Label class="text-right">Type <span class="text-red-600">*</span></Form.Label>
-			<Select.Root type="single" bind:value={$formData.type} name="type">
+			<Select.Root type="single" bind:value={$formData.type} name="type" required>
 				<Select.Trigger {...props} class="col-span-3">
 					{$formData.type ? $formData.type : 'Select a verified type to display'}
 				</Select.Trigger>
@@ -159,4 +161,7 @@
 <!-- <Form.Description>This is parent section for section.</Form.Description> -->
 <!-- <Form.Description>This is tenantCode for this assessment.</Form.Description> -->
 <!-- <Form.Description>This is current version.</Form.Description> -->
-<!-- </form>	 -->
+<Dialog.Footer>
+	<Button type="submit">Save changes</Button>
+</Dialog.Footer>
+</form>	

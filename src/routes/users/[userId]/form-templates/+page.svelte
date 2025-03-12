@@ -168,14 +168,14 @@
 											Make changes to your Assessment Template here. Click save when you're done.
 										</Dialog.Description>
 									</Dialog.Header>
-									<form method="POST" action="?/newAssessment" use:enhance>
+									<!-- <form method="POST" action="?/newAssessment" use:enhance> -->
 										<div class="">
 											<AssessmentForm {data} />
 										</div>
-										<Dialog.Footer>
+										<!-- <Dialog.Footer>
 											<Button type="submit">Save changes</Button>
-										</Dialog.Footer>
-									</form>
+										</Dialog.Footer> -->
+									<!-- </form> -->
 								</Dialog.Content>
 							</Dialog.Root>
 						</div>

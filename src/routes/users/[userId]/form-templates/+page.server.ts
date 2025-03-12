@@ -27,7 +27,8 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		return {
 			assessmentTemplate,
 			message: response.Message,
-			form: await superValidate(initialData, zod(assessmentSchema)),
+			// form: await superValidate(initialData, zod(assessmentSchema)),
+			form:initialData
 		};
 
 	} catch (error) {
