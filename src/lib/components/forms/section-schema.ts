@@ -6,8 +6,8 @@ export const sectionSchema = z.object({
     title: z.string().min(8).max(256),
 	parentSectionId: z.string(),
 	// parentSection: z.number(),
-	description: z.string().optional(),
-	sectionIdentifier: z.string().optional(),
+	description: z.string().nullable().optional(),
+	sectionIdentifier: z.string().nullable().optional(),
 	// sequence: z.string().optional(),
 });
 
