@@ -30,8 +30,8 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		return {
 			assessmentTemplateId,
 			templateInfo,
-			sectionForm: await superValidate(zod(sectionSchema)),
-			questionForm: await superValidate(zod(questionSchema)),
+			// sectionForm: await superValidate(zod(sectionSchema)),
+			// questionForm: await superValidate(zod(questionSchema)),
 			message: response.Message
 		};
 	} catch (error) {

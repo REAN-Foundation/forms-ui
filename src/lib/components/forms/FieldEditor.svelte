@@ -1,69 +1,16 @@
 <script lang="ts">
-	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { questionSchema, type QuestionSchema } from './question-schema';
-	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { Button } from '$lib/components/ui/button';
-	// import { createEventDispatcher } from 'svelte';
-	// import * as Accordion from '$lib/components/ui/accordion/index.js';
-
-	import Option from './Option.svelte';
-	import RangeRating from './RangeRating.svelte';
 	import { enhance } from '$app/forms';
-	import Icon from '@iconify/svelte';
-
 	import * as Card from '$lib/components/ui/card/index.js';
 	import InfoIcon from '../common/InfoIcon.svelte';
-	import Question from '../preview/Question.svelte';
+	import { Label } from '../ui/label';
+
 	//////////////////////////////////////////////////////////////////////////////
 
-	// interface Props {
-	// 	data: { form: SuperValidated<Infer<QuestionSchema>> };
-	// 	responseType: string;
-	// 	id: string;
-	// 	questionCard: any; // Replace `any` with the correct type
-	// 	handleSubmit();
-	// }
-
-	// Destructure props
-	let { formDataForForm, questionCard, closeModel } = $props();
-	// $effect(() => {
-	let existingObject = {
-		id: questionCard.id,
-		title: questionCard.Title,
-		description: questionCard.Description,
-		responseType: questionCard.ResponseType,
-		score: questionCard.Score,
-		correctAnswer: questionCard.CorrectAnswer,
-		hint: questionCard.Hint,
-		questionImageUrl: questionCard.QuestionImageUrl,
-		rangeMin: questionCard.RangeMin,
-		rangeMax: questionCard.RangeMax
-	};
-
-	// 	form.description = questionCard.Description;
-	// existingObject.title = questionCard.Title;
-	// 	form.score = questionCard.Score;
-	// 	form.correctAnswer = questionCard.CorrectAnswer;
-	// 	form.hint = questionCard.Hint;
-	// 	form.questionImageUrl = questionCard.QuestionImageUrl;
-	// 	form.rangeMin = questionCard.RangeMin;
-	// 	form.rangeMax = questionCard.RangeMax;
-	// });
-
-	console.log(formDataForForm, 'This is data form editor');
-	// Initialize superForm
-	const form = superForm(existingObject, {
-		validators: zodClient(questionSchema),
-		applyAction: false,
-		dataType: 'json'
-	});
-
-	const { form: formData } = form;
+	let { questionCard, closeModel } = $props();
 
 	async function handleSubmit() {
-		console.log(formData, 'THis is formdata from handlesubmit');
 		console.log(questionCard.Title);
 
 		const model = {
@@ -90,13 +37,12 @@
 	// console.log(form.title, 'this is form title');
 
 	let options = $state([]);
-	options = formDataForForm.questionForm.options ? [...formDataForForm.questionForm.options] : [];
+	options = questionCard.options ? [...questionCard.options] : [];
 
 	const hardcodedImageUrl = 'https://example.com/default';
 
 	function addOption() {
-		if (formDataForForm.form.data.responseType === '"MultiChoiceSelection"' && options.length >= 2)
-			return;
+		if (questionCard.responseType === '"MultiChoiceSelection"' && options.length >= 2) return;
 		options = [
 			...options,
 			{ Sequence: (options.length + 1).toString(), Data: '', ImageUrl: hardcodedImageUrl }
@@ -119,33 +65,97 @@
 
 	// 	// dispatch('handleSubmit', { formData });
 	// }
-
-	const fields = {
-		Range: RangeRating,
-		Rating: RangeRating,
-		SingleChoiceSelection: Option,
-		MultiChoiceSelection: Option,
-		Boolean: Option
-	};
 </script>
-
-<!-- action="?/updateQuestion" -->
 
 <Card.Root class="rounded-lg border p-4">
 	<form
 		method="POST"
 		use:enhance
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-5 py-4"
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
 		onsubmit={handleSubmit}
 	>
-		<Form.Field {form} name="id" class="hidden">
+		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Id<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is id of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.id} class="hidden" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.Title} required minlength="8" maxlength="256" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Description for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.Description} />
+
+		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Response Type<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.ResponseType} class="hidden" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Question Score<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.Score} />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Question Hint<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Hint for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.Hint} />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Question CorrectAnswer<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.QuestionImageUrl} />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 "
+				>Question QuestionImageUrl<span class="text-red-600">*</span></Label
+			>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.QuestionImageUrl} />
+
+		<!-- <Form.Field {form} name="id" class="hidden">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Id</Form.Label>
 					<Input {...props} bind:value={questionCard.id} />
 				{/snippet}
 			</Form.Control>
-			<Form.Description>This is id of section.</Form.Description>
+			<Form.Description>This is id of Question.</Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 
@@ -169,7 +179,7 @@
 					/>
 				{/snippet}
 			</Form.Control>
-			<!-- <Form.Description>This is your question title.</Form.Description> -->
+			<Form.Description>This is your question title.</Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 
@@ -180,7 +190,7 @@
 					<Input {...props} bind:value={questionCard.ResponseType} class="w-full" />
 				{/snippet}
 			</Form.Control>
-			<!-- <Form.Description>This is your question title.</Form.Description> -->
+			<Form.Description>This is your question title.</Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 
@@ -195,11 +205,11 @@
 					</div>
 					<Input {...props} bind:value={questionCard.Description} class="w-full" />
 				{/snippet}
-				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
+				<input type="text" class="w-full" bind:value={desc} name="description">
 			</Form.Control>
-			<!-- <Form.Description></Form.Description> -->
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
-		</Form.Field>
+		</Form.Field> -->
 
 		<!-- {#if responseType === 'Range' || responseType === 'Rating'}
 			<svelte:component this={fields[responseType]} {data} />
@@ -210,15 +220,15 @@
 		{/if} -->
 
 		<!-- Options Section -->
-		{#if formDataForForm.questionForm.responseType === 'Range' || formDataForForm.questionForm.responseType === 'Rating'}
-			<!-- <svelte:component this={fields[formDataForForm.responseType]} {formDataForForm} /> -->
-		{:else if formDataForForm.questionForm.responseType === 'Boolean'}
+		<!-- 	{#if questionCard.responseType === 'Range' || questionCard.responseType === 'Rating'}
+			<svelte:component this={fields[formDataForForm.responseType]} {formDataForForm} />
+		{:else if questionCard.responseType === 'Boolean'}
 			<div class="mt-4">
 				<Button
 					type="button"
 					onclick={addOption}
 					class="btn btn-primary mb-4"
-					disabled={formDataForForm.questionForm.responseType === 'Boolean' && options.length >= 2}
+					disabled={questionCard.responseType === 'Boolean' && options.length >= 2}
 				>
 					Add Option
 				</Button>
@@ -257,7 +267,7 @@
 
 				<input type="hidden" name="options" value={JSON.stringify(options)} />
 			</div>
-		{:else if formDataForForm.questionForm.responseType === 'SingleChoiceSelection' || formDataForForm.questionForm.responseType === 'MultiChoiceSelection'}
+		{:else if questionCard.responseType === 'SingleChoiceSelection' || questionCard.responseType === 'MultiChoiceSelection'}
 			<div class="mt-4">
 				<Button type="button" onclick={addOption} class="btn btn-primary mb-4">Add Option</Button>
 
@@ -297,7 +307,7 @@
 			</div>
 		{/if}
 
-		<!-- <Accordion.Root class="w-full ">
+		<Accordion.Root class="w-full ">
 			<Accordion.Item value="item-1">
 				<Accordion.Trigger>Score</Accordion.Trigger>
 				<Accordion.Content
@@ -359,7 +369,7 @@
 				</Accordion.Content>
 			</Accordion.Item>
 		</Accordion.Root> -->
-
+		<!-- 
 		<Form.Field {form} name="score">
 			<Form.Control>
 				{#snippet children({ props })}
@@ -371,9 +381,9 @@
 					</div>
 					<Input {...props} bind:value={questionCard.Score} class="w-full" />
 				{/snippet}
-				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
+				<input type="text" class="w-full" bind:value={desc} name="description">
 			</Form.Control>
-			<!-- <Form.Description></Form.Description> -->
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="questionImageUrl">
@@ -387,9 +397,9 @@
 					</div>
 					<Input {...props} bind:value={questionCard.QuestionImageUrl} class="w-full" />
 				{/snippet}
-				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
+				<input type="text" class="w-full" bind:value={desc} name="description">
 			</Form.Control>
-			<!-- <Form.Description></Form.Description> -->
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="correctAnswer">
@@ -403,9 +413,9 @@
 					</div>
 					<Input {...props} bind:value={questionCard.CorrectAnswer} class="w-full" />
 				{/snippet}
-				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
+				<input type="text" class="w-full" bind:value={desc} name="description">
 			</Form.Control>
-			<!-- <Form.Description></Form.Description> -->
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
 		</Form.Field>
 		<Form.Field {form} name="hint">
@@ -419,11 +429,11 @@
 					</div>
 					<Input {...props} bind:value={questionCard.Hint} class="w-full" />
 				{/snippet}
-				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
+				<input type="text" class="w-full" bind:value={desc} name="description">
 			</Form.Control>
-			<!-- <Form.Description></Form.Description> -->
+			<Form.Description></Form.Description>
 			<Form.FieldErrors />
-		</Form.Field>
+		</Form.Field> -->
 
 		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
 	</form>

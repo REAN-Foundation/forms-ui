@@ -4,8 +4,8 @@
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
 
-	let { formDataForForm, questionCard, closeSheet, handleSubmitForm, closeModel } = $props();
-	console.log(formDataForForm, 'this is pageData');
+	let {  questionCard, closeModel,closeSheet } = $props();
+	// console.log(formDataForForm, 'this is pageData');
 </script>
 
 <div class="relative">
@@ -31,7 +31,7 @@
 		</div>
 		<!-- {JSON.stringify(questionCard)} -->
 
-		<FielEditorForm {questionCard} {formDataForForm} {closeModel}/>
+		<FielEditorForm {questionCard} {closeModel}/>
 		<!-- <QuestionForm
 			{id}
 			{responseType}

@@ -1,40 +1,17 @@
 <script lang="ts">
-	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { sectionSchema, type SectionSchema } from './section-schema';
-	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
-
 	import Icon from '@iconify/svelte';
-
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import InfoIcon from '../common/InfoIcon.svelte';
 	import { Label } from '../ui/label';
+	import { enhance } from '$app/forms';
 
-	let { data, sectionData, handleCancel, closeModel } = $props();
+	let { sectionData, handleCancel, closeModel } = $props();
 
-	console.log(sectionData, 'This is data from section form editor');
-
-	let existingObject = {
-		id: sectionData.id,
-		parentSectionId: sectionData.ParentSectionId,
-		title: sectionData.Title,
-		description: sectionData.Description,
-		sectionIdentifier: sectionData.SectionIdentifier
-	};
-	// Initialize superForm
-	const form = superForm(existingObject, {
-		validators: zodClient(sectionSchema),
-		applyAction: true,
-		dataType: 'json'
-	});
-
-	const { form: formData, enhance } = form;
 	///////////////////////////////////////////////////////////////
 
 	async function handleSubmit() {
-		console.log(formData, 'THis is formdata from handlesubmit');
 		console.log(sectionData.Title);
 
 		const model = {
@@ -57,8 +34,6 @@
 	}
 </script>
 
-<!-- submit|preventDefault={handleSubmit} -->
-<!-- action="?/updateSection" -->
 <Card.Root class="rounded-lg border p-4">
 	<form
 		method="post"
@@ -80,7 +55,7 @@
 				<InfoIcon title={'This is id of section.'} cls={'w-20'} />
 			</div>
 		</div>
-		<Input bind:value={sectionData.Title} class="hidden" />
+		<Input bind:value={sectionData.id} class="hidden" />
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">ParentSectionId<span class="text-red-600">*</span></Label>
@@ -90,6 +65,33 @@
 			</div>
 		</div>
 		<Input bind:value={sectionData.ParentSectionId} class="hidden" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is title of section.'} cls={'w-20'} />
+			</div>
+		</div>
+		<Input bind:value={sectionData.Title} required minlength="8" maxlength="256" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Description for section.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={sectionData.Description} />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Section Identifier<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Section Identifier for section.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={sectionData.SectionIdentifier} />
 
 		<!-- <Form.Field {form} name="id" class="hidden">
 			<Form.Control>
@@ -130,34 +132,7 @@
 		<!-- <Form.Description>This is title of section.</Form.Description> -->
 		<!-- Replace div with a button and handle keyboard accessibility -->
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is title of section.'} cls={'w-20'} />
-			</div>
-		</div>
-		<Input bind:value={sectionData.Title} minlength="8" maxlength="256" />
-
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Description for section.'} cls={'text-primary'} />
-			</div>
-		</div>
-		<Input bind:value={sectionData.Description} />
-
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Section Identifier<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Section Identifier for section.'} cls={'text-primary'} />
-			</div>
-		</div>
-		<Input bind:value={sectionData.SectionIdentifier} />
-		<!-- 
-		<Form.Field {form} name="description">
+		<!-- <Form.Field {form} name="description">
 			<Form.Control>
 				{#snippet children({ props })}
 					<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
@@ -202,9 +177,7 @@
 		<Form.FieldErrors />
 	</Form.Field> -->
 
-		<Form.Button type="submit" class="mx-auto mt-5 w-full" onclick={handleSubmit}
-			>Submit</Form.Button
-		>
+		<Button type="submit" class="mx-auto mt-5 w-full" onclick={handleSubmit}>Submit</Button>
 	</form>
 </Card.Root>
 

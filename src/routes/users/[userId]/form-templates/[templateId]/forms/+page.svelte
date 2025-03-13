@@ -180,10 +180,10 @@
 
 	
 
-	function handleSubmitForm(event: { preventDefault: () => void }) {
-		event.preventDefault();
-		closeSheet(event);
-	}
+	// function handleSubmitForm(event: { preventDefault: () => void }) {
+	// 	event.preventDefault();
+	// 	closeSheet(event);
+	// }
 
 	async function handleDeleteCard(id: string, type: 'Section' | 'Card') {
 		console.log('Inside parent handle delete card');
@@ -251,12 +251,11 @@
 			{closeModel}
 			handleCancel={closeSectionForm}
 			sectionData={sectionToOpen}
-			data={data.sectionForm}
 		/>
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper formDataForForm={data} {closeModel}{handleSubmitForm} {closeSheet} questionCard={cardToOpen} />
+	<FormHelper  {closeModel} {closeSheet} questionCard={cardToOpen} />
 {/if}
 
 <div class="bg-green-5 flex min-h-screen flex-row">
