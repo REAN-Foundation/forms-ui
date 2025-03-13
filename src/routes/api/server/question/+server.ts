@@ -1,5 +1,5 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
-import { createQuestion, deleteQuestion } from '../../services/question';
+import { createQuestion, deleteQuestion, updateQuestion } from '../../services/question';
 
 //////////////////////////////////////////////////////////////
 
@@ -55,3 +55,45 @@ export const DELETE = async (event: RequestEvent) => {
         );
     }
 };
+
+
+export const PUT = async (event: RequestEvent) => {
+    try {
+        const request = event.request;
+        const data = await request.json();
+
+        console.log('data from api/server/section:', data);
+
+        const response = await updateQuestion(
+            data.id,
+            data.title,
+            data.description,
+            data.responseType,
+            data.score,
+            data.correctAnswer,
+            data.hint,
+            data.questionImageUrl,
+
+        );
+        // return json({
+        //     status: 'success',
+        //     message: response.message || 'Section updated successfully!',
+        //     data: response,
+        // });
+        console.log(response,"----------------------------------------------");
+
+        return new Response(JSON.stringify(response))
+    } catch (err) {
+        const error = err as CustomError;
+        console.error(`Error updating the section: ${error.message}`);
+        return json(
+            {
+                status: 'error',
+                message: error.message || 'An error occurred while updating the section.',
+                details: error.details || null,
+            },
+            { status: 500 }
+        );
+    }
+};
+

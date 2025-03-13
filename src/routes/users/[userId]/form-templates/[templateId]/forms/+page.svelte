@@ -160,6 +160,26 @@
 		invalidateAll();
 	}
 
+	function closeModel(type: string, response: any) {
+		if (type === 'Section') {
+			console.log(response);
+
+			toastMessage(response);
+
+			if (response.HttpCode === 200) {
+				sectionForm = false;
+			}
+		}
+		if (type === 'Card') {
+			toastMessage(response);
+			if (response.HttpCode === 200) {
+				showSheet = false;
+			}
+		}
+	}
+
+	
+
 	function handleSubmitForm(event: { preventDefault: () => void }) {
 		event.preventDefault();
 		closeSheet(event);
@@ -223,21 +243,20 @@
 	}
 </script>
 
-
 {#if sectionForm}
 	<div
 		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
 	>
 		<SectionEditorForm
+			{closeModel}
 			handleCancel={closeSectionForm}
 			sectionData={sectionToOpen}
 			data={data.sectionForm}
 		/>
-
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper formDataForForm={data} {handleSubmitForm} {closeSheet} questionCard={cardToOpen} />
+	<FormHelper formDataForForm={data} {closeModel}{handleSubmitForm} {closeSheet} questionCard={cardToOpen} />
 {/if}
 
 <div class="bg-green-5 flex min-h-screen flex-row">

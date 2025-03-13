@@ -8,9 +8,10 @@
 
 	let { data }: { data: PageServerData } = $props();
 	const userId = page.params.userId;
+	$inspect(data)
 
-	let sections = $state(data.assessmentTemplate[0].Subsections);
-	let templateInfo = $state(data.assessmentTemplate[0].ParentFormTemplate);
+	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
+	let templateInfo = $state(data.assessmentTemplate);
 </script>
 
 <div class="card container h-full w-full px-16 pt-4">

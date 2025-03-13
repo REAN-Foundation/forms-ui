@@ -68,11 +68,14 @@ export const PUT = async (event: RequestEvent) => {
             data.description,
             data.sectionIdentifier
         );
-        return json({
-            status: 'success',
-            message: response.message || 'Section updated successfully!',
-            data: response,
-        });
+        // return json({
+        //     status: 'success',
+        //     message: response.message || 'Section updated successfully!',
+        //     data: response,
+        // });
+        console.log(response);
+        
+        return new Response(JSON.stringify(response))
     } catch (err) {
         const error = err as CustomError;
         console.error(`Error updating the section: ${error.message}`);

@@ -27,7 +27,7 @@
 	// }
 
 	// Destructure props
-	let { handleSubmit, formDataForForm, questionCard } = $props();
+	let { formDataForForm, questionCard, closeModel } = $props();
 	// $effect(() => {
 	let existingObject = {
 		id: questionCard.id,
@@ -62,6 +62,31 @@
 
 	const { form: formData } = form;
 
+	async function handleSubmit() {
+		console.log(formData, 'THis is formdata from handlesubmit');
+		console.log(questionCard.Title);
+
+		const model = {
+			id: questionCard.id,
+			title: questionCard.Title,
+			description: questionCard.Description,
+			responseType: questionCard.ResponseType,
+			score: questionCard.Score,
+			correctAnswer: questionCard.CorrectAnswer,
+			hint: questionCard.Hint,
+			questionImageUrl: questionCard.QuestionImageUrl
+		};
+		const response = await fetch(`/api/server/question`, {
+			method: 'PUT',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const question = await response.json();
+		console.log(question);
+		if (question.HttpCode === 200) {
+			closeModel('Card', question);
+		}
+	}
 	// console.log(form.title, 'this is form title');
 
 	let options = $state([]);
@@ -104,18 +129,20 @@
 	};
 </script>
 
+<!-- action="?/updateQuestion" -->
+
 <Card.Root class="rounded-lg border p-4">
 	<form
-		action="?/updateQuestion"
-		method="post"
+		method="POST"
 		use:enhance
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-5 py-4"
+		onsubmit={handleSubmit}
 	>
 		<Form.Field {form} name="id" class="hidden">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Id</Form.Label>
-					<Input {...props} bind:value={$formData.id} />
+					<Input {...props} bind:value={questionCard.id} />
 				{/snippet}
 			</Form.Control>
 			<Form.Description>This is id of section.</Form.Description>
@@ -134,7 +161,7 @@
 
 					<Input
 						{...props}
-						bind:value={$formData.title}
+						bind:value={questionCard.Title}
 						class="w-full"
 						maxlength="100"
 						minlength="8"
@@ -150,7 +177,7 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Type</Form.Label>
-					<Input {...props} bind:value={$formData.responseType} class="w-full" />
+					<Input {...props} bind:value={questionCard.ResponseType} class="w-full" />
 				{/snippet}
 			</Form.Control>
 			<!-- <Form.Description>This is your question title.</Form.Description> -->
@@ -166,7 +193,7 @@
 							<InfoIcon title={'This is your question description.'} cls={'w-40'} />
 						</div>
 					</div>
-					<Input {...props} bind:value={$formData.description} class="w-full" />
+					<Input {...props} bind:value={questionCard.Description} class="w-full" />
 				{/snippet}
 				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
 			</Form.Control>
@@ -342,7 +369,7 @@
 							<InfoIcon title={'This is your question score.'} cls={'w-40'} />
 						</div>
 					</div>
-					<Input {...props} bind:value={$formData.score} class="w-full" />
+					<Input {...props} bind:value={questionCard.Score} class="w-full" />
 				{/snippet}
 				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
 			</Form.Control>
@@ -358,7 +385,7 @@
 							<InfoIcon title={'This is your question questionImageUrl.'} cls={'w-40'} />
 						</div>
 					</div>
-					<Input {...props} bind:value={$formData.questionImageUrl} class="w-full" />
+					<Input {...props} bind:value={questionCard.QuestionImageUrl} class="w-full" />
 				{/snippet}
 				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
 			</Form.Control>
@@ -374,7 +401,7 @@
 							<InfoIcon title={'This is your question Correct Answer.'} cls={'w-40'} />
 						</div>
 					</div>
-					<Input {...props} bind:value={$formData.correctAnswer} class="w-full" />
+					<Input {...props} bind:value={questionCard.CorrectAnswer} class="w-full" />
 				{/snippet}
 				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
 			</Form.Control>
@@ -390,7 +417,7 @@
 							<InfoIcon title={'This is your question Hint.'} cls={'w-40'} />
 						</div>
 					</div>
-					<Input {...props} bind:value={$formData.hint} class="w-full" />
+					<Input {...props} bind:value={questionCard.Hint} class="w-full" />
 				{/snippet}
 				<!-- <input type="text" class="w-full" bind:value={desc} name="description"> -->
 			</Form.Control>

@@ -81,6 +81,9 @@ export const actions = {
 	// 	throw redirect(303, `/user/${userId}/assessment/${assessmentId}/question`,);
 	// },
 
+	default: async (event: RequestEvent) => {
+	},
+
 	updateQuestion: async (event: RequestEvent) => {
 		console.log('result is ');
 		const userId = event.params.userId;
