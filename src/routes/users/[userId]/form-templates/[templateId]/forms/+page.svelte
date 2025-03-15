@@ -47,7 +47,7 @@
 		errorMessage('Unable to update form. Please try again.');
 	}
 
-	let cardToOpen;
+	let cardToOpen=$state();
 
 	function openSheet(card) {
 		showSheet = true;

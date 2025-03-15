@@ -12,7 +12,7 @@
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
-	let displayQuestions = $state()	
+	let displayQuestions = $state([])	
 
 	// Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
 	let displayOption = templateInfo.ItemsPerPage;

@@ -3,8 +3,22 @@
 	import FielEditorForm from '../forms/FieldEditor.svelte';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import TextForm from '../forms/responseType/TextForm.svelte';
+	import FloatForm from '../forms/responseType/FloatForm.svelte';
+	import IntegerForm from '../forms/responseType/IntegerForm.svelte';
+	import BooleanForm from '../forms/responseType/BooleanForm.svelte';
+	import ObjectForm from '../forms/responseType/ObjectForm.svelte';
+	import TextArrayForm from '../forms/responseType/TextArrayForm.svelte';
+	import MultipleChoiceSelectionForm from '../forms/responseType/MultipleChoiceSelectionForm.svelte';
+	import SingleChoiceSelectionForm from '../forms/responseType/SingleChoiceSelectionForm.svelte';
+	import DateForm from '../forms/responseType/DateForm.svelte';
+	import DateTimeForm from '../forms/responseType/DateTimeForm.svelte';
+	import RatingForm from '../forms/responseType/RatingForm.svelte';
+	import RangeForm from '../forms/responseType/RangeForm.svelte';
+	import AdvanceForm from '../forms/responseType/AdvanceForm.svelte';
 
-	let {  questionCard, closeModel,closeSheet } = $props();
+	let { questionCard, closeModel, closeSheet } = $props();
+
 	// console.log(formDataForForm, 'this is pageData');
 </script>
 
@@ -31,13 +45,34 @@
 		</div>
 		<!-- {JSON.stringify(questionCard)} -->
 
-		<FielEditorForm {questionCard} {closeModel}/>
-		<!-- <QuestionForm
-			{id}
-			{responseType}
-			{questionCard}
-			handleSubmit={handleSubmitForm}
-		/> -->
+		<FielEditorForm {questionCard} {closeModel} />
+		{#if questionCard.ResponseType === 'Text'}
+			<TextForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Float'}
+			<FloatForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Integer'}
+			<IntegerForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Boolean'}
+			<BooleanForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Object'}
+			<ObjectForm {questionCard} {closeModel} />
+		{:else if questionCard === 'TextArray'}
+			<TextArrayForm {questionCard} {closeModel} />
+		{:else if questionCard === 'MultiChoiceSelection'}
+			<MultipleChoiceSelectionForm {questionCard} {closeModel} />
+		{:else if questionCard === 'SingleChoiceSelection'}
+			<SingleChoiceSelectionForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Date'}
+			<DateForm {questionCard} {closeModel} />
+		{:else if questionCard === 'DateTime'}
+			<DateTimeForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Rating'}
+			<RatingForm {questionCard} {closeModel} />
+		{:else if questionCard === 'Range'}
+			<RangeForm {questionCard} {closeModel} />
+		{:else}
+			<AdvanceForm {questionCard} {closeModel} />
+		{/if}
 	</div>
 </div>
 

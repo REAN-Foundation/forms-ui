@@ -1,37 +1,24 @@
-import { error, fail, redirect } from '@sveltejs/kit';
-import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import type { ServerLoadEvent } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getFormTemplateDetails } from '../../../../../api/services/form-template';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { questionSchema } from '$lib/components/forms/question-schema';
-import { updateQuestion } from '../../../../../api/services/question';
-import chalk from 'chalk';
-import { updateSection } from '../../../../../api/services/section';
-import { sectionSchema } from '$lib/components/forms/section-schema';
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
-	// const { userId } = event.params;
-	// console.log("This is load method of form page----------------");
 	event.depends('app:allNodes');
 	try {
 		const assessmentTemplateId = event.params.templateId;
 		const response = await getFormTemplateDetails(assessmentTemplateId);
-		// console.log(response);
+
 		if (response.Status === 'failure' || response.HttpCode !== 200) {
 			throw error(response.HttpCode, response.Message);
 		}
 
 		const templateInfo = response.Data;
-		console.log('templateInfo', JSON.stringify(templateInfo));
-		console.log("This is load method", templateInfo.FormSections[0].Subsections);
 		return {
 			assessmentTemplateId,
 			templateInfo,
-			// sectionForm: await superValidate(zod(sectionSchema)),
-			// questionForm: await superValidate(zod(questionSchema)),
 			message: response.Message
 		};
 	} catch (error) {
@@ -81,94 +68,90 @@ export const actions = {
 	// 	throw redirect(303, `/user/${userId}/assessment/${assessmentId}/question`,);
 	// },
 
-	default: async (event: RequestEvent) => {
-	},
+	////
 
-	updateQuestion: async (event: RequestEvent) => {
-		console.log('result is ');
-		const userId = event.params.userId;
-		const templateId = event.params.templateId;
-		const form = await superValidate(event, zod(questionSchema));
-		console.log('result is ', form);
+	// updateQuestion: async (event: RequestEvent) => {
+	// 	console.log('result is ');
+	// 	const userId = event.params.userId;
+	// 	const templateId = event.params.templateId;
+	// 	const form = await superValidate(event, zod(questionSchema));
+	// 	console.log('result is ', form);
 
-		if (!form.valid) {
-			return fail(400, { form });
-		}
-
-
-		let options = [];
-		if (form.data.responseType === 'SingleChoiceSelection' || form.data.responseType === 'MultiChoiceSelection' || form.data.responseType === 'Boolean') {
+	// 	if (!form.valid) {
+	// 		return fail(400, { form });
+	// 	}
 
 
-			try {
-				const parsedOptions = JSON.parse(form.data.options[0]);
-				options = parsedOptions.map((option, index) => ({
-					Text: option.Text,
-					Sequence: option.Sequence || (index + 1).toString(),
-					ImageUrl: option.ImageUrl
-				}));
-			} catch (error) {
-				console.error("Error parsing options:", error);
-				return fail(400, { form, message: "Invalid options format" });
-			}
-			console.log("Reconstructed options:", JSON.stringify(options));
-		}
-
-		const response = await updateQuestion(
-			form.data.id,
-			form.data.title,
-			form.data.description,
-			form.data.responseType,
-			form.data.score,
-			form.data.correctAnswer,
-			form.data.hint,
-			form.data.questionImageUrl,
-			form.data.rangeMin,
-			form.data.rangeMax,
-			options
-		);
-
-		console.log(chalk.hex('#6a329f')('Response from updation of Question', response));
-
-		if (response.Status === 'failure' || response.HttpCode !== 200) {
-			// toast.error('Question has not been created');
-			throw redirect(303, `/users/${userId}/form-templates/${templateId}`);
-		}
-
-		// toast.success("Question added successfully!");
-		throw redirect(303, `/users/${userId}/form-templates/${templateId}/forms`);
-	},
+	// 	let options = [];
+	// 	if (form.data.responseType === 'SingleChoiceSelection' || form.data.responseType === 'MultiChoiceSelection' || form.data.responseType === 'Boolean') {
 
 
-	updateSection: async (event: RequestEvent) => {
-		const userId = event.params.userId;
-		const templateId = event.params.templateId;
+	// 		try {
+	// 			const parsedOptions = JSON.parse(form.data.options[0]);
+	// 			options = parsedOptions.map((option, index) => ({
+	// 				Text: option.Text,
+	// 				Sequence: option.Sequence || (index + 1).toString(),
+	// 				ImageUrl: option.ImageUrl
+	// 			}));
+	// 		} catch (error) {
+	// 			console.error("Error parsing options:", error);
+	// 			return fail(400, { form, message: "Invalid options format" });
+	// 		}
+	// 		console.log("Reconstructed options:", JSON.stringify(options));
+	// 	}
 
-		const form = await superValidate(event, zod(sectionSchema));
-		if (!form.valid) {
-			return fail(400, {
-				form,
-			});
-		}
-		console.log("This is form data", form.data);
-		const response = await updateSection(
-			// ParentTemplateId,
-			form.data.id,
-			form.data.parentSectionId,
-			form.data.title,
-			form.data.description,
-			form.data.sectionIdentifier,
-			// form.data.sequence
-		);
-		// console.log(chalk.hex('#09FA25')("this is from server", JSON.stringify(response), "page.server.ts file"));
+	// 	const response = await updateQuestion(
+	// 		form.data.id,
+	// 		form.data.title,
+	// 		form.data.description,
+	// 		form.data.responseType,
+	// 		form.data.score,
+	// 		form.data.correctAnswer,
+	// 		form.data.hint,
+	// 		form.data.questionImageUrl,
+	// 		form.data.rangeMin,
+	// 		form.data.rangeMax,
+	// 		options
+	// 	);
 
-		if (response.Status === 'failure' || response.HttpCode !== 200) {
-			throw redirect(303, `preview`);
-		}
-		// toast.success("Form section Added succeccsfully !")
-		throw redirect(303, `/users/${userId}/form-templates/${templateId}/forms`,);
-	}
+	// 	console.log(chalk.hex('#6a329f')('Response from updation of Question', response));
+
+	// 	if (response.Status === 'failure' || response.HttpCode !== 200) {
+	// 		// toast.error('Question has not been created');
+	// 		throw redirect(303, `/users/${userId}/form-templates/${templateId}`);
+	// 	}
+
+	// 	// toast.success("Question added successfully!");
+	// 	throw redirect(303, `/users/${userId}/form-templates/${templateId}/forms`);
+	// },
+
+
+	// updateSection: async (event: RequestEvent) => {
+	// 	const userId = event.params.userId;
+	// 	const templateId = event.params.templateId;
+
+	// 	const form = await superValidate(event, zod(sectionSchema));
+	// 	if (!form.valid) {
+	// 		return fail(400, {
+	// 			form,
+	// 		});
+	// 	}
+	// 	console.log("This is form data", form.data);
+	// 	const response = await updateSection(
+	// 		// ParentTemplateId,
+	// 		form.data.id,
+	// 		form.data.parentSectionId,
+	// 		form.data.title,
+	// 		form.data.description,
+	// 		form.data.sectionIdentifier,
+	// 		// form.data.sequence
+	// 	);
+	// 	// console.log(chalk.hex('#09FA25')("this is from server", JSON.stringify(response), "page.server.ts file"));
+
+	// 	if (response.Status === 'failure' || response.HttpCode !== 200) {
+	// 		throw redirect(303, `preview`);
+	// 	}
+	// 	// toast.success("Form section Added succeccsfully !")
+	// 	throw redirect(303, `/users/${userId}/form-templates/${templateId}/forms`,);
+	// }
 };
-
-
-

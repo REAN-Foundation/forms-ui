@@ -34,8 +34,7 @@
 			closeModel('Card', question);
 		}
 	}
-	// console.log(form.title, 'this is form title');
-
+	
 	let options = $state([]);
 	options = questionCard.options ? [...questionCard.options] : [];
 
@@ -58,13 +57,6 @@
 	function removeOption(index: number) {
 		options = options.filter((_, i) => i !== index);
 	}
-
-	// function submit(event: Event) {
-	// 	event.preventDefault();
-	// 	formData.options = options;
-
-	// 	// dispatch('handleSubmit', { formData });
-	// }
 </script>
 
 <Card.Root class="rounded-lg border p-4">
