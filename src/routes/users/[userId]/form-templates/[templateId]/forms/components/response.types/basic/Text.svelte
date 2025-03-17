@@ -8,7 +8,7 @@
 </script>
 
 <Button
-	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
+   class="flex w-full h-fit flex-col gap-2 p-4 hover:border hover:border-dashed hover:border-gray-500 text-left items-start"
 	onclick={() => {
 		openSheet(card);
 	}}
@@ -29,3 +29,16 @@
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>
 	</div>
 </Button>
+
+<!-- <Button
+    class="flex w-full h-fit flex-col gap-2 p-4 hover:border hover:border-dashed hover:border-gray-500 text-left items-start"
+    onclick={() => questionEditRoute(id)}
+    variant="ghost"
+>
+    <h1 class="text-md font-bold text-slate-400">{card.Title || 'Enter question here'}</h1>
+    <div class="flex items-center gap-1 text-sm font-serif text-slate-500">
+        <Icon icon="fluent:text-12-regular" width="15" height="15" />
+        <p>Text</p>
+    </div>
+    <p class="text-sm text-slate-400">{card.Description || ''}</p>
+</Button> -->

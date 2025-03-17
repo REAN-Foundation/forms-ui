@@ -46,7 +46,7 @@
 		onsubmit={handleSubmit}
 	>
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Id<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Id</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is id of Question.'} cls={'w-20'} />
@@ -61,10 +61,10 @@
 				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.Title} required minlength="8" maxlength="256" />
+		<Input bind:value={questionCard.Title}/>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Description</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Description for Question.'} cls={'text-primary'} />
@@ -73,7 +73,7 @@
 		<Input bind:value={questionCard.Description} />
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Response Type<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Response Type</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
@@ -82,16 +82,16 @@
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Score<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Question Score</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.Score} />
+		<Input bind:value={questionCard.Score} type="number" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Hint<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Question Hint</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Hint for Question.'} cls={'text-primary'} />
@@ -100,7 +100,7 @@
 		<Input bind:value={questionCard.Hint} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question CorrectAnswer<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Question CorrectAnswer</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />
@@ -110,7 +110,7 @@
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 "
-				>Question QuestionImageUrl<span class="text-red-600">*</span></Label
+				>Question QuestionImageUrl</Label
 			>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
