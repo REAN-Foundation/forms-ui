@@ -23,7 +23,9 @@
 			score: questionCard.Score,
 			correctAnswer: questionCard.CorrectAnswer,
 			hint: questionCard.Hint,
-			questionImageUrl: questionCard.QuestionImageUrl
+			questionImageUrl: questionCard.QuestionImageUrl,
+			rangeMin: questionCard.RangeMin,
+			rangeMax: questionCard.RangeMax
 		};
 		const response = await fetch(`/api/server/question`, {
 			method: 'PUT',
@@ -80,6 +82,24 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Minimum Range<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.RangeMin} type="number" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Maximim Range<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.RangeMax} type="number" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Score</Label>

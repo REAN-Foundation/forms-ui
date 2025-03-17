@@ -77,7 +77,9 @@ export const PUT = async (event: RequestEvent) => {
             data.correctAnswer,
             data.hint,
             data.questionImageUrl,
-            data.options
+            data.options,
+            data.rangeMin,
+            data.rangeMax
 
         );
         // return json({
