@@ -5,36 +5,75 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	// import InfoIcon from '';
-	// import { Label } from '../ui/label';
+	import Icon from '@iconify/svelte';
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	let { questionCard, closeModel } = $props();
 
-	async function handleSubmit() {
-		console.log(questionCard.Title);
+	let options = $state(questionCard.Options ? [...questionCard.Options] : []);
 
-		const model = {
-			id: questionCard.id,
-			title: questionCard.Title,
-			description: questionCard.Description,
-			responseType: questionCard.ResponseType,
-			score: questionCard.Score,
-			correctAnswer: questionCard.CorrectAnswer,
-			hint: questionCard.Hint,
-			questionImageUrl: questionCard.QuestionImageUrl
-		};
-		const response = await fetch(`/api/server/question`, {
-			method: 'PUT',
-			body: JSON.stringify(model),
-			headers: { 'content-type': 'application/json' }
-		});
-		const question = await response.json();
-		console.log(question);
-		if (question.HttpCode === 200) {
-			closeModel('Card', question);
+	async function handleSubmit(event) {
+		event.preventDefault();
+
+		try {
+			const updatedOptions = options.map((option, index) => ({
+				Text: option.Text,
+				Sequence: option.Sequence || (index + 1).toString(),
+				ImageUrl: option.ImageUrl
+			}));
+
+			const model = {
+				id: questionCard.id,
+				title: questionCard.Title,
+				description: questionCard.Description,
+				responseType: questionCard.ResponseType,
+				score: questionCard.Score,
+				correctAnswer: questionCard.CorrectAnswer,
+				hint: questionCard.Hint,
+				questionImageUrl: questionCard.QuestionImageUrl,
+				options: updatedOptions
+			};
+
+			console.log('model: ', model);
+
+			const response = await fetch('/api/server/question', {
+				method: 'PUT',
+				body: JSON.stringify(model),
+				headers: { 'Content-Type': 'application/json' }
+			});
+
+			const question = await response.json();
+			if (question.HttpCode === 200) {
+				closeModel('Card', question);
+			}
+		} catch (error) {
+			console.error('Error submitting form:', error);
 		}
+	}
+
+	const hardcodedImageUrl = 'https://example.com/default';
+
+	function addOption() {
+		if (questionCard.ResponseType === 'Boolean' && options.length >= 2) return;
+
+		// Add a new option
+		options = [
+			...options,
+			{ Sequence: (options.length + 1).toString(), Text: '', ImageUrl: hardcodedImageUrl }
+		];
+	}
+
+	function updateOption(index, key, value) {
+		// Update the option at the specified index
+		options[index] = { ...options[index], [key]: value };
+		// Trigger reactivity by reassigning the array
+		options = [...options];
+	}
+
+	function removeOption(index) {
+		// Remove the option at the specified index
+		options = options.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -42,7 +81,7 @@
 	<form
 		method="POST"
 		use:enhance
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={handleSubmit}
 	>
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
@@ -54,7 +93,7 @@
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -72,14 +111,62 @@
 		</div>
 		<Input bind:value={questionCard.Description} />
 
-		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+		<div class="mt-5 flex flex-col">
+			<Label>Options</Label>
+			<Button
+				type="button"
+				onclick={addOption}
+				class="mt-2 w-fit"
+				disabled={questionCard.ResponseType === 'Boolean' && options.length >= 2}
+			>
+				Add Option
+			</Button>
+
+			{#each options as option, index}
+				<div class="mb-2 flex items-center">
+					<Input
+						type="number"
+						name={`options[${index}].Sequence`}
+						bind:value={option.Sequence}
+						oninput={(e) => updateOption(index, 'Sequence', e.target.value)}
+						placeholder={`Sequence of ${index + 1} Option`}
+						class="mr-2 w-1/4"
+					/>
+					<Input
+						type="text"
+						name={`options[${index}].Text`}
+						bind:value={option.Text}
+						oninput={(e) => updateOption(index, 'Text', e.target.value)}
+						placeholder={`Data for Option ${index + 1}`}
+						class="mr-2 w-full"
+					/>
+					<Input type="hidden" name={`options[${index}].ImageUrl`} bind:value={option.ImageUrl} />
+					<Button type="button" onclick={() => removeOption(index)} class="ml-2">
+						<Icon icon="mingcute:delete-2-line" width="25" height="25" />
+					</Button>
+				</div>
+			{/each}
+
+			<input type="hidden" name="options" value={JSON.stringify(options)} />
+		</div>
+
+		<!-- Replace div with a button and handle keyboard accessibility -->
+		<!-- <div class="relative mt-5 grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.ResponseType} class="hidden" />
+		<Input bind:value={questionCard.ResponseType} class="" /> -->
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Response Type<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.ResponseType} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Score<span class="text-red-600">*</span></Label>
@@ -88,10 +175,10 @@
 				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.Score} />
+		<Input bind:value={questionCard.Score} type="number"/>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Hint<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 ">Hint for this question<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Hint for Question.'} cls={'text-primary'} />
@@ -100,18 +187,18 @@
 		<Input bind:value={questionCard.Hint} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question CorrectAnswer<span class="text-red-600">*</span></Label>
+			<Label class="col-span-11 "
+				>CorrectAnswer for this Question<span class="text-red-600">*</span></Label
+			>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.QuestionImageUrl} />
+		<Input bind:value={questionCard.CorrectAnswer} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 "
-				>Question QuestionImageUrl<span class="text-red-600">*</span></Label
-			>
+			<Label class="col-span-11 ">QuestionImageUrl<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />

@@ -2,17 +2,18 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
 	import { goto, invalidate } from '$app/navigation';
-	import { page } from '$app/stores';
+	// import { page } from '$app/stores';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import Icon from '@iconify/svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import { page } from '$app/state';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	let { id }: { id: string } = $props();
-	const userId = $page.params.userId;
+	const userId = page.params.userId;
 	let response;
 	let submissionId = $state();
 	let createdLink = $state();

@@ -27,6 +27,9 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 };
 
 export const actions = {
+	default: async () => {
+		console.log('result is ');
+	}
 	// createQuestion: async (event: RequestEvent) => {
 	// 	console.log('result is ');
 	// 	// const request = event.request;

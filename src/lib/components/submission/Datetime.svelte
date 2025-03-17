@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
-	export let q;
-	export let answers;
+	let { q, answers = $bindable() } = $props();
 </script>
 
 {#if q.ResponseType === 'DateTime'}

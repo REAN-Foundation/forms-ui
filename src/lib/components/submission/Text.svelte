@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	export let q;
-	// export let submit;
-	export let answers;
+	// export let q;
+	// // export let submit;
+	// export let answers;
+	let { q, answers = $bindable() } = $props();
 
 	function handleInput(event, id) {
 		answers[id] = +event.target.value;
@@ -19,12 +20,8 @@
 	{#if q.Description}
 		<Label for="title" class="ml-4 ">{q.Description || ''}</Label><br />
 	{/if}
-	<Input
-		name={q.id}
-		bind:value={answers[q.id]}
-		type="text"
-		/>
-		<!-- oninput={(e) => handleInput(e, q.id)} -->
+	<Input name={q.id} bind:value={answers[q.id]} type="text" />
+	<!-- oninput={(e) => handleInput(e, q.id)} -->
 	<div class="flex justify-end">
 		{#if q.Hint}
 			<Label for="hint" class="float-right ml-auto mt-4 justify-end  p-2">Hint: {q.Hint}</Label>

@@ -2,6 +2,10 @@ import { json, type RequestEvent } from '@sveltejs/kit';
 import { createQuestion, deleteQuestion, updateQuestion } from '../../services/question';
 
 //////////////////////////////////////////////////////////////
+interface CustomError extends Error {
+    statusCode?: number;
+    details?: string;
+}
 
 export const POST = async (event: RequestEvent) => {
     try {
@@ -62,7 +66,7 @@ export const PUT = async (event: RequestEvent) => {
         const request = event.request;
         const data = await request.json();
 
-        console.log('data from api/server/section:', data);
+        console.log('data from api/server/question:', data);
 
         const response = await updateQuestion(
             data.id,
@@ -73,6 +77,7 @@ export const PUT = async (event: RequestEvent) => {
             data.correctAnswer,
             data.hint,
             data.questionImageUrl,
+            data.options
 
         );
         // return json({
@@ -80,7 +85,7 @@ export const PUT = async (event: RequestEvent) => {
         //     message: response.message || 'Section updated successfully!',
         //     data: response,
         // });
-        console.log(response,"----------------------------------------------");
+        // console.log(response,"----------------------------------------------");
 
         return new Response(JSON.stringify(response))
     } catch (err) {

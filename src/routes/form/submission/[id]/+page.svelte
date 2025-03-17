@@ -4,102 +4,105 @@
 	import { Button } from '$lib/components/ui/button';
 	import { save, submit } from './apiFunctions';
 
-	let data: PageServerData = $props();
+	let { data }: { data: PageServerData } = $props();
+	console.log('sections');
+	$inspect(data.assessmentTemplate);
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	// const questions = data.assessmentTemplate.Questions;
 
+	
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
-	let displayQuestions = $state([])	
+	// let displayQuestions = $state([]);
 
-	// Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
-	let displayOption = templateInfo.ItemsPerPage;
+	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
+	// let displayOption = templateInfo.ItemsPerPage;
 
-	// Sort sections based on Sequence (A1, A2, A3...)
-	const sortedSections = sections.sort((a, b) =>
-		(a.Sequence || '').localeCompare(b.Sequence || '')
-	);
+	// // Sort sections based on Sequence (A1, A2, A3...)
+	// const sortedSections = sections.sort((a, b) =>
+	// 	(a.Sequence || '').localeCompare(b.Sequence || '')
+	// );
 
-	// Group questions by their ParentFormSection (section)
-	const questionsBySection = sortedSections.map((section) => ({
-		section,
-		questions: questions
-			.filter((q) => q.ParentFormSection?.id === section.id)
-			.sort((a, b) => (a.Sequence || '').localeCompare(b.Sequence || ''))
-	}));
+	// // Group questions by their ParentFormSection (section)
+	// const questionsBySection = sortedSections.map((section) => ({
+	// 	section,
+	// 	questions: questions
+	// 		.filter((q) => q.ParentFormSection?.id === section.id)
+	// 		.sort((a, b) => (a.Sequence || '').localeCompare(b.Sequence || ''))
+	// }));
 
-	// Flatten questions across sections, maintaining sequence order
-	const allQuestionsInOrder = questionsBySection.flatMap((group) => group.questions);
+	// // Flatten questions across sections, maintaining sequence order
+	// const allQuestionsInOrder = questionsBySection.flatMap((group) => group.questions);
 
-	// Get the total number of questions
-	const totalQuestions = allQuestionsInOrder.length;
+	// // Get the total number of questions
+	// const totalQuestions = allQuestionsInOrder.length;
 
-	// Helper function to get current questions based on ItemsPerPage
-	function getCurrentQuestions(index: number) {
-		switch (displayOption) {
-			case 'OneQuestion':
-				return [allQuestionsInOrder[index]]; // Show one question at a time
-			case 'FiveQuestions':
-				return allQuestionsInOrder.slice(index, index + 5); // Show 5 questions
-			case 'TenQuestions':
-				return allQuestionsInOrder.slice(index, index + 10); // Show 10 questions
-			case 'AllQuestions':
-			default:
-				return allQuestionsInOrder; // Show all questions at once
-		}
-	}
+	// // Helper function to get current questions based on ItemsPerPage
+	// function getCurrentQuestions(index: number) {
+	// 	switch (displayOption) {
+	// 		case 'OneQuestion':
+	// 			return [allQuestionsInOrder[index]]; // Show one question at a time
+	// 		case 'FiveQuestions':
+	// 			return allQuestionsInOrder.slice(index, index + 5); // Show 5 questions
+	// 		case 'TenQuestions':
+	// 			return allQuestionsInOrder.slice(index, index + 10); // Show 10 questions
+	// 		case 'AllQuestions':
+	// 		default:
+	// 			return allQuestionsInOrder; // Show all questions at once
+	// 	}
+	// }
 
-	// Reactive variable that holds the questions currently being displayed
-	displayQuestions = getCurrentQuestions(currentIndex);
-	// $: console.log('displayQuestions:', displayQuestions);
+	// // Reactive variable that holds the questions currently being displayed
+	// displayQuestions = getCurrentQuestions(currentIndex);
+	// // $: console.log('displayQuestions:', displayQuestions);
 
-	// Determine the max index for pagination based on ItemsPerPage
-	function getMaxIndex() {
-		switch (displayOption) {
-			case 'OneQuestion':
-				return totalQuestions - 1;
-			case 'FiveQuestions':
-				return Math.max(0, totalQuestions - 5);
-			case 'TenQuestions':
-				return Math.max(0, totalQuestions - 10);
-			case 'AllQuestions':
-			default:
-				return 0;
-		}
-	}
+	// // Determine the max index for pagination based on ItemsPerPage
+	// function getMaxIndex() {
+	// 	switch (displayOption) {
+	// 		case 'OneQuestion':
+	// 			return totalQuestions - 1;
+	// 		case 'FiveQuestions':
+	// 			return Math.max(0, totalQuestions - 5);
+	// 		case 'TenQuestions':
+	// 			return Math.max(0, totalQuestions - 10);
+	// 		case 'AllQuestions':
+	// 		default:
+	// 			return 0;
+	// 	}
+	// }
 
-	// Handle next page (or question)
-	function nextPage() {
-		const maxIndex = getMaxIndex();
-		if (currentIndex < maxIndex) {
-			currentIndex = Math.min(currentIndex + getStep(), maxIndex);
-		}
-		console.log('Next page clicked. New currentIndex:', currentIndex);
-	}
+	// // Handle next page (or question)
+	// function nextPage() {
+	// 	const maxIndex = getMaxIndex();
+	// 	if (currentIndex < maxIndex) {
+	// 		currentIndex = Math.min(currentIndex + getStep(), maxIndex);
+	// 	}
+	// 	console.log('Next page clicked. New currentIndex:', currentIndex);
+	// }
 
-	// Handle previous page (or question)
-	function prevPage() {
-		if (currentIndex > 0) {
-			currentIndex = Math.max(currentIndex - getStep(), 0);
-		}
-		console.log('Previous page clicked. New currentIndex:', currentIndex);
-	}
+	// // Handle previous page (or question)
+	// function prevPage() {
+	// 	if (currentIndex > 0) {
+	// 		currentIndex = Math.max(currentIndex - getStep(), 0);
+	// 	}
+	// 	console.log('Previous page clicked. New currentIndex:', currentIndex);
+	// }
 
-	// Get the step for pagination based on ItemsPerPage setting
-	function getStep() {
-		switch (displayOption) {
-			case 'OneQuestion':
-				return 1;
-			case 'FiveQuestions':
-				return 5;
-			case 'TenQuestions':
-				return 10;
-			default:
-				return 1;
-		}
-	}
+	// // Get the step for pagination based on ItemsPerPage setting
+	// function getStep() {
+	// 	switch (displayOption) {
+	// 		case 'OneQuestion':
+	// 			return 1;
+	// 		case 'FiveQuestions':
+	// 			return 5;
+	// 		case 'TenQuestions':
+	// 			return 10;
+	// 		default:
+	// 			return 1;
+	// 	}
+	// }
 
 	// Toggle the sidebar's collapsed state
 	function toggleSidebar() {
@@ -108,7 +111,7 @@
 
 	// Save the current answers to the backend
 	function handleSave(event) {
-	event.preventDefault();
+		event.preventDefault();
 		const FormSubmissionId = $page.params.id;
 		save({ Data: answers, FormSubmissionId: FormSubmissionId });
 	}
@@ -166,24 +169,19 @@
 
 <div class="flex flex-row">
 	<!-- Collapsible Sidebar -->
-	<div
+	<!-- <p>Display Option: {displayOption}</p> -->
+	<!-- <div
 		class={`transition-all duration-300 ease-in-out ${isCollapsed ? 'w-24' : 'w-1/5'} border p-2`}
 	>
 		<Button onclick={toggleSidebar} variant="ghost" class="mb-4 w-full p-2">
 			{isCollapsed ? 'Open' : 'Close'}
 		</Button>
 		{#if !isCollapsed}
-			<p>Display Option: {displayOption}</p>
 		{/if}
-	</div>
+	</div> -->
 
 	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1">
-		<form
-			action="?/response"
-			method="post"
-			onsubmit={handleSave}
-			class="mx-auto w-[80%] space-y-3"
-		>
+		<form action="?/response" method="post" onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
 			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
 				{#if templateInfo}
 					<div>
@@ -204,14 +202,31 @@
 									Version: {templateInfo.CurrentVersion}
 								</p>
 							</div>
-							<span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span>
+							<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
 						</div>
 					</div>
 				{/if}
 			</div>
 
 			<div class="min-h-[390px]">
-				{#if displayOption === 'OneQuestion'}
+				{#each sections ?? [] as s}
+					<div class="mb-4 min-h-[300px]">
+						<h4 class="text-md font-semibold">
+							Section: {s.Title || 'Untitled Section'}
+						</h4>
+						<p class="text-sm text-gray-600">
+							{s.Description || 'No description provided.'}
+						</p>
+
+						{#each s?.Questions ?? [] as sq, index}
+							<div class="mt-2">
+								<svelte:component this={componentsMap[sq.ResponseType]} q={sq} bind:answers />
+							</div>
+						{/each}
+					</div>
+				{/each}
+
+				<!-- {#if displayOption === 'OneQuestion'}
 					{#each displayQuestions as question (question.id)}
 						<div class="mb-4 min-h-[300px]">
 							<h4 class="text-md font-semibold">
@@ -220,7 +235,7 @@
 							<p class="text-sm text-gray-600">
 								{question.ParentFormSection.Description || 'No description provided.'}
 							</p>
-							<!-- {question.ResponseType} -->
+					
 							<div class="mt-2">
 								<svelte:component
 									this={componentsMap[question.ResponseType]}
@@ -242,7 +257,7 @@
 						{#each displayQuestions as question (question.id)}
 							{#if section.id === question.ParentFormSection.id && section.Title !== 'Assessment Root Section'}
 								<div class="mb-4 min-h-[100px]">
-									<!-- {question.ResponseType} -->
+							
 									<div class="mt-2">
 										<svelte:component
 											this={componentsMap[question.ResponseType]}
@@ -255,7 +270,7 @@
 						{/each}
 						{/if}
 					{/each}
-				{/if}
+				{/if} -->
 			</div>
 
 			<!-- <div class="flex justify-between">
@@ -265,7 +280,7 @@
 				
 			</div> -->
 
-			<div class="flex justify-between space-x-2 p-4">
+			<!-- <div class="flex justify-between space-x-2 p-4">
 				<Button type="button" onclick={prevPage} variant="outline" disabled={currentIndex === 0}>
 					Previous
 				</Button>
@@ -278,7 +293,7 @@
 				>
 					Next
 				</Button>
-			</div>
+			</div> -->
 			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
 				<Button type="submit" variant="outline" class="w-full">Save</Button>
 				<Button onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"

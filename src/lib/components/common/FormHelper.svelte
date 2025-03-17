@@ -43,32 +43,32 @@
 				<Icon icon="hugeicons:cancel-01" width="15" height="15" />
 			</Button>
 		</div>
-		<!-- {JSON.stringify(questionCard)} -->
+		<!-- {JSON.stringify(questionCard.ResponseType)} -->
 
-		<FielEditorForm {questionCard} {closeModel} />
+		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
 		{#if questionCard.ResponseType === 'Text'}
 			<TextForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Float'}
+		{:else if questionCard.ResponseType === 'Float'}
 			<FloatForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Integer'}
+		{:else if questionCard.ResponseType === 'Integer'}
 			<IntegerForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Boolean'}
+		{:else if questionCard.ResponseType === 'Boolean'}
 			<BooleanForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Object'}
+		{:else if questionCard.ResponseType === 'Object'}
 			<ObjectForm {questionCard} {closeModel} />
-		{:else if questionCard === 'TextArray'}
+		{:else if questionCard.ResponseType === 'TextArray'}
 			<TextArrayForm {questionCard} {closeModel} />
-		{:else if questionCard === 'MultiChoiceSelection'}
+		{:else if questionCard.ResponseType === 'MultiChoiceSelection'}
 			<MultipleChoiceSelectionForm {questionCard} {closeModel} />
-		{:else if questionCard === 'SingleChoiceSelection'}
+		{:else if questionCard.ResponseType === 'SingleChoiceSelection'}
 			<SingleChoiceSelectionForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Date'}
+		{:else if questionCard.ResponseType === 'Date'}
 			<DateForm {questionCard} {closeModel} />
-		{:else if questionCard === 'DateTime'}
+		{:else if questionCard.ResponseType === 'DateTime'}
 			<DateTimeForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Rating'}
+		{:else if questionCard.ResponseType === 'Rating'}
 			<RatingForm {questionCard} {closeModel} />
-		{:else if questionCard === 'Range'}
+		{:else if questionCard.ResponseType === 'Range'}
 			<RangeForm {questionCard} {closeModel} />
 		{:else}
 			<AdvanceForm {questionCard} {closeModel} />

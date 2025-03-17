@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Label } from '$lib/components/ui/label/index.js';
-	export let q;
-	export let answers;
-	let optionsArray: any;
+	let { q, answers = $bindable() } = $props();
+	let optionsArray: any = $state();
 
 	// Ensure q.Options is defined, is an array, and contains at least one non-empty string
 	// if (Array.isArray(q.Options) && q.Options.length > 0 && typeof q.Options[0] === 'string') {
@@ -15,7 +14,7 @@
 		optionsArray = [];
 	}
 
-	let selected: string[] = [];
+	let selected: string[] = $state([]);
 
 	function handleCheckboxChange(event: Event) {
 		const target = event.target as HTMLInputElement;

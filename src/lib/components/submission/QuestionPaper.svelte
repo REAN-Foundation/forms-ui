@@ -11,9 +11,10 @@
 
 	/////////////////////////////////////////////////////////////////////////////////
 
-	export let sections;
-	export let questions;
-	export let answers;
+	let {sections, questions, answers} = $props();
+	// export let sections;
+	// export let questions;
+	// export let answers;
 	// export let textValues
 
 	const componentsMap = {

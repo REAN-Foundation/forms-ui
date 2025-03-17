@@ -66,9 +66,9 @@ export const updateQuestion = async (
 	correctAnswer?: string,
 	hint?: string,
 	questionImageUrl?: string,
+	options?: string[],
 	rangeMin?: number,
 	rangeMax?: number,
-	options?: string[],
 ) => {
 
 	const body = {

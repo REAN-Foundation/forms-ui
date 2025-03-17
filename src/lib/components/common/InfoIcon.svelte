@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 
+	let {title, cls} = $props();
 	// export let showTooltip;
-	let showTooltip = false;
-	export let title;
-	export let cls;
+	let showTooltip = $state(false);
+	// export let title;
+	// export let cls;
 </script>
 
 <button

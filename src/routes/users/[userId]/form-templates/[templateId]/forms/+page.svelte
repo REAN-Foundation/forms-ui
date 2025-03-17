@@ -15,12 +15,24 @@
 	////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
+
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
-
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
+
+	let showSheet = $state(false); // false;
+	let questionCard = $state();
+	let highlightedSection: number | null = $state();
+	let highlightedSubSection: number | null = $state();
+	let deleteButtonClicked = $state(false);
+	let deleteSubButtonClicked = $state(false);
+	let sectionForm = $state(false);
+	let subSectionForm = $state(false);
+
+	let cardToOpen=$state();
+	let sectionToOpen = $state();
 
 	$effect(() => {
 		uiSections = data.templateInfo.FormSections[0].Subsections;
@@ -32,22 +44,6 @@
 			typeOfQuestion = target.value;
 		}
 	}
-
-	let showSheet = $state(false); // false;
-	let questionCard = $state();
-	let highlightedSection: number | null = $state();
-	let highlightedSubSection: number | null = $state();
-	let deleteButtonClicked = $state(false);
-	let deleteSubButtonClicked = $state(false);
-	let sectionForm = $state(false);
-	let subSectionForm = $state(false);
-
-	if (form) {
-		showSheet = true;
-		errorMessage('Unable to update form. Please try again.');
-	}
-
-	let cardToOpen=$state();
 
 	function openSheet(card) {
 		showSheet = true;
@@ -228,7 +224,6 @@
 		}
 	}
 
-	let sectionToOpen = $state();
 	async function openSectionForm(section) {
 		sectionToOpen = section;
 		sectionForm = true;

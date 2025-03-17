@@ -5,6 +5,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
+	import Icon from '@iconify/svelte';
 	// import InfoIcon from '';
 	// import { Label } from '../ui/label';
 
@@ -12,29 +13,66 @@
 
 	let { questionCard, closeModel } = $props();
 
-	async function handleSubmit() {
-		console.log(questionCard.Title);
+	let options = $state(questionCard.Options ? [...questionCard.Options] : []);
 
-		const model = {
-			id: questionCard.id,
-			title: questionCard.Title,
-			description: questionCard.Description,
-			responseType: questionCard.ResponseType,
-			score: questionCard.Score,
-			correctAnswer: questionCard.CorrectAnswer,
-			hint: questionCard.Hint,
-			questionImageUrl: questionCard.QuestionImageUrl
-		};
-		const response = await fetch(`/api/server/question`, {
-			method: 'PUT',
-			body: JSON.stringify(model),
-			headers: { 'content-type': 'application/json' }
-		});
-		const question = await response.json();
-		console.log(question);
-		if (question.HttpCode === 200) {
-			closeModel('Card', question);
+	async function handleSubmit(event) {
+		event.preventDefault();
+
+		try {
+			const updatedOptions = options.map((option, index) => ({
+				Text: option.Text,
+				Sequence: option.Sequence || (index + 1).toString(),
+				ImageUrl: option.ImageUrl
+			}));
+
+			const model = {
+				id: questionCard.id,
+				title: questionCard.Title,
+				description: questionCard.Description,
+				responseType: questionCard.ResponseType,
+				score: questionCard.Score,
+				correctAnswer: questionCard.CorrectAnswer,
+				hint: questionCard.Hint,
+				questionImageUrl: questionCard.QuestionImageUrl,
+				options: updatedOptions
+			};
+			const response = await fetch(`/api/server/question`, {
+				method: 'PUT',
+				body: JSON.stringify(model),
+				headers: { 'content-type': 'application/json' }
+			});
+			const question = await response.json();
+			console.log(question);
+			if (question.HttpCode === 200) {
+				closeModel('Card', question);
+			}
+		} catch (error) {
+			console.error('Error submitting form:', error);
 		}
+	}
+
+	const hardcodedImageUrl = 'https://example.com/default';
+
+	function addOption() {
+		if (questionCard.ResponseType === 'Boolean' && options.length >= 2) return;
+
+		// Add a new option
+		options = [
+			...options,
+			{ Sequence: (options.length + 1).toString(), Text: '', ImageUrl: hardcodedImageUrl }
+		];
+	}
+
+	function updateOption(index, key, value) {
+		// Update the option at the specified index
+		options[index] = { ...options[index], [key]: value };
+		// Trigger reactivity by reassigning the array
+		options = [...options];
+	}
+
+	function removeOption(index) {
+		// Remove the option at the specified index
+		options = options.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -71,6 +109,45 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
+
+		<div class="mt-5 flex flex-col">
+			<Label>Options</Label>
+			<Button
+				type="button"
+				onclick={addOption}
+				class="mt-2 w-fit"
+				disabled={questionCard.ResponseType === 'Boolean' && options.length >= 2}
+			>
+				Add Option
+			</Button>
+
+			{#each options as option, index}
+				<div class="mb-2 flex items-center">
+					<Input
+						type="number"
+						name={`options[${index}].Sequence`}
+						bind:value={option.Sequence}
+						oninput={(e) => updateOption(index, 'Sequence', e.target.value)}
+						placeholder={`Sequence of ${index + 1} Option`}
+						class="mr-2 w-1/4"
+					/>
+					<Input
+						type="text"
+						name={`options[${index}].Text`}
+						bind:value={option.Text}
+						oninput={(e) => updateOption(index, 'Text', e.target.value)}
+						placeholder={`Data for Option ${index + 1}`}
+						class="mr-2 w-full"
+					/>
+					<Input type="hidden" name={`options[${index}].ImageUrl`} bind:value={option.ImageUrl} />
+					<Button type="button" onclick={() => removeOption(index)} class="ml-2">
+						<Icon icon="mingcute:delete-2-line" width="25" height="25" />
+					</Button>
+				</div>
+			{/each}
+
+			<input type="hidden" name="options" value={JSON.stringify(options)} />
+		</div>
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type<span class="text-red-600">*</span></Label>

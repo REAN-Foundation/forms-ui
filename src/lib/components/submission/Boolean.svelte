@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	export let q;
-	export let answers;
-	let optionsArray: any;
+	let { q, answers = $bindable() } = $props();
+	let optionsArray: any =$state();
 
 	// Ensure q.Options is defined, is an array, and contains at least one non-empty string
 	// if (Array.isArray(q.Options) && q.Options.length > 0) {
@@ -15,7 +14,7 @@
 	}
 	// }
 
-	let selected = '';
+	let selected = $state('');
 
 	function handleRadioChange(event) {
 		const value = event.target.value;
@@ -32,7 +31,7 @@
 
 		<Label for="description" class="ml-4">{q.Description || ''}</Label>
 
-		{#if optionsArray.length > 0}
+		{#if optionsArray}
 			{#each optionsArray as o}
 				<div class="bg-slate">
 					<input
