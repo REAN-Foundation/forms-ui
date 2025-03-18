@@ -7,7 +7,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 
 	let SectionTemplate = {
-		id:number,
+		id: number,
 		localId: number,
 		name: '',
 		type: 'Section',
@@ -33,7 +33,7 @@
 <div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
 	<div class="fixed space-y-4 px-4 py-1">
 		<Card.Root class="rounded-lg border p-4">
-			<Card.Title class="text-md mb-3">Drag Section and SubSection From Here</Card.Title>
+			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 			<!-- Section selection -->
 			<div
 				class="flex cursor-grab items-center justify-center"
@@ -50,7 +50,7 @@
 					/>
 					Add Section
 				</Button>
-			</div> 
+			</div>
 			<!-- Sub Section selection -->
 			<!-- <div
 				class="flex cursor-grab items-center justify-center mt-2"

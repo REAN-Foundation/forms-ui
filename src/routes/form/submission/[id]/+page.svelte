@@ -11,7 +11,6 @@
 	let templateInfo = $state(data.assessmentTemplate);
 	// const questions = data.assessmentTemplate.Questions;
 
-	
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
@@ -210,7 +209,7 @@
 
 			<div class="min-h-[390px]">
 				{#each sections ?? [] as s}
-					<div class="mb-4 min-h-[300px]">
+					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">
 							Section: {s.Title || 'Untitled Section'}
 						</h4>
@@ -219,10 +218,27 @@
 						</p>
 
 						{#each s?.Questions ?? [] as sq, index}
-							<div class="mt-2">
+							<div class="mt-2 border p-3">
 								<svelte:component this={componentsMap[sq.ResponseType]} q={sq} bind:answers />
 							</div>
 						{/each}
+
+						<div class=" p-5">
+							{#each s?.Subsections ?? [] as ss}
+								<h4 class="text-md mt-5 font-semibold">
+									Sub Section: {ss.Title || 'Untitled Sub Section'}
+								</h4>
+								<p class="text-sm text-gray-600">
+									{ss.Description || 'No description provided.'}
+								</p>
+
+								{#each ss?.Questions ?? [] as ssq, index}
+									<div class="mt-2 border p-3">
+										<svelte:component this={componentsMap[ssq.ResponseType]} q={ssq} bind:answers />
+									</div>
+								{/each}
+							{/each}
+						</div>
 					</div>
 				{/each}
 
