@@ -11,10 +11,15 @@
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
+	import { error } from '@sveltejs/kit';
 
 	////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
+
+    let errors: Record<string, string> = $state({});
+    // console.log('form data:');
+    // $inspect(errors);
 
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
@@ -38,6 +43,9 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 
+    console.log('uiSections:');
+    $inspect(uiSections);
+    
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.value === 'Basic' || target.value === 'Advanced') {
@@ -153,6 +161,7 @@
 
 	function closeSheet(event?: any) {
 		showSheet = false;
+        errors = {};
 		invalidateAll();
 	}
 
@@ -171,6 +180,7 @@
 			if (response.HttpCode === 200) {
 				showSheet = false;
 			}
+            // errors = {};
 		}
 	}
 
@@ -236,6 +246,28 @@
 	function closeSubSectionForm() {
 		subSectionForm = false;
 	}
+
+    async function handleQuestionCardUpdate(model) {
+		const response = await fetch(`/api/server/question`, {
+			method: 'PUT',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const question = await response.json();
+		console.log(question);
+		if (question.HttpCode === 200) {
+			closeModel('Card', question);
+            errors ={};
+            invalidateAll();
+            return;
+		}
+
+        errors = question?.Errors || {};
+        if (Object.keys(errors).length === 0) {
+            toastMessage(question);
+        }
+        invalidateAll();
+	}
 </script>
 
 {#if sectionForm}
@@ -250,7 +282,7 @@
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper  {closeModel} {closeSheet} questionCard={cardToOpen} />
+	<FormHelper  {closeModel} {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors={errors}/>
 {/if}
 
 <div class="bg-green-5 flex min-h-screen flex-row">

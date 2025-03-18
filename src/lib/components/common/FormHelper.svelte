@@ -17,9 +17,9 @@
 	import RangeForm from '../forms/responseType/RangeForm.svelte';
 	import AdvanceForm from '../forms/responseType/AdvanceForm.svelte';
 
-	let { questionCard, closeModel, closeSheet } = $props();
+	let { questionCard = $bindable(), errors = $bindable(), closeModel, closeSheet, handleQuestionCardUpdate } = $props();
 
-	// console.log(formDataForForm, 'this is pageData');
+	console.log('question card', questionCard);
 </script>
 
 <div class="relative">
@@ -47,29 +47,29 @@
 
 		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
 		{#if questionCard.ResponseType === 'Text'}
-			<TextForm {questionCard} {closeModel} />
+			<TextForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Float'}
-			<FloatForm {questionCard} {closeModel} />
+			<FloatForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Integer'}
-			<IntegerForm {questionCard} {closeModel} />
+			<IntegerForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Boolean'}
-			<BooleanForm {questionCard} {closeModel} />
+			<BooleanForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Object'}
-			<ObjectForm {questionCard} {closeModel} />
+			<ObjectForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'TextArray'}
-			<TextArrayForm {questionCard} {closeModel} />
+			<TextArrayForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate}/>
 		{:else if questionCard.ResponseType === 'MultiChoiceSelection'}
-			<MultipleChoiceSelectionForm {questionCard} {closeModel} />
+			<MultipleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'SingleChoiceSelection'}
-			<SingleChoiceSelectionForm {questionCard} {closeModel} />
+			<SingleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Date'}
-			<DateForm {questionCard} {closeModel} />
+			<DateForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'DateTime'}
-			<DateTimeForm {questionCard} {closeModel} />
+			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
-			<RatingForm {questionCard} {closeModel} />
+			<RatingForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Range'}
-			<RangeForm {questionCard} {closeModel} />
+			<RangeForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
 		{:else}
 			<AdvanceForm {questionCard} {closeModel} />
 		{/if}

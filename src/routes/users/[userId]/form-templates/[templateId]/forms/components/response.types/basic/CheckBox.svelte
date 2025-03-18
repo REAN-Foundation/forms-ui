@@ -5,13 +5,20 @@
 
 	let { openSheet, card } = $props();
 
-	let optionsArray = $state([]);
+	let optionsArray = $state(card.Options??[]);
+    console.log("optionsArray");
+    $inspect(optionsArray);
 
-	if (card.Options && Array.isArray(card.Options) && card.Options.length > 0) {
-		optionsArray = card.Options.map((option) => option.Text);
-	} else {
-		optionsArray = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-	}
+    $effect(() => {
+        optionsArray = card?.Options?.map((option) => option.Text);
+    })
+
+	// if (card.Options && Array.isArray(card.Options) && card.Options.length > 0) {
+	// 	optionsArray = card.Options.map((option) => option.Text);
+	// } else {
+	// 	optionsArray = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+	// }
+
 </script>
 
 <Button
@@ -27,7 +34,7 @@
 		</h1>
 	</div>
 	<div class=" h-fit w-full rounded p-1">
-		{#each optionsArray as option, index}
+     	{#each optionsArray as option, index}
 			<div class="flex items-center">
 				<input type="checkbox" id={`option${index}`} name="options" disabled />
 				<label for={`option${index}`} class="ml-2 font-serif text-sm text-slate-500">{option}</label

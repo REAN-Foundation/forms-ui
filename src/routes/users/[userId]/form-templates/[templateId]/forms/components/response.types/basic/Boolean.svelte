@@ -6,13 +6,17 @@
 
 	let { openSheet, card } = $props();
 
-	let optionsArray = $state([]);
+	let optionsArray = $state(card.Options??[]);
 
-	if (card.Options && Array.isArray(card.Options) && card.Options.length > 0) {
-		optionsArray = card.Options.map((option) => option.Text);
-	} else {
-		optionsArray = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-	}
+    $effect(() => {
+        optionsArray = card?.Options?.map((option) => option.Text);
+    })
+    
+	// if (card.Options && Array.isArray(card.Options) && card.Options.length > 0) {
+	// 	optionsArray = card.Options.map((option) => option.Text);
+	// } else {
+	// 	optionsArray = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+	// }
 </script>
 
 <Button

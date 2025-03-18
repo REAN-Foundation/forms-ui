@@ -6,6 +6,7 @@ import { getFormTemplateDetails } from '../../../../../api/services/form-templat
 //////////////////////////////////////////////////////////////////////////////////////////
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
+    console.log('Form load called.............');
 	event.depends('app:allNodes');
 	try {
 		const assessmentTemplateId = event.params.templateId;

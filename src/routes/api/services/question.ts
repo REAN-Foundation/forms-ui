@@ -70,7 +70,6 @@ export const updateQuestion = async (
 	rangeMin?: number,
 	rangeMax?: number,
 ) => {
-
 	const body = {
 		Title: title,
 		...(description && { Description: description }),

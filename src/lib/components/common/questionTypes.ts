@@ -297,3 +297,58 @@ export const measurements: AdvanceTypes[] = [
         }
     }
 ];
+
+export interface QuestionOption {
+    Text: string;
+    Sequence: string;
+    ImageUrl: string;
+}
+
+export interface QueryResponseType {
+    Text: 'Text',
+    Float: 'Float',
+    Integer: 'Integer',
+    Boolean: 'Boolean',
+    Object: 'Object',
+    TextArray: 'TextArray',
+    SingleChoiceSelection: 'SingleChoiceSelection',
+    MultiChoiceSelection: 'MultiChoiceSelection',
+    File: 'File',
+    Date: 'Date',
+    DateTime: 'DateTime',
+    Rating: 'Rating',
+    Location: 'Location',
+    Range: 'Range',
+    None: 'None',
+    Temperature: 'Temperature',
+    BloodPressure: 'BloodPressure',
+    Glucose: 'Glucose',
+    BloodOxygenSaturation: 'BloodOxygenSaturation',
+    PulseRate: 'PulseRate',
+    Hematocrit: 'Hematocrit',
+    Cholesterol: 'Cholesterol',
+    Lipoprotein: 'Lipoprotein',
+    CReactiveProtein: 'CReactiveProtein',
+    Sleep: 'Sleep',
+    HemoglobinA1C: 'HemoglobinA1C',
+    KidneyFunction: 'KidneyFunction',
+    WaistCircumference: 'WaistCircumference',
+    Electrolytes: 'Electrolytes',
+    RespiratoryRate: 'RespiratoryRate',
+    Weight: 'Weight',
+    Height: 'Height'
+  };
+
+export interface QuestionUpdateModel {
+    id?: string;
+    Title?: string;
+    Description?: string;
+    ResponseType?: QueryResponseType;
+    Score?: number;
+    CorrectAnswer?: string;
+    Hint?: string;
+    Options?: QuestionOption[];
+    QuestionImageUrl?: string;
+    RangeMin?: number;
+    RangeMax?: number;
+}

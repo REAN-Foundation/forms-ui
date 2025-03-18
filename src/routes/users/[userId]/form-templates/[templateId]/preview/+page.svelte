@@ -8,7 +8,7 @@
 
 	let { data }: { data: PageServerData } = $props();
 	const userId = page.params.userId;
-	$inspect(data)
+	// $inspect(data)
 
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);

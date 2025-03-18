@@ -25,7 +25,6 @@
 	// console.log(submissionId);
 	// console.log(createdLink);
 
-	$inspect(link);
 	function addQuestions(templateId: string) {
 		goto(`/users/${userId}/form-templates/${templateId}/forms`);
 	}
