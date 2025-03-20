@@ -105,40 +105,68 @@
 			</Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content>
+
+	<DropdownMenu.Content class="w-44 space-y-2">
 		<DropdownMenu.Group>
-			<DropdownMenu.GroupHeading>Actions</DropdownMenu.GroupHeading>
-			<DropdownMenu.Item>
+			<DropdownMenu.GroupHeading class="text-sm text-gray-500">Actions</DropdownMenu.GroupHeading>
+			<DropdownMenu.Item  class="">
 				<Button
 					variant="ghost"
-					class="h-5 w-full justify-start"
-					onclick={() => reviewAssessment(id)}>Preview</Button
+					class="h-8 w-full justify-start "
+					onclick={() => reviewAssessment(id)}
 				>
+					Preview
+				</Button>
 			</DropdownMenu.Item>
-		</DropdownMenu.Group>
 
-		<DropdownMenu.Item>
-			<Button variant="ghost" class="h-5 w-full justify-start" onclick={() => addQuestions(id)}
-				>Add Questions</Button
-			>
-		</DropdownMenu.Item>
+			<DropdownMenu.Item  class="">
+				<Button
+					variant="ghost"
+					class="h-8 w-full justify-start "
+					onclick={() => addQuestions(id)}
+				>
+					Add Questions
+				</Button>
+			</DropdownMenu.Item>
+	
 
-		<AlertDialog.Root>
+		<!-- <DropdownMenu.Separator /> -->
+		<!-- <DropdownMenu.Item class=" p-1"> -->
+			<AlertDialog.Root>
+				<AlertDialog.Trigger class={buttonVariants({ variant: 'ghost' })}>
+					<Button variant="ghost" class="w-full  flex content-start">Generate Link</Button>
+				</AlertDialog.Trigger>
+				<AlertDialog.Content>
+					<AlertDialog.Header>
+						<AlertDialog.Title>This is the link for the template</AlertDialog.Title>
+						<AlertDialog.Description>
+							Copy the link and share your template as a personal question paper to collect data.
+							<div class="mt-5 flex w-full items-center space-x-2">
+								<Input placeholder={link} />
+								<Button onclick={() => createLink(id)}>Generate</Button>
+							</div>
+						</AlertDialog.Description>
+					</AlertDialog.Header>
+					<AlertDialog.Footer>
+						<AlertDialog.Cancel onclick={copyToClipboard}>
+							<Icon icon="ion:copy-outline" width="20" height="20" class="mr-2" />
+							Copy to clipboard
+						</AlertDialog.Cancel>
+						<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+						<AlertDialog.Action onclick={openLink}>Search</AlertDialog.Action>
+					</AlertDialog.Footer>
+				</AlertDialog.Content>
+			</AlertDialog.Root>
+		<!-- </DropdownMenu.Item> -->
+		<!-- <AlertDialog.Root>
 			<AlertDialog.Trigger class={buttonVariants({ variant: 'ghost' })}>
-				<Button variant="ghost" class="h-8 w-full justify-start pl-6 ">Generate Link</Button>
+				<Button variant="ghost" class="h-8 w-full justify-start">Generate Link</Button>
 			</AlertDialog.Trigger>
 			<AlertDialog.Content>
-				<AlertDialog.Header
-					><AlertDialog.Footer>
-						<AlertDialog.Cancel>
-							<Icon icon="iwwa:delete" width="16" height="16" />
-						</AlertDialog.Cancel></AlertDialog.Footer
-					>
-					<AlertDialog.Title>This is link for the template</AlertDialog.Title>
+				<AlertDialog.Header>
+					<AlertDialog.Title>This is the link for the template</AlertDialog.Title>
 					<AlertDialog.Description>
-						Copy the link and search your template as your personal question paper share with
-						community to collect the data.
-						<!-- <Input>this is link{link}</Input>  -->
+						Copy the link and share your template as a personal question paper to collect data.
 						<div class="mt-5 flex w-full items-center space-x-2">
 							<Input placeholder={link} />
 							<Button onclick={() => createLink(id)}>Generate</Button>
@@ -146,37 +174,43 @@
 					</AlertDialog.Description>
 				</AlertDialog.Header>
 				<AlertDialog.Footer>
-					<AlertDialog.Cancel onclick={copyToClipboard}
-						><Icon icon="ion:copy-outline" width="20" height="20" class="mr-2" />
-						Copy to clipboard</AlertDialog.Cancel
-					>
+					<AlertDialog.Cancel onclick={copyToClipboard}>
+						<Icon icon="ion:copy-outline" width="20" height="20" class="mr-2" />
+						Copy to clipboard
+					</AlertDialog.Cancel>
 					<AlertDialog.Action onclick={openLink}>Search</AlertDialog.Action>
 				</AlertDialog.Footer>
 			</AlertDialog.Content>
 		</AlertDialog.Root>
 
-		<DropdownMenu.Separator />
-
-		<AlertDialog.Root>
-			<AlertDialog.Trigger class="{buttonVariants({ variant: 'ghost' })} w-full ">
-				<Button variant="ghost" class="h-8 w-full justify-start pl-6">Delete</Button>
-			</AlertDialog.Trigger>
-			<AlertDialog.Content>
-				<AlertDialog.Header>
-					<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-					<AlertDialog.Description>
-						This action cannot be undone. Deleting will remove the assessment and all associated
-						data.
-					</AlertDialog.Description>
-				</AlertDialog.Header>
-				<AlertDialog.Footer>
-					<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-					<AlertDialog.Action
-						class="w-fit bg-destructive hover:bg-destructive dark:text-white"
-						onclick={() => handleDeleteAssessment(id)}>Delete</AlertDialog.Action
-					>
-				</AlertDialog.Footer>
-			</AlertDialog.Content>
-		</AlertDialog.Root>
+		<DropdownMenu.Separator /> -->
+		<!-- <DropdownMenu.Item  class=""> -->
+			<AlertDialog.Root>
+				<AlertDialog.Trigger class="w-full">
+					<Button variant="ghost" class="h-8 w-full justify-start text-destructive hover:bg-destructive hover:text-white">
+						Delete
+					</Button>
+				</AlertDialog.Trigger>
+				<AlertDialog.Content>
+					<AlertDialog.Header>
+						<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+						<AlertDialog.Description>
+							This action cannot be undone. Deleting will remove the assessment and all associated
+							data.
+						</AlertDialog.Description>
+					</AlertDialog.Header>
+					<AlertDialog.Footer>
+						<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+						<AlertDialog.Action
+							class="w-fit bg-red-600 text-white hover:bg-red-700"
+							onclick={() => handleDeleteAssessment(id)}
+						>
+							Delete
+						</AlertDialog.Action>
+					</AlertDialog.Footer>
+				</AlertDialog.Content>
+			</AlertDialog.Root>
+		<!-- </DropdownMenu.Item> -->
+			</DropdownMenu.Group>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

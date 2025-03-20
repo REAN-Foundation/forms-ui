@@ -11,29 +11,34 @@
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let { questionCard = $bindable(), errors = $bindable(), closeModel, handleQuestionCardUpdate } = $props();
+	let {
+		questionCard = $bindable(),
+		errors = $bindable(),
+		closeModel,
+		handleQuestionCardUpdate
+	} = $props();
 
-    let options = $state(questionCard.Options ? [...questionCard.Options] : []);
+	let options = $state(questionCard.Options ? [...questionCard.Options] : []);
 
-    // $effect(() => {
-    //     options = questionCard.Options ? [...questionCard.Options] : [];
-    // })
+	// $effect(() => {
+	//     options = questionCard.Options ? [...questionCard.Options] : [];
+	// })
 
-    console.log('options: ', options);
-    $inspect(options);
+	console.log('options: ', options);
+	$inspect(options);
 	// let options = $state(questionCard.Options ? [...questionCard.Options] : []);
 
 	async function handleSubmit(event) {
 		event.preventDefault();
 
 		// try {
-			const updatedOptions = options.map((option, index) => ({
-				Text: option.Text,
-				Sequence: option.Sequence || index + 1,
-				ImageUrl: option.ImageUrl
-			}));
+		const updatedOptions = options.map((option, index) => ({
+			Text: option.Text,
+			Sequence: option.Sequence || index + 1,
+			ImageUrl: option.ImageUrl
+		}));
 
-            const model: QuestionUpdateModel = {
+		const model: QuestionUpdateModel = {
 			id: questionCard.id,
 			Title: questionCard.Title,
 			Description: questionCard.Description,
@@ -42,44 +47,50 @@
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
 			QuestionImageUrl: questionCard.QuestionImageUrl,
-            Options: updatedOptions
-		    };
+			Options: updatedOptions,
+			IsRequired: questionCard.IsRequired
+		};
 
-			// const model = {
-			// 	id: questionCard.id,
-			// 	title: questionCard.Title,
-			// 	description: questionCard.Description,
-			// 	responseType: questionCard.ResponseType,
-			// 	score: questionCard.Score,
-			// 	correctAnswer: questionCard.CorrectAnswer,
-			// 	hint: questionCard.Hint,
-			// 	questionImageUrl: questionCard.QuestionImageUrl,
-			// 	options: updatedOptions
-			// };
+		// const model = {
+		// 	id: questionCard.id,
+		// 	title: questionCard.Title,
+		// 	description: questionCard.Description,
+		// 	responseType: questionCard.ResponseType,
+		// 	score: questionCard.Score,
+		// 	correctAnswer: questionCard.CorrectAnswer,
+		// 	hint: questionCard.Hint,
+		// 	questionImageUrl: questionCard.QuestionImageUrl,
+		// 	options: updatedOptions
+		// };
 
-            const result = await questionSchema.safeParseAsync(model);
-            if (!result.success) {
-                console.log('client side validation error',result.error.flatten().fieldErrors);
-                errors = Object.fromEntries(Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [key, val?.[0] || '']));
-            }
+		const result = await questionSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
 
-            if (Object.keys(errors).length === 0 || result?.success) {
-                console.log('Called handleQuestionCardUpdate');
-                handleQuestionCardUpdate(model);
-            }
+		if (Object.keys(errors).length === 0 || result?.success) {
+			console.log('Called handleQuestionCardUpdate');
+			handleQuestionCardUpdate(model);
+		}
 
-			// console.log('model: ', model);
+		// console.log('model: ', model);
 
-			// const response = await fetch('/api/server/question', {
-			// 	method: 'PUT',
-			// 	body: JSON.stringify(model),
-			// 	headers: { 'Content-Type': 'application/json' }
-			// });
+		// const response = await fetch('/api/server/question', {
+		// 	method: 'PUT',
+		// 	body: JSON.stringify(model),
+		// 	headers: { 'Content-Type': 'application/json' }
+		// });
 
-			// const question = await response.json();
-			// if (question.HttpCode === 200) {
-			// 	closeModel('Card', question);
-			// }
+		// const question = await response.json();
+		// if (question.HttpCode === 200) {
+		// 	closeModel('Card', question);
+		// }
 		// } catch (error) {
 		// 	console.error('Error submitting form:', error);
 		// }
@@ -113,7 +124,10 @@
 <Card.Root class="rounded-lg border p-4">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
-		onsubmit={(event) => { event.preventDefault(); handleSubmit(event); }}
+		onsubmit={(event) => {
+			event.preventDefault();
+			handleSubmit(event);
+		}}
 	>
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
@@ -132,7 +146,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Title} />
-        <p class="error">{errors?.Title}</p>
+		<p class="error">{errors?.Title}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
@@ -142,7 +156,23 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
-        
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<div class="col-span-11 space-x-2">
+				<Label for="isRequired">Is Required</Label>
+				<input
+					id="isRequired"
+					type="checkbox"
+					bind:checked={questionCard.IsRequired}
+					aria-labelledby="isRequired"
+					class="h-5 w-5"
+				/>
+			</div>
+			<div class="relative col-span-1">
+				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<p class="error">{errors?.IsRequired}</p>
 
 		<div class="mt-5 flex flex-col">
 			<Label>Options <span class="text-red-600">*</span></Label>
@@ -209,7 +239,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Score} type="number" />
-        <p class="error">{errors?.Score}</p>
+		<p class="error">{errors?.Score}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Hint</Label>
@@ -219,7 +249,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Hint} />
-        <p class="error">{errors?.Hint}</p>
+		<p class="error">{errors?.Hint}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Correct Answer</Label>
@@ -229,7 +259,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.CorrectAnswer} />
-        <p class="error">{errors?.CorrectAnswer}</p>
+		<p class="error">{errors?.CorrectAnswer}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Image Url</Label>
@@ -239,7 +269,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
-        <p class="error">{errors?.QuestionImageUrl}</p>
+		<p class="error">{errors?.QuestionImageUrl}</p>
 
 		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
 	</form>

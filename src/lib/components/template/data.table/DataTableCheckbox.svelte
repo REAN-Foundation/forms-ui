@@ -9,4 +9,4 @@
 	}: ComponentProps<typeof Checkbox> = $props();
 </script>
 
-<Checkbox bind:checked={() => checked, onCheckedChange} {...restProps} />
+<!-- <Checkbox bind:checked={() => checked, onCheckedChange} {...restProps} /> -->

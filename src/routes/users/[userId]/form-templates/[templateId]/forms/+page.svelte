@@ -43,8 +43,8 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 
-    console.log('uiSections:');
-    $inspect(uiSections);
+    // console.log('uiSections:');
+    // $inspect(uiSections);
     
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;

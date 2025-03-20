@@ -108,7 +108,8 @@ export const PUT = async (event: RequestEvent) => {
             data.QuestionImageUrl,
             data.Options,
             data.RangeMin,
-            data.RangeMax
+            data.RangeMax,
+            data.IsRequired
 
         );
         return new Response(JSON.stringify(response))

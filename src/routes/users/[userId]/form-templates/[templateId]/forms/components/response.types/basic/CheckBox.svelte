@@ -6,8 +6,8 @@
 	let { openSheet, card } = $props();
 
 	let optionsArray = $state(card.Options??[]);
-    console.log("optionsArray");
-    $inspect(optionsArray);
+    // console.log("optionsArray");
+    // $inspect(optionsArray);
 
     $effect(() => {
         optionsArray = card?.Options?.map((option) => option.Text);
