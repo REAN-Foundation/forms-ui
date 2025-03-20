@@ -29,7 +29,8 @@
 			Score: questionCard.Score,
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
-			QuestionImageUrl: questionCard.QuestionImageUrl ? questionCard.QuestionImageUrl : null
+			QuestionImageUrl: questionCard.QuestionImageUrl ? questionCard.QuestionImageUrl : null,
+			IsRequired: questionCard.IsRequired
 		};
 
 		const result = await questionSchema.safeParseAsync(model);
@@ -97,6 +98,23 @@
 		</div>
 		<Input bind:value={questionCard.Description} />
 		<p class="error">{errors?.Description}</p>
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<div class="col-span-11 space-x-2">
+				<Label for="isRequired">Is Required</Label>
+				<input
+					id="isRequired"
+					type="checkbox"
+					bind:checked={questionCard.IsRequired}
+					aria-labelledby="isRequired"
+					class="h-5 w-5"
+				/>
+			</div>
+			<div class="relative col-span-1">
+				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<p class="error">{errors?.IsRequired}</p>
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>

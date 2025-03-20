@@ -10,10 +10,15 @@
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let { questionCard = $bindable(), errors = $bindable(), closeModel, handleQuestionCardUpdate } = $props();
+	let {
+		questionCard = $bindable(),
+		errors = $bindable(),
+		closeModel,
+		handleQuestionCardUpdate
+	} = $props();
 
 	async function handleSubmit(event) {
-        event.preventDefault();
+		event.preventDefault();
 		console.log(questionCard.Title);
 
 		const model: QuestionUpdateModel = {
@@ -24,19 +29,25 @@
 			Score: questionCard.Score,
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
-			QuestionImageUrl: questionCard.QuestionImageUrl
+			QuestionImageUrl: questionCard.QuestionImageUrl,
+			IsRequired: questionCard.IsRequired
 		};
 
-        const result = await questionSchema.safeParseAsync(model);
-        if (!result.success) {
-            console.log('client side validation error',result.error.flatten().fieldErrors);
-            errors = Object.fromEntries(Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [key, val?.[0] || '']));
-        }
+		const result = await questionSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
 
-        if (Object.keys(errors).length === 0 || result?.success) {
-            console.log('Called handleQuestionCardUpdate');
-            handleQuestionCardUpdate(model);
-        }
+		if (Object.keys(errors).length === 0 || result?.success) {
+			console.log('Called handleQuestionCardUpdate');
+			handleQuestionCardUpdate(model);
+		}
 
 		// const response = await fetch(`/api/server/question`, {
 		// 	method: 'PUT',
@@ -54,7 +65,10 @@
 <Card.Root class="rounded-lg border p-4">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
-        onsubmit={(event) => { event.preventDefault(); handleSubmit(event); }}
+		onsubmit={(event) => {
+			event.preventDefault();
+			handleSubmit(event);
+		}}
 	>
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
@@ -73,7 +87,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Title} />
-        <p class="error">{errors?.Title}</p>
+		<p class="error">{errors?.Title}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
@@ -83,7 +97,24 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
-        <p class="error">{errors?.Description}</p>
+		<p class="error">{errors?.Description}</p>
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<div class="col-span-11 space-x-2">
+				<Label for="isRequired">Is Required</Label>
+				<input
+					id="isRequired"
+					type="checkbox"
+					bind:checked={questionCard.IsRequired}
+					aria-labelledby="isRequired"
+					class="h-5 w-5"
+				/>
+			</div>
+			<div class="relative col-span-1">
+				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<p class="error">{errors?.IsRequired}</p>
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
@@ -102,7 +133,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Score} type="number" />
-        <p class="error">{errors?.Score}</p>
+		<p class="error">{errors?.Score}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Hint</Label>
@@ -112,7 +143,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Hint} />
-        <p class="error">{errors?.Hint}</p>
+		<p class="error">{errors?.Hint}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">CorrectAnswer</Label>
@@ -122,7 +153,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.CorrectAnswer} />
-        <p class="error">{errors?.CorrectAnswer}</p>
+		<p class="error">{errors?.CorrectAnswer}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Image Url</Label>
@@ -132,7 +163,7 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
-        <p class="error">{errors?.QuestionImageUrl}</p>
+		<p class="error">{errors?.QuestionImageUrl}</p>
 
 		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
 	</form>

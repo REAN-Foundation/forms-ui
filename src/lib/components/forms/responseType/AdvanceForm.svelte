@@ -23,7 +23,8 @@
 			score: questionCard.Score,
 			correctAnswer: questionCard.CorrectAnswer,
 			hint: questionCard.Hint,
-			questionImageUrl: questionCard.QuestionImageUrl
+			questionImageUrl: questionCard.QuestionImageUrl,
+			IsRequired: questionCard.IsRequired
 		};
 		const response = await fetch(`/api/server/question`, {
 			method: 'PUT',
@@ -61,7 +62,7 @@
 				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.Title}/>
+		<Input bind:value={questionCard.Title} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
@@ -71,6 +72,23 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<div class="col-span-11 space-x-2">
+				<Label for="isRequired">Is Required</Label>
+				<input
+					id="isRequired"
+					type="checkbox"
+					bind:checked={questionCard.IsRequired}
+					aria-labelledby="isRequired"
+					class="h-5 w-5"
+				/>
+			</div>
+			<div class="relative col-span-1">
+				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
+			</div>
+		</div>
+		<p class="error">{errors?.IsRequired}</p>
 
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
@@ -109,9 +127,7 @@
 		<Input bind:value={questionCard.QuestionImageUrl} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 "
-				>Question QuestionImageUrl</Label
-			>
+			<Label class="col-span-11 ">Question QuestionImageUrl</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />
