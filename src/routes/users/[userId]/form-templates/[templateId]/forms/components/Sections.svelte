@@ -7,7 +7,7 @@
 	import Icon from '@iconify/svelte';
 	import { formComponents } from './response.types/index';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-
+    import Sections from './Sections.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -228,170 +228,19 @@
 				</div>
 
 				{#if section.Subsections.length > 0}
-					{#each section.Subsections as subsection, index (subsection.id)}
-						<div
-							class="my-2 h-fit w-full p-1 {highlightedSubSection === subsection.id
-								? 'highlight'
-								: ''} "
-							ondragenter={() => handleDragEnterSubsection(subsection.id)}
-							ondragleave={() => handleDragLeaveSubsection(subsection.id)}
-							ondragover={(event) => handleDragOverSubsection(subsection.id, event)}
-							use:dropzone={{
-								on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id, subsection.id)
-							}}
-							role="region"
-							aria-label={`Subsection ${subsection.Title}`}
-						>
-							<Collapsible.Root class=" space-y-2">
-								<div class="flex flex-row">
-									<div class="flex items-center justify-between space-x-4 px-4">
-										<Collapsible.Trigger
-											class={buttonVariants({
-												variant: 'ghost',
-												size: 'sm',
-												class: 'w-9 p-0'
-											})}
-										>
-											<Tooltip.Provider>
-												<Tooltip.Root>
-													<Tooltip.Trigger>
-														<Button variant="ghost" size="sm" class="w-9 p-0">
-															<Icon
-																icon="fluent:chevron-up-down-24-regular"
-																width="16"
-																height="16"
-															/>
-
-															<span class="sr-only">Toggle</span>
-														</Button>
-													</Tooltip.Trigger>
-													<Tooltip.Content>
-														<p>Collaps to see</p>
-													</Tooltip.Content>
-												</Tooltip.Root>
-											</Tooltip.Provider>
-										</Collapsible.Trigger>
-									</div>
-									<div class="flex h-fit w-full flex-row">
-										<Button variant="outline" class="h-full w-full p-2" onclick={()=>openSectionForm(subsection)}>
-											<!-- onclick={() => openSubSectionForm(subsection.id, section.databaseId)} -->
-											<div class="flex-col">
-												{#if subsection.Title}
-													<p>{subsection.Title}</p>
-												{:else}
-													<p>{`Subsection ${index + 1}`}</p>
-												{/if}
-												<p class=" text-gray-300">Drag cards into this section</p>
-											</div>
-										</Button>
-
-										<AlertDialog.Root>
-											<AlertDialog.Trigger class={buttonVariants({ variant: 'outline' })}>
-												<Button variant="ghost" class="ml-1 h-full py-5">
-													<Icon
-														icon="weui:delete-outlined"
-														width="20"
-														height="20"
-														style="color:red"
-													/></Button
-												>
-											</AlertDialog.Trigger>
-											<AlertDialog.Content>
-												<AlertDialog.Header>
-													<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-													<AlertDialog.Description>
-														This action cannot be undone. This will permanently delete your Sub
-														Section and remove your data from our servers.
-													</AlertDialog.Description>
-												</AlertDialog.Header>
-												<AlertDialog.Footer>
-													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-													<AlertDialog.Action
-														class="bg-destructive hover:bg-destructive dark:text-white"
-														onclick={() => confirmDeleteCard(subsection.id, 'Section')}
-														>Delete</AlertDialog.Action
-													>
-												</AlertDialog.Footer>
-											</AlertDialog.Content>
-										</AlertDialog.Root>
-									</div>
-								</div>
-								<Collapsible.Content class="space-y-2">
-									<div
-										class="h-fit w-full"
-										role="list"
-										aria-label={`Cards in Subsection: ${subsection.Title}`}
-									>
-										{#each subsection.Questions as subcard, index (subcard.id)}
-											<div
-												class="hover-container my-1 items-center justify-between"
-												ondragover={(event) => {
-													event.preventDefault();
-												}}
-												role="listitem"
-												aria-label={`Draggable subcard: ${subcard.Title}`}
-											>
-												<div class="relative flex w-[95%]">
-													{#if subcard.name !== 'None'}
-														<svelte:component
-															this={formComponents[subcard.ResponseType]}
-															card={subcard}
-															{openSheet}
-														/>
-													{:else}
-														<div class="relative"></div>
-													{/if}
-
-													<button
-														class="delete-button"
-														onclick={() => openDeleteModal(subcard.id)}
-														aria-label="Delete subcard"
-													>
-														<Icon
-															icon="weui:delete-outlined"
-															width="18"
-															height="18"
-															style="color: red"
-														/>
-													</button>
-												</div>
-											</div>
-										{/each}
-
-										{#if deleteSubButtonClicked}
-											<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
-
-											<div class="fixed inset-0 z-50 flex items-center justify-center border">
-												<div
-													class="relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full"
-												>
-													<div class="flex flex-col space-y-2 text-center sm:text-left">
-														<h1 class="text-lg font-semibold">Are you absolutely sure?</h1>
-														<p class="text-sm text-muted-foreground">
-															This action cannot be undone. This will permanently delete your
-															subcard.
-														</p>
-													</div>
-
-													<div
-														class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"
-													>
-														<Button variant="outline" onclick={closeDeleteSubModal}>Cancel</Button>
-														<Button
-															class="bg-destructive hover:bg-destructive dark:text-white"
-															onclick={() => confirmDeleteCard(cardToDelete, 'Card')}
-														>
-															Delete
-														</Button>
-													</div>
-												</div>
-											</div>
-										{/if}
-									</div>
-								</Collapsible.Content>
-							</Collapsible.Root>
-						</div>
-					{/each}
+                    <Sections
+                        bind:uiSections={section.Subsections}
+                        {handleDragAndDrop}
+                        {highlightedSection}
+                        {highlightedSubSection}
+                        {deleteButtonClicked}
+                        {deleteSubButtonClicked}                        
+                        {openSheet}
+                        {subSectionForm}
+                        {handleDeleteCard}
+                        {openSectionForm}
+                        {closeSheet}
+                    />
 				{/if}
 			</Collapsible.Content>
 		</Collapsible.Root>
