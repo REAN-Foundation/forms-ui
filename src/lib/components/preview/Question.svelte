@@ -2,8 +2,8 @@
 	import Input from '../ui/input/input.svelte';
 	import Label from '../ui/label/label.svelte';
 
-	let {question}=$props();
-	console.log(question)
+	let { question } = $props();
+	// console.log(question)
 </script>
 
 <div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
@@ -11,7 +11,7 @@
 		<Label for="title" class="text-md">{question.Title || 'Question Title'}</Label>
 		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-		<br/>
+		<br />
 		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
 		<Input disabled type={question.ResponseType} class="mt-2" />
 	</div>

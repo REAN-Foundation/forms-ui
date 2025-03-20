@@ -5,7 +5,7 @@
 	import Boolean from './BooleanChoice.svelte';
 
 	export let q;
-	console.log(q)
+	// console.log(q)
 </script>
 
 <div class="">
