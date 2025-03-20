@@ -164,6 +164,7 @@
 	import Range from '$lib/components/submission/Range.svelte';
 	import Rating from '$lib/components/submission/Rating.svelte';
 	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
+	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 </script>
 
 <div class="flex flex-row">
@@ -208,7 +209,8 @@
 			</div>
 
 			<div class="min-h-[390px]">
-				{#each sections ?? [] as s}
+				<QuestionPaper {sections} bind:answers={answers} />
+				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">
 							Section: {s.Title || 'Untitled Section'}
@@ -224,23 +226,13 @@
 						{/each}
 
 						<div class=" p-5">
-							{#each s?.Subsections ?? [] as ss}
-								<h4 class="text-md mt-5 font-semibold">
-									Sub Section: {ss.Title || 'Untitled Sub Section'}
-								</h4>
-								<p class="text-sm text-gray-600">
-									{ss.Description || 'No description provided.'}
-								</p>
-
-								{#each ss?.Questions ?? [] as ssq, index}
-									<div class="mt-2 border p-3">
-										<svelte:component this={componentsMap[ssq.ResponseType]} q={ssq} bind:answers />
-									</div>
-								{/each}
-							{/each}
+							{#if s?.Subsections?.length > 0}
+						
+								<p>subsection</p>
+							{/if}
 						</div>
 					</div>
-				{/each}
+				{/each} -->
 
 				<!-- {#if displayOption === 'OneQuestion'}
 					{#each displayQuestions as question (question.id)}
