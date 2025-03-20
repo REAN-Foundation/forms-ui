@@ -337,7 +337,7 @@ export interface QueryResponseType {
     RespiratoryRate: 'RespiratoryRate',
     Weight: 'Weight',
     Height: 'Height'
-  };
+};
 
 export interface QuestionUpdateModel {
     id?: string;
@@ -351,4 +351,5 @@ export interface QuestionUpdateModel {
     QuestionImageUrl?: string;
     RangeMin?: number;
     RangeMax?: number;
+    IsRequired?: boolean;
 }

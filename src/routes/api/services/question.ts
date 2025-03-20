@@ -69,6 +69,7 @@ export const updateQuestion = async (
 	options?: string[],
 	rangeMin?: number,
 	rangeMax?: number,
+	isRequired?: boolean
 ) => {
 	const body = {
 		Title: title,
@@ -81,7 +82,8 @@ export const updateQuestion = async (
 		...(questionImageUrl && { QuestionImageUrl: questionImageUrl }),
 		...(rangeMin && { RangeMin: rangeMin }),
 		...(rangeMax && { RangeMax: rangeMax }),
-		...(options && options.length > 0 && { Options: options })
+		...(options && options.length > 0 && { Options: options }),
+		...(isRequired && { IsRequired: isRequired }),
 	};
 
 	const url = BACKEND_API_URL + `/questions/${qestionId}`;
