@@ -1,4 +1,4 @@
-import { BACKEND_API_URL, FRONT_END_URL } from "$env/static/private";
+import { BACKEND_API_URL } from "$env/static/private";
 import { get_, post_ } from "./common";
 
 export const createSubmission = async (
@@ -6,7 +6,6 @@ export const createSubmission = async (
 ) => {
 	const body = {
 		FormTemplateId: templateId,
-		FormUrl: FRONT_END_URL + `/form/submission`
 	};
 
 	const url = BACKEND_API_URL + `/form-submissions`;

@@ -9,6 +9,7 @@
 	import { toast } from 'svelte-sonner';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { page } from '$app/state';
+	import { toastMessage } from '$lib/components/toast/toast.store';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,15 +36,35 @@
 	}
 
 	const createLink = async (templateId: string) => {
-		response = await submission({ templateId });
-		submissionId = response.Data.id;
-		createdLink = response.Data.FormUrl;
-		submissionId && createdLink
-			? toast.success('Link has been generated')
-			: toast.error('Error in creating the link');
-		invalidate('app:assessmentTemplate');
+        try {
+			const response = await fetch(`/api/server/submission`, {
+				method: 'POST',
+				body: JSON.stringify({FormTemplateId: templateId}),
+				headers: { 'Content-Type': 'application/json' }
+			});
+			const result = await response.json();
 
-		link = createdLink + `/${submissionId}`;
+            if (result.HttpCode === 201 || result.State === 'success') {
+                link = result?.Data?.Link;
+                toastMessage(result);
+            } else {
+                toastMessage(result);
+            }
+
+		} catch (error) {
+			console.error('Submission Error:', error);
+            toastMessage();
+			return null;
+		}
+		// response = await submission({ templateId });
+		// submissionId = response.Data.id;
+		// createdLink = response.Data.FormUrl;
+		// submissionId && createdLink
+		// 	? toast.success('Link has been generated')
+		// 	: toast.error('Error in creating the link');
+		// invalidate('app:assessmentTemplate');
+
+		// link = createdLink + `/${submissionId}`;
 	};
 
 	async function submission(model: { templateId: string }) {
