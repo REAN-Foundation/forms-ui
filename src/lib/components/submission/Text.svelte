@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	// export let q;
-	// // export let submit;
-	// export let answers;
+
+	///////////////////////////////////////////////////////////////////////////
+
 	let { q, answers = $bindable() } = $props();
 
 	function handleInput(event, id) {
 		answers[id] = +event.target.value;
 	}
+
 </script>
 
 <div class="flex w-full flex-col px-4 py-2">
 	<div class="flex justify-between">
-		<Label for={q.Title}>{q.Title || 'No title provided'}</Label>
+		<Label for={q.Title}>{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
+		</Label>
 		{#if q.Score}
 			<Label for="score">{q.Score}</Label>
 		{/if}
@@ -23,7 +28,7 @@
 		<Label class="text-xs text-gray-500">{q.Description}</Label>
 	{/if}
 
-	<Input name={q.id} bind:value={answers[q.id]} type="text" class="mt-2" />
+	<Input name={q.id} bind:value={answers[q.id]} type="text" class="mt-2" {...(q.IsRequired ? { required: true } : {})} />
 
 	{#if q.Hint}
 		<Label class="self-end text-xs text-gray-400">Hint: {q.Hint}</Label>

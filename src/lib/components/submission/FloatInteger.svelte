@@ -14,7 +14,11 @@
 
 <!-- {#if q.Title} -->
 <div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}>{q.Title || 'No title provided'}</Label>
+	<Label for={q.Title}>{q.Title || 'No title provided'}
+		{#if q.IsRequired}
+				<span class="text-red-600 ml-1">*</span>
+			{/if}
+	</Label>
 
 	{#if q.score}
 		<Label for="score" class="float-right">{q.Score}</Label>
@@ -25,9 +29,11 @@
 	{/if}
 	<Input
 		type="number"
+		step="any"
 		class="w-full"
 		bind:value={answers[q.id]}
 		name={q.id}
+		{...(q.IsRequired ? { required: true } : {})}
 		/>
 		<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if q.Hint}

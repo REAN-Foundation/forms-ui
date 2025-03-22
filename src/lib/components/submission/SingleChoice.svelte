@@ -22,7 +22,11 @@
 
 <!-- {#if q.Title} -->
 	<div class="flex w-full flex-col gap-1.5 p-4">
-		<Label for={q.Title}>{q.Title || 'Select :'}</Label>
+		<Label for={q.Title}>{q.Title || 'Select :'}
+			{#if q.IsRequired}
+				<span class="text-red-600 ml-1">*</span>
+			{/if}
+		</Label>
 
 		<Label for="score" class="float-right">{q.Score || ''}</Label>
 
@@ -38,6 +42,7 @@
 					bind:group={selected}
 					value={o}
 					id={o}
+					{...(q.IsRequired ? { required: true } : {})} 
 				/>
 				<Label for={o}>{o}</Label><br />
 			</div>

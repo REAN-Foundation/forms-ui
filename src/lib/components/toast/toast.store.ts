@@ -20,3 +20,14 @@ export const addToast = (toast: { message?: string; type?: "info" | "error" | "s
 export const dismissToast = (id) => {
   toasts.update((all) => all.filter((t) => t.id !== id));
 };
+
+export const toastMessage = (response = null) => {
+  const { HttpCode, Message } = response;
+  const isSuccess = HttpCode === 201 || HttpCode === 200;
+
+  addToast({
+      message: Message || 'Something went wrong',
+      type: isSuccess ? 'success' : 'error',
+      timeout: 3000
+  });
+};
