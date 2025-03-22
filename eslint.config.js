@@ -30,5 +30,13 @@ export default ts.config(
 	    parser: ts.parser
 	  }
 	}
+  },
+  {
+    rules: {
+        rules: {
+
+            "@typescript-eslint/no-explicit-any": "warn"
+        }
+    }
   }
 );

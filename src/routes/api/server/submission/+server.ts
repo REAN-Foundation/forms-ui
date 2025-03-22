@@ -1,26 +1,21 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import chalk from 'chalk';
 import { createSubmission } from '../../services/submission';
+import { ResponseHandler } from '$lib/utils/response.handler';
 
 //////////////////////////////////////////////////////////////
 
 export const POST = async (event: RequestEvent) => {
-    const request = event.request;
-    const data = await request.json();
-    console.log(chalk.hex('#00f0ff')(data))
-
-    // console.log(`${event} this is data`)
-
     try {
-        const response = await createSubmission(
-            data.templateId,
-        );
-		console.log(chalk.hex('#00f000')(JSON.stringify(response),"this is submissionlink"))
+        const data = await event.request.json();
+        console.log(chalk.hex('#00f0ff')('Received Data to create submission link:', data));
 
-        return new Response(JSON.stringify(response));
-    } catch (err) {
-        console.error(`Error fetching the submission: ${err.message}`);
-        return new Response(err.message);
+        const response = await createSubmission(data.FormTemplateId);
+        console.log(chalk.hex('#00f000')('Received Response for Submission Link:', JSON.stringify(response)));
+
+        return ResponseHandler.success(response);
+    } catch (error) {
+        return ResponseHandler.handleError(error);
     }
 };
 
