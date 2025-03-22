@@ -3,6 +3,20 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { save, submit } from './apiFunctions';
+	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
+	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
+	import Text from '$lib/components/submission/Text.svelte';
+	import File from '$lib/components/submission/File.svelte';
+	import MultipleChoices from '$lib/components/submission/MultipleChoice.svelte';
+	import DateTime from '$lib/components/submission/Datetime.svelte';
+	import Bool from '$lib/components/submission/Boolean.svelte';
+	import Range from '$lib/components/submission/Range.svelte';
+	import Rating from '$lib/components/submission/Rating.svelte';
+	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
+	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
+	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
+
+	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
 	console.log('sections');
@@ -10,7 +24,7 @@
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	// const questions = data.assessmentTemplate.Questions;
-
+	$inspect(sections);
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
@@ -109,16 +123,45 @@
 	}
 
 	// Save the current answers to the backend
-	function handleSave(event) {
-		event.preventDefault();
-		const FormSubmissionId = $page.params.id;
-		save({ Data: answers, FormSubmissionId: FormSubmissionId });
-	}
+	// function handleSave(event) {
+	// 	event.preventDefault();
+	// 	const FormSubmissionId = $page.params.id;
+	// 	save({ Data: answers, FormSubmissionId: FormSubmissionId });
+	// }
 
-	// Submit the form to the backend
-	function handleSubmit() {
+	async function handleSave() {
 		const FormSubmissionId = $page.params.id;
-		submit(FormSubmissionId);
+		const url = `/api/server/question-response`;
+		const headers = { 'Content-Type': 'application/json' };
+		const res = await fetch(url, {
+			method: 'POST',
+			body: JSON.stringify({ Data: answers, FormSubmissionId: FormSubmissionId }),
+			headers
+		});
+		const saveData = await res.json();
+		console.log('saveData: ', saveData);
+		toastMessage(saveData);
+	}
+	// Submit the form to the backend
+	// function handleSubmit() {
+	// 	const FormSubmissionId = $page.params.id;
+	// 	const response = submit(FormSubmissionId);
+	// 	toastMessage(response);
+	// 	console.log('response: ', response);
+	// }
+
+	async function handleSubmit() {
+		const FormSubmissionId = $page.params.id;
+		const url = `/api/server/submit`;
+		const headers = { 'Content-Type': 'application/json' };
+		const res = await fetch(url, {
+			method: 'POST',
+			body: JSON.stringify(FormSubmissionId),
+			headers
+		});
+		const submissionData = await res.json();
+		toastMessage(submissionData);
+		console.log('submissionData: ', submissionData);
 	}
 
 	const componentsMap = {
@@ -153,18 +196,8 @@
 		HemoglobinA1C: BloodOxygen,
 		WaistCircumference: BloodOxygen
 	};
+	$inspect('ansers in page-----------', answers);
 
-	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
-	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
-	import Text from '$lib/components/submission/Text.svelte';
-	import File from '$lib/components/submission/File.svelte';
-	import MultipleChoices from '$lib/components/submission/MultipleChoice.svelte';
-	import DateTime from '$lib/components/submission/Datetime.svelte';
-	import Bool from '$lib/components/submission/Boolean.svelte';
-	import Range from '$lib/components/submission/Range.svelte';
-	import Rating from '$lib/components/submission/Rating.svelte';
-	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
-	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 </script>
 
 <div class="flex flex-row">
@@ -181,7 +214,7 @@
 	</div> -->
 
 	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1">
-		<form action="?/response" method="post" onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
+		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
 			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
 				{#if templateInfo}
 					<div>
@@ -304,7 +337,7 @@
 			</div> -->
 			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
 				<Button type="submit" variant="outline" class="w-full">Save</Button>
-				<Button onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
+				<Button  onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
 					>Submit</Button
 				>
 			</div>

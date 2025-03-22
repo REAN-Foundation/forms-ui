@@ -7,7 +7,11 @@
 
 <!-- {#if q.Title} -->
 	<div class="flex w-full flex-col gap-1.5 p-4">
-		<Label for="title">{q.Title || 'No title provided'}</Label>
+		<Label for="title">{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+				<span class="text-red-600 ml-1">*</span>
+			{/if}
+		</Label>
 
 		<!-- <Label>Drop file here{q.ResponseType}</Label> -->
 
@@ -17,7 +21,7 @@
 			>{q.Description || 'No description provided'}</Label
 		>
 
-		<Input type="text" class=" w-full" name={q.id} bind:value={answers[q.id]} />
+		<Input type="text" class=" w-full" name={q.id} bind:value={answers[q.id]} {...(q.IsRequired ? { required: true } : {})} />
 
 		<div class="flex justify-end">
 			<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">{q.Hint || ''}</Label>
