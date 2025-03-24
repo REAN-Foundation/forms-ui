@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '$lib/components/forms/question.schema';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -48,17 +42,6 @@
 			console.log('Called handleQuestionCardUpdate');
 			handleQuestionCardUpdate(model);
 		}
-
-		// const response = await fetch(`/api/server/question`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify(model),
-		// 	headers: { 'content-type': 'application/json' }
-		// });
-		// const question = await response.json();
-		// console.log(question);
-		// if (question.HttpCode === 200) {
-		// 	closeModel('Card', question);
-		// }
 	}
 </script>
 

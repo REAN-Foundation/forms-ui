@@ -1,23 +1,15 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question.schema';
-	// import InfoIcon from '';
-	// import { Label } from '../ui/label';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -31,7 +23,7 @@
 			Score: questionCard.Score,
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
-			QuestionImageUrl: questionCard.QuestionImageUrl,
+			QuestionImageUrl: questionCard.QuestionImageUrl ? questionCard.QuestionImageUrl : null,
 			IsRequired: questionCard.IsRequired
 		};
 
@@ -50,16 +42,6 @@
 			console.log('Called handleQuestionCardUpdate');
 			handleQuestionCardUpdate(model);
 		}
-		// const response = await fetch(`/api/server/question`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify(model),
-		// 	headers: { 'content-type': 'application/json' }
-		// });
-		// const question = await response.json();
-		// console.log(question);
-		// if (question.HttpCode === 200) {
-		// 	closeModel('Card', question);
-		// }
 	}
 </script>
 
@@ -147,7 +129,7 @@
 		<p class="error">{errors?.Hint}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Correct Answer</Label>
+			<Label class="col-span-11 ">CorrectAnswer</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />

@@ -5,70 +5,46 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question.schema';
+	// import InfoIcon from '';
+	// import { Label } from '../ui/label';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard } = $props();
 
-	async function handleSubmit(event) {
-		event.preventDefault();
+	async function handleSubmit() {
 		console.log(questionCard.Title);
 
-		const model: QuestionUpdateModel = {
+		const model = {
 			id: questionCard.id,
-			Title: questionCard.Title,
-			Description: questionCard.Description,
-			ResponseType: questionCard.ResponseType,
-			Score: questionCard.Score,
-			CorrectAnswer: questionCard.CorrectAnswer,
-			Hint: questionCard.Hint,
-			QuestionImageUrl: questionCard.QuestionImageUrl ? questionCard.QuestionImageUrl : null,
+			title: questionCard.Title,
+			description: questionCard.Description,
+			responseType: questionCard.ResponseType,
+			score: questionCard.Score,
+			correctAnswer: questionCard.CorrectAnswer,
+			hint: questionCard.Hint,
+			questionImageUrl: questionCard.QuestionImageUrl,
 			IsRequired: questionCard.IsRequired
 		};
-
-		const result = await questionSchema.safeParseAsync(model);
-		if (!result.success) {
-			console.log('client side validation error', result.error.flatten().fieldErrors);
-			errors = Object.fromEntries(
-				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
-					key,
-					val?.[0] || ''
-				])
-			);
+		const response = await fetch(`/api/server/question`, {
+			method: 'PUT',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const question = await response.json();
+		console.log(question);
+		if (question.HttpCode === 200) {
+			closeModel('Card', question);
 		}
-
-		if (Object.keys(errors).length === 0 || result?.success) {
-			console.log('Called handleQuestionCardUpdate');
-			handleQuestionCardUpdate(model);
-		}
-
-		// const response = await fetch(`/api/server/question`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify(model),
-		// 	headers: { 'content-type': 'application/json' }
-		// });
-		// const question = await response.json();
-		// console.log(question);
-		// if (question.HttpCode === 200) {
-		// 	closeModel('Card', question);
-		// }
 	}
 </script>
 
 <Card.Root class="rounded-lg border p-4">
 	<form
+		method="POST"
+		use:enhance
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
-		onsubmit={(event) => {
-			event.preventDefault();
-			handleSubmit(event);
-		}}
+		onsubmit={handleSubmit}
 	>
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
@@ -87,7 +63,6 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Title} />
-		<p class="error">{errors?.Title}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
@@ -97,7 +72,6 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
-		<p class="error">{errors?.Description}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 space-x-2">
@@ -126,44 +100,40 @@
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Score</Label>
+			<Label class="col-span-11 ">Question Score</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
 		<Input bind:value={questionCard.Score} type="number" />
-		<p class="error">{errors?.Score}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Hint</Label>
+			<Label class="col-span-11 ">Question Hint</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Hint for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
 		<Input bind:value={questionCard.Hint} />
-		<p class="error">{errors?.Hint}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Correct Answer</Label>
+			<Label class="col-span-11 ">Question CorrectAnswer</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={questionCard.CorrectAnswer} />
-		<p class="error">{errors?.CorrectAnswer}</p>
+		<Input bind:value={questionCard.QuestionImageUrl} />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Image Url</Label>
+			<Label class="col-span-11 ">Question QuestionImageUrl</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
-		<p class="error">{errors?.QuestionImageUrl}</p>
 
 		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
 	</form>

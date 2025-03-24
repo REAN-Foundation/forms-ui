@@ -63,10 +63,10 @@ export const PUT = async (event: RequestEvent) => {
 
         const response = await updateSection(
             data.id,
-            data.parentSectionId,
-            data.title,
-            data.description,
-            data.sectionIdentifier
+            data.ParentSectionId,
+            data.Title,
+            data.Description,
+            data.SectionIdentifier
         );
         // return json({
         //     status: 'success',

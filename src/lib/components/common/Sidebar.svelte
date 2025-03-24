@@ -72,7 +72,7 @@
 
 		<!-- Layout selection -->
 		<Card.Root class="space-y-3 rounded-lg border p-4">
-			<Card.Title class="text-md  ">Cards</Card.Title>
+			<Card.Title class="text-md">Question </Card.Title>
 			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-3">
 				<label class="flex cursor-pointer items-center">
 					<input
@@ -118,7 +118,7 @@
 		</Card.Root>
 
 		<Card.Root class="rounded-lg border p-4">
-			<Card.Title class="text-md  ">Response Type Cards</Card.Title>
+			<Card.Title class="text-md  ">Question Response Types</Card.Title>
 			<div class="scrollbar-hide max-h-80 overflow-y-auto pt-3">
 				<ul class="space-y-2">
 					{#if typeOfQuestion === 'Advanced'}
@@ -156,10 +156,10 @@
 					{/if}
 				</ul>
 			</div>
-			<form class="mb-4 flex w-full items-center space-x-2">
+			<!-- <form class="mb-4 flex w-full items-center space-x-2">
 				<Input type="text" placeholder="Search element ..." class="flex-grow" />
 				<Icon icon="zondicons:search" width="18" height="18" />
-			</form>
+			</form> -->
 		</Card.Root>
 	</div>
 </div>

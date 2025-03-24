@@ -157,28 +157,9 @@
 							>
 								Add New</Button
 							> -->
-							<Dialog.Root>
-								<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
-									Add New
-								</Dialog.Trigger>
-								<Dialog.Content class="sm:max-w-[100vh]">
-									<Dialog.Header>
-										<Dialog.Title>Add New</Dialog.Title>
-										<Dialog.Description>
-											Make changes to your Assessment Template here. Click save when you're done.
-										</Dialog.Description>
-									</Dialog.Header>
-									<form method="POST" action="?/newAssessment" use:enhance>
-										<div class="">
+						
 											<AssessmentForm {data} />
-										</div>
-										<Dialog.Footer>
-											<Button type="submit">Save changes</Button>
-										</Dialog.Footer>
-									</form>
-								</Dialog.Content>
-							</Dialog.Root>
-						</div>
+					</div>
 
 						<DataTable data={assessments} {columns} />
 					</div>

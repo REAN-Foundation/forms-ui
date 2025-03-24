@@ -1,95 +1,55 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	import Icon from '@iconify/svelte';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question.schema';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	let options = $state(questionCard.Options ? [...questionCard.Options] : []);
-
-	// console.log('MCQ options: ');
-	// $inspect(options);
-
-	// $effect(() => {
-	//     questionCard.Options = options;
-	// })
 
 	async function handleSubmit(event) {
 		event.preventDefault();
 
-		try {
-			const updatedOptions = options.map((option, index) => ({
-				Text: option.Text,
-				Sequence: option.Sequence || index + 1,
-				ImageUrl: option.ImageUrl
-			}));
+		const updatedOptions = options.map((option, index) => ({
+			Text: option.Text,
+			Sequence: option.Sequence || index + 1,
+			ImageUrl: option.ImageUrl
+		}));
 
-			const model: QuestionUpdateModel = {
-				id: questionCard.id,
-				Title: questionCard.Title,
-				Description: questionCard.Description,
-				ResponseType: questionCard.ResponseType,
-				Score: questionCard.Score,
-				CorrectAnswer: questionCard.CorrectAnswer,
-				Hint: questionCard.Hint,
-				QuestionImageUrl: questionCard.QuestionImageUrl,
-				Options: updatedOptions,
-				IsRequired: questionCard.IsRequired
-			};
+		const model: QuestionUpdateModel = {
+			id: questionCard.id,
+			Title: questionCard.Title,
+			Description: questionCard.Description,
+			ResponseType: questionCard.ResponseType,
+			Score: questionCard.Score,
+			CorrectAnswer: questionCard.CorrectAnswer,
+			Hint: questionCard.Hint,
+			QuestionImageUrl: questionCard.QuestionImageUrl,
+			Options: updatedOptions,
+			IsRequired: questionCard.IsRequired
+		};
 
-			// const model = {
-			// 	id: questionCard.id,
-			// 	title: questionCard.Title,
-			// 	description: questionCard.Description,
-			// 	responseType: questionCard.ResponseType,
-			// 	score: questionCard.Score,
-			// 	correctAnswer: questionCard.CorrectAnswer,
-			// 	hint: questionCard.Hint,
-			// 	questionImageUrl: questionCard.QuestionImageUrl,
-			// 	options: updatedOptions
-			// };
-			questionCard.Options = updatedOptions;
-			const result = await questionSchema.safeParseAsync(model);
-			if (!result.success) {
-				console.log('client side validation error', result.error.flatten().fieldErrors);
-				errors = Object.fromEntries(
-					Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
-						key,
-						val?.[0] || ''
-					])
-				);
-			}
+		const result = await questionSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
 
-			if (Object.keys(errors).length === 0 || result?.success) {
-				console.log('Called handleQuestionCardUpdate');
-				handleQuestionCardUpdate(model);
-			}
-
-			// const response = await fetch(`/api/server/question`, {
-			// 	method: 'PUT',
-			// 	body: JSON.stringify(model),
-			// 	headers: { 'content-type': 'application/json' }
-			// });
-			// const question = await response.json();
-			// console.log(question);
-			// if (question.HttpCode === 200) {
-			// 	closeModel('Card', question);
-			// }
-		} catch (error) {
-			console.error('Error submitting form:', error);
+		if (Object.keys(errors).length === 0 || result?.success) {
+			console.log('Called handleQuestionCardUpdate');
+			handleQuestionCardUpdate(model);
 		}
 	}
 
@@ -118,12 +78,9 @@
 	}
 </script>
 
-<!-- method="POST"
-use:enhance -->
-
 <Card.Root class="rounded-lg border p-4">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
@@ -138,7 +95,7 @@ use:enhance -->
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -156,7 +113,6 @@ use:enhance -->
 			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
-		<p class="error">{errors?.Description}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 space-x-2">
@@ -176,7 +132,7 @@ use:enhance -->
 		<p class="error">{errors?.IsRequired}</p>
 
 		<div class="mt-5 flex flex-col">
-			<Label>Options<span class="text-red-600">*</span></Label>
+			<Label>Options <span class="text-red-600">*</span></Label>
 			<Button
 				type="button"
 				onclick={addOption}
@@ -214,17 +170,26 @@ use:enhance -->
 			<input type="hidden" name="options" value={JSON.stringify(options)} />
 		</div>
 
+		<!-- Replace div with a button and handle keyboard accessibility -->
+		<!-- <div class="relative mt-5 grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Response Type</Label>
+			<div class="relative col-span-1">
+				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.ResponseType} class="" /> -->
+
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
 			</div>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Score</Label>
+			<Label class="col-span-11 ">Question Score</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
