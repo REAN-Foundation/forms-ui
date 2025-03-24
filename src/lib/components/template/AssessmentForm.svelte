@@ -26,10 +26,10 @@
 </script>
 
 <Dialog.Root>
-	<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} ml-auto w-28">
+	<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} my-2 w-28 md:ml-auto">
 		Add New
 	</Dialog.Trigger>
-	<Dialog.Content class="sm:max-w-[100vh]">
+	<Dialog.Content class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] ">
 		<Dialog.Header>
 			<Dialog.Title>Add New</Dialog.Title>
 			<Dialog.Description>
@@ -81,8 +81,11 @@
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Group>
-									<Select.Item value="AllQuestions" label="All Questions">All Questions</Select.Item	>
-									<Select.Item value="OneQuestion" label="1 Question" disabled>1 Question</Select.Item>
+									<Select.Item value="AllQuestions" label="All Questions">All Questions</Select.Item
+									>
+									<Select.Item value="OneQuestion" label="1 Question" disabled
+										>1 Question</Select.Item
+									>
 									<Select.Item value="OneSection" label="1 Section" disabled>1 Section</Select.Item>
 								</Select.Group>
 							</Select.Content>
@@ -131,8 +134,8 @@
 
 			<Form.Field {form} name="DefaultSectionNumbering">
 				<Form.Control>
-					<div class="flex flex-row gap-2">
-						<Checkbox bind:checked={$formData.DefaultSectionNumbering} disabled/>
+					<div class="my-4 flex flex-row gap-2">
+						<Checkbox bind:checked={$formData.DefaultSectionNumbering} disabled />
 						<div class="space-y-1 leading-none">
 							<Form.Label>Default Section Numbering</Form.Label>
 						</div>

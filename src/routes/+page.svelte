@@ -22,16 +22,12 @@
 	}
 </script>
 
-<div class="container mx-auto p-8">
-	<div class="rounded bg-gray-100 p-8 shadow dark:border dark:bg-transparent">
-		<div class="mb-6">
-			<img src="" alt="" class="mx-auto" height="34" width="34" />
-			<h1 class=" text-center text-xl font-bold">zForms</h1>
-		</div>
-		<div class="mx-auto flex items-center justify-center">
-			<Card.Root class="w-[350px] rounded-xl">
+<div class="flex min-h-screen items-center justify-center">
+	<div class="rounded shadow dark:border dark:bg-transparent">
+		<div>
+			<Card.Root class="w-[350px]  rounded-xl">
 				<Card.Header>
-					<Card.Title>Sign in</Card.Title>
+					<Card.Title>Sign In</Card.Title>
 				</Card.Header>
 				<Card.Content>
 					<form
@@ -42,16 +38,18 @@
 						onsubmit={handleSubmit}
 					>
 						<div class="grid w-full items-center gap-4">
-							<div class="flex w-full max-w-sm flex-col gap-1.5">
-								<Label for="username">Username</Label>
+							<div class="flex w-full max-w-sm flex-col">
+								<Label for="username" class="mb-2 text-base">Username</Label>
 								<Input
 									type="text"
 									placeholder="username"
-									class="max-w-xs"
+									class="max-w-xs "
 									name="username"
 									required
 								/>
-								<div class="relative my-4 flex items-center">
+								<div class=" relative my-4 flex w-full flex-col">
+									<Label for="username" class="mb-2 text-base ">Password</Label>
+
 									{#if showPassword}
 										<Input
 											type="text"
@@ -88,10 +86,9 @@
 								</div>
 							</div>
 						</div>
-						<Button class="w-full " type="submit">Login</Button>
+						<Button class="w-full" type="submit">Login</Button>
 					</form>
 				</Card.Content>
-				<Card.Footer></Card.Footer>
 			</Card.Root>
 		</div>
 	</div>
