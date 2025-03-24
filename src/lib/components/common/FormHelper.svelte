@@ -7,7 +7,7 @@
 	import IntegerForm from '../forms/responseType/IntegerFieldEditor.svelte';
 	import BooleanForm from '../forms/responseType/BooleanFieldEditor.svelte';
 	import ObjectForm from '../forms/responseType/ObjectFieldEditor.svelte';
-	import TextArrayForm from '../forms/responseType/TextArray.svelte';
+	import TextArrayForm from '../forms/responseType/TextArrayFieldEditor.svelte';
 	import MultipleChoiceSelectionForm from '../forms/responseType/MultipleChoiceSelectionFieldEditor.svelte';
 	import SingleChoiceSelectionForm from '../forms/responseType/SingleChoiceSelectionFieldEditor.svelte';
 	import DateForm from '../forms/responseType/DateFieldEditor.svelte';
