@@ -1,23 +1,15 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question.schema';
-	// import InfoIcon from '';
-	// import { Label } from '../ui/label';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -32,8 +24,6 @@
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
 			QuestionImageUrl: questionCard.QuestionImageUrl,
-			RangeMin: questionCard.RangeMin,
-			RangeMax: questionCard.RangeMax,
 			IsRequired: questionCard.IsRequired
 		};
 
@@ -52,24 +42,11 @@
 			console.log('Called handleQuestionCardUpdate');
 			handleQuestionCardUpdate(model);
 		}
-
-		// console.log(model,'-===-=--=-=-=-=-=-=-')
-		// const response = await fetch(`/api/server/question`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify(model),
-		// 	headers: { 'content-type': 'application/json' }
-		// });
-		// const question = await response.json();
-		// console.log(question);
-		// if (question.HttpCode === 200) {
-		// 	closeModel('Card', question);
-		// }
 	}
 </script>
 
 <!-- method="POST"
 use:enhance -->
-
 <Card.Root class="rounded-lg border p-4">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
@@ -134,26 +111,6 @@ use:enhance -->
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Minimum Rate<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
-			</div>
-		</div>
-		<Input bind:value={questionCard.RangeMin} type="number" />
-		<p class="error">{errors?.RangeMin}</p>
-
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Maximim Rate<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
-			</div>
-		</div>
-		<Input bind:value={questionCard.RangeMax} type="number" />
-		<p class="error">{errors?.RangeMax}</p>
-
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Score</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -184,7 +141,7 @@ use:enhance -->
 		<p class="error">{errors?.CorrectAnswer}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question QuestionImageUrl</Label>
+			<Label class="col-span-11 ">Question Image Url</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />

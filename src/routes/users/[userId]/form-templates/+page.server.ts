@@ -1,8 +1,9 @@
 import { type Actions, type RequestEvent, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { createFormTemplate, getFormTemplateById } from '../../../api/services/form-template';
-
 import { superValidate } from "sveltekit-superforms";
+
+// import { superValidate } from "sveltekit-superforms";
 import { fail } from "@sveltejs/kit";
 import { zod } from "sveltekit-superforms/adapters";
 import { assessmentSchema } from '$lib/components/template/assessment-schema';
@@ -17,17 +18,18 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 	try {
 		const ownerUserId = userId;
-		const response = await getFormTemplateById({ownerUserId});
+		const response = await getFormTemplateById({ ownerUserId });
 
-		const assessmentTemplate = response?.Data?.Items ?? []; 
+		const assessmentTemplate = response?.Data?.Items ?? [];
 
-		const initialData = {
-			defaultSectionNumbering: true 
-		};
+		// const initialData = {
+		// 	defaultSectionNumbering: true
+		// };
 		return {
 			assessmentTemplate,
 			message: response.Message,
-			form: await superValidate(initialData, zod(assessmentSchema)),
+			// form: await superValidate(initialData, zod(assessmentSchema)),
+			form: await superValidate(zod(assessmentSchema)),
 		};
 
 	} catch (error) {
@@ -44,7 +46,11 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 export const actions = {
 	newAssessment: async (event: RequestEvent) => {
+		// const request = event.request;
+		// const data = await request.formData();
 
+		// console.log(Object.fromEntries(data));
+		// console.log(data)
 		const form = await superValidate(event, zod(assessmentSchema));
 		if (!form.valid) {
 			return fail(400, {
@@ -55,14 +61,14 @@ export const actions = {
 		const userId = event.params.userId
 
 		const response = await createFormTemplate(
-			form.data.title,
-			form.data.description,
-			form.data.currentVersion,
-			form.data.tenantCode,
-			form.data.itemsPerPage,
-			form.data.type,
+			form.data.Title,
+			form.data.Description,
+			form.data.CurrentVersion,
+			form.data.TenantCode,
+			form.data.ItemsPerPage,
+			form.data.Type,
 			userId,
-			form.data.defaultSectionNumbering
+			form.data.DefaultSectionNumbering
 		);
 
 		const templateId = response.Data.id;
@@ -74,7 +80,7 @@ export const actions = {
 			);
 		}
 
-		 throw redirect(
+		throw redirect(
 			303,
 			`/users/${userId}/form-templates/${templateId}/forms`,
 			successMessage(`Form template created successfully!`),
@@ -82,4 +88,5 @@ export const actions = {
 		);
 	},
 } satisfies Actions;
+
 

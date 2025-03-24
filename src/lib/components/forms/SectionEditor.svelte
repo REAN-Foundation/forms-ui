@@ -6,30 +6,38 @@
 	import InfoIcon from '../common/InfoIcon.svelte';
 	import { Label } from '../ui/label';
 	import { enhance } from '$app/forms';
+	import { sectionSchema } from './section-schema';
 
-	let { sectionData, handleCancel, closeModel } = $props();
-
+	let { sectionData, closeSectionForm, errors = $bindable(), handleSectionUpdate } = $props();
+	console.log(errors);
 	///////////////////////////////////////////////////////////////
 
-	async function handleSubmit() {
-		console.log(sectionData.Title);
+	async function handleSubmit(event) {
+		event.preventDefault();
 
 		const model = {
 			id: sectionData.id,
-			parentSectionId: sectionData.ParentSectionId,
-			title: sectionData.Title,
-			description: sectionData.Description,
-			sectionIdentifier: sectionData.SectionIdentifier
+			ParentSectionId: sectionData.ParentSectionId,
+			Title: sectionData.Title,
+			Description: sectionData.Description,
+			SectionIdentifier: sectionData.SectionIdentifier
 		};
-		const response = await fetch(`/api/server/section`, {
-			method: 'PUT',
-			body: JSON.stringify(model),
-			headers: { 'content-type': 'application/json' }
-		});
-		const section = await response.json();
-		console.log(section);
-		if (section.HttpCode === 200) {
-			closeModel('Section', section);
+
+		console.log(model);
+		
+		const result = await sectionSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
+
+		if (Object.keys(errors).length === 0 || result?.success) {
+			handleSectionUpdate(model);
 		}
 	}
 </script>
@@ -42,7 +50,7 @@
 	>
 		<Card.Title>
 			<div class="flex justify-end">
-				<Button type="button" variant="destructive" size="icon" onclick={handleCancel}>
+				<Button type="button" variant="destructive" size="icon" onclick={closeSectionForm}>
 					<Icon icon="iwwa:delete" width="16" height="16" />
 				</Button>
 			</div>
@@ -73,7 +81,8 @@
 				<InfoIcon title={'This is title of section.'} cls={'w-20'} />
 			</div>
 		</div>
-		<Input bind:value={sectionData.Title} required minlength="8" maxlength="256" />
+		<Input bind:value={sectionData.Title} />
+		<p class="text-destructive">{errors?.Title}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
@@ -83,6 +92,7 @@
 			</div>
 		</div>
 		<Input bind:value={sectionData.Description} />
+		<p class="text-destructive">{errors?.Description}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Section Identifier<span class="text-red-600">*</span></Label>
@@ -91,91 +101,8 @@
 				<InfoIcon title={'This is Section Identifier for section.'} cls={'text-primary'} />
 			</div>
 		</div>
-		<Input bind:value={sectionData.SectionIdentifier} />
-
-		<!-- <Form.Field {form} name="id" class="hidden">
-			<Form.Control>
-				{#snippet children({ props })}
-					<Form.Label>Id</Form.Label>
-					<Input {...props} bind:value={sectionData.id} required />
-				{/snippet}
-			</Form.Control>
-			<Form.Description>This is id of section.</Form.Description>
-			<Form.FieldErrors />
-		</Form.Field>
-
-		<Form.Field {form} name="parentSectionId" class="hidden">
-			<Form.Control>
-				{#snippet children({ props })}
-					<Form.Label>ParentSectionId</Form.Label>
-					<Input {...props} bind:value={sectionData.ParentSectionId} required />
-				{/snippet}
-			</Form.Control>
-			<Form.Description>This is id of section.</Form.Description>
-			<Form.FieldErrors />
-		</Form.Field> -->
-
-		<!-- <Form.Field {form} name="title">
-			<Form.Control>
-				{#snippet children({ props })}
-					<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-						<Form.Label class="col-span-11 ">Title<span class="text-red-600">*</span></Form.Label>
-						<div class="relative col-span-1">
-							<InfoIcon title={'This is title of section.'} cls={'w-20'} />
-						</div>
-					</div>
-					<Input {...props} />
-					{/snippet}
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field> -->
-		<!-- <Form.Description>This is title of section.</Form.Description> -->
-		<!-- Replace div with a button and handle keyboard accessibility -->
-
-		<!-- <Form.Field {form} name="description">
-			<Form.Control>
-				{#snippet children({ props })}
-					<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-						<Form.Label class="col-span-11 "
-							>Description <span class="text-red-600">*</span></Form.Label
-						>
-						<div class="relative col-span-1">
-							<InfoIcon title={'This is Description for section.'} cls={'text-primary'} />
-						</div>
-					</div>
-					<Input {...props} bind:value={sectionData.Description} />
-				{/snippet}
-			</Form.Control>
-			<Form.FieldErrors />
-		</Form.Field> -->
-		<!-- <Form.Description>This is Description for section.</Form.Description> -->
-
-		<!-- <Form.Field {form} name="sectionIdentifier">
-			<Form.Control>
-				{#snippet children({ props })}
-					<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-						<Form.Label class="col-span-11 "
-							>Section Identifier <span class="text-red-600">*</span></Form.Label
-						>
-						<div class="relative col-span-1">
-							<InfoIcon title={'This is Section Identifier for section.'} cls={'text-primary'} />
-						</div>
-					</div>
-					<Input {...props} bind:value={sectionData.SectionIdentifier} />
-				{/snippet}
-			</Form.Control>
-			<Form.FieldErrors />
-		</Form.Field> -->
-		<!-- <Form.Description>This is Section identifier.</Form.Description> -->
-
-		<!-- <Form.Field {form} name="sequence">
-		<Form.Control let:attrs>
-			<Form.Label>Sequence</Form.Label>
-			<Input {...attrs} bind:value={$formData.sequence} />
-		</Form.Control>
-		<Form.Description>This is Sequence of section.</Form.Description>
-		<Form.FieldErrors />
-	</Form.Field> -->
+		<Input bind:value={sectionData.SectionIdentifier} disabled/>
+		<p class="text-destructive">{errors?.SectionIdentifier}</p>
 
 		<Button type="submit" class="mx-auto mt-5 w-full" onclick={handleSubmit}>Submit</Button>
 	</form>

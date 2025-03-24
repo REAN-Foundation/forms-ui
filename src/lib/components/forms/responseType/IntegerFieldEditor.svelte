@@ -1,89 +1,47 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import Icon from '@iconify/svelte';
-	import { questionSchema } from '../question.schema';
+	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
-
-	let options = $state(questionCard.Options ? [...questionCard.Options] : []);
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
+		console.log(questionCard.Title);
 
-		try {
-			const updatedOptions = options.map((option, index) => ({
-				Text: option.Text,
-				Sequence: option.Sequence || index + 1,
-				ImageUrl: option.ImageUrl
-			}));
+		const model: QuestionUpdateModel = {
+			id: questionCard.id,
+			Title: questionCard.Title,
+			Description: questionCard.Description,
+			ResponseType: questionCard.ResponseType,
+			Score: questionCard.Score,
+			CorrectAnswer: questionCard.CorrectAnswer,
+			Hint: questionCard.Hint,
+			QuestionImageUrl: questionCard.QuestionImageUrl,
+			IsRequired: questionCard.IsRequired
+		};
 
-			const model = {
-				id: questionCard.id,
-				Title: questionCard.Title,
-				Description: questionCard.Description,
-				ResponseType: questionCard.ResponseType,
-				Score: questionCard.Score,
-				CorrectAnswer: questionCard.CorrectAnswer,
-				Hint: questionCard.Hint,
-				QuestionImageUrl: questionCard.QuestionImageUrl,
-				Options: updatedOptions,
-				IsRequired: questionCard.IsRequired
-			};
-
-			const result = await questionSchema.safeParseAsync(model);
-			if (!result.success) {
-				console.log('client side validation error', result.error.flatten().fieldErrors);
-				errors = Object.fromEntries(
-					Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
-						key,
-						val?.[0] || ''
-					])
-				);
-			}
-
-			if (Object.keys(errors).length === 0 || result?.success) {
-				console.log('Called handleQuestionCardUpdate');
-				handleQuestionCardUpdate(model);
-			}
-		} catch (error) {
-			console.error('Error submitting form:', error);
+		const result = await questionSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
 		}
-	}
 
-	const hardcodedImageUrl = 'https://example.com/default';
-
-	function addOption() {
-		if (questionCard.ResponseType === 'Boolean' && options.length >= 2) return;
-
-		// Add a new option
-		options = [
-			...options,
-			{ Sequence: (options.length + 1).toString(), Text: '', ImageUrl: hardcodedImageUrl }
-		];
-	}
-
-	function updateOption(index, key, value) {
-		// Update the option at the specified index
-		options[index] = { ...options[index], [key]: value };
-		// Trigger reactivity by reassigning the array
-		options = [...options];
-	}
-
-	function removeOption(index) {
-		// Remove the option at the specified index
-		options = options.filter((_, i) => i !== index);
+		if (Object.keys(errors).length === 0 || result?.success) {
+			console.log('Called handleQuestionCardUpdate');
+			handleQuestionCardUpdate(model);
+		}
 	}
 </script>
 
@@ -141,45 +99,6 @@
 		</div>
 		<p class="error">{errors?.IsRequired}</p>
 
-		<div class="mt-5 flex flex-col">
-			<Label>Options<span class="text-red-600">*</span></Label>
-			<Button
-				type="button"
-				onclick={addOption}
-				class="mt-2 w-fit"
-				disabled={questionCard.ResponseType === 'Boolean' && options.length >= 2}
-			>
-				Add Option
-			</Button>
-
-			{#each options as option, index}
-				<div class="mb-2 flex items-center">
-					<Input
-						type="number"
-						name={`options[${index}].Sequence`}
-						bind:value={option.Sequence}
-						oninput={(e) => updateOption(index, 'Sequence', e.target.value)}
-						placeholder={`Sequence of ${index + 1} Option`}
-						class="mr-2 w-1/4"
-					/>
-					<Input
-						type="text"
-						name={`options[${index}].Text`}
-						bind:value={option.Text}
-						oninput={(e) => updateOption(index, 'Text', e.target.value)}
-						placeholder={`Data for Option ${index + 1}`}
-						class="mr-2 w-full"
-					/>
-					<Input type="hidden" name={`options[${index}].ImageUrl`} bind:value={option.ImageUrl} />
-					<Button type="button" onclick={() => removeOption(index)} class="ml-2">
-						<Icon icon="mingcute:delete-2-line" width="25" height="25" />
-					</Button>
-				</div>
-			{/each}
-
-			<input type="hidden" name="options" value={JSON.stringify(options)} />
-		</div>
-
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
 			<div class="relative col-span-1">
@@ -210,7 +129,7 @@
 		<p class="error">{errors?.Hint}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Correct Answer</Label>
+			<Label class="col-span-11 ">CorrectAnswer</Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
 				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />

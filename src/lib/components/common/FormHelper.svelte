@@ -1,23 +1,22 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import FielEditorForm from '../forms/FieldEditor.svelte';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import TextForm from '../forms/responseType/TextForm.svelte';
-	import FloatForm from '../forms/responseType/FloatForm.svelte';
-	import IntegerForm from '../forms/responseType/IntegerForm.svelte';
-	import BooleanForm from '../forms/responseType/BooleanForm.svelte';
-	import ObjectForm from '../forms/responseType/ObjectForm.svelte';
-	import TextArrayForm from '../forms/responseType/TextArrayForm.svelte';
-	import MultipleChoiceSelectionForm from '../forms/responseType/MultipleChoiceSelectionForm.svelte';
-	import SingleChoiceSelectionForm from '../forms/responseType/SingleChoiceSelectionForm.svelte';
-	import DateForm from '../forms/responseType/DateForm.svelte';
-	import DateTimeForm from '../forms/responseType/DateTimeForm.svelte';
-	import RatingForm from '../forms/responseType/RatingForm.svelte';
-	import RangeForm from '../forms/responseType/RangeForm.svelte';
-	import AdvanceForm from '../forms/responseType/AdvanceForm.svelte';
+	import TextForm from '../forms/responseType/TextFieldEditor.svelte';
+	import FloatForm from '../forms/responseType/FloatFieldEditor.svelte';
+	import IntegerForm from '../forms/responseType/IntegerFieldEditor.svelte';
+	import BooleanForm from '../forms/responseType/BooleanFieldEditor.svelte';
+	import ObjectForm from '../forms/responseType/ObjectFieldEditor.svelte';
+	import TextArrayForm from '../forms/responseType/TextArrayFieldEditor.svelte';
+	import MultipleChoiceSelectionForm from '../forms/responseType/MultipleChoiceSelectionFieldEditor.svelte';
+	import SingleChoiceSelectionForm from '../forms/responseType/SingleChoiceSelectionFieldEditor.svelte';
+	import DateForm from '../forms/responseType/DateFieldEditor.svelte';
+	import DateTimeForm from '../forms/responseType/DateTimeFieldEditor.svelte';
+	import RatingForm from '../forms/responseType/RatingFieldEditor.svelte';
+	import RangeForm from '../forms/responseType/RangeFieldEditor.svelte';
+	import AdvanceForm from '../forms/responseType/AdvanceFieldEditor.svelte';
 
-	let { questionCard = $bindable(), errors = $bindable(), closeModel, closeSheet, handleQuestionCardUpdate } = $props();
+	let { questionCard = $bindable(), errors = $bindable(), closeSheet, handleQuestionCardUpdate } = $props();
 
 	console.log('question card', questionCard);
 </script>
@@ -47,31 +46,31 @@
 
 		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
 		{#if questionCard.ResponseType === 'Text'}
-			<TextForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<TextForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Float'}
-			<FloatForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<FloatForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Integer'}
-			<IntegerForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<IntegerForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Boolean'}
-			<BooleanForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<BooleanForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Object'}
-			<ObjectForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<ObjectForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'TextArray'}
-			<TextArrayForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate}/>
+			<TextArrayForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
 		{:else if questionCard.ResponseType === 'MultiChoiceSelection'}
-			<MultipleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<MultipleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'SingleChoiceSelection'}
-			<SingleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<SingleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Date'}
-			<DateForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<DateForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'DateTime'}
-			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
-			<RatingForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<RatingForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Range'}
-			<RangeForm bind:questionCard={questionCard} bind:errors={errors} {closeModel} {handleQuestionCardUpdate} />
+			<RangeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else}
-			<AdvanceForm {questionCard} {closeModel} />
+			<AdvanceForm {questionCard} />
 		{/if}
 	</div>
 </div>

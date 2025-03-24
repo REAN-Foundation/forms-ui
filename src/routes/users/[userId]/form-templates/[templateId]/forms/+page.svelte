@@ -17,9 +17,9 @@
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
-    let errors: Record<string, string> = $state({});
-    // console.log('form data:');
-    // $inspect(errors);
+	let errors: Record<string, string> = $state({});
+	// console.log('form data:');
+	// $inspect(errors);
 
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
@@ -36,16 +36,16 @@
 	let sectionForm = $state(false);
 	let subSectionForm = $state(false);
 
-	let cardToOpen=$state();
+	let cardToOpen = $state();
 	let sectionToOpen = $state();
 
 	$effect(() => {
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 
-    // console.log('uiSections:');
-    // $inspect(uiSections);
-    
+	// console.log('uiSections:');
+	// $inspect(uiSections);
+
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.value === 'Basic' || target.value === 'Advanced') {
@@ -161,7 +161,7 @@
 
 	function closeSheet(event?: any) {
 		showSheet = false;
-        errors = {};
+		errors = {};
 		invalidateAll();
 	}
 
@@ -180,11 +180,9 @@
 			if (response.HttpCode === 200) {
 				showSheet = false;
 			}
-            // errors = {};
+			// errors = {};
 		}
 	}
-
-	
 
 	// function handleSubmitForm(event: { preventDefault: () => void }) {
 	// 	event.preventDefault();
@@ -241,13 +239,15 @@
 
 	function closeSectionForm() {
 		sectionForm = false;
+		errors = {};
+		invalidateAll();
 	}
 
 	function closeSubSectionForm() {
 		subSectionForm = false;
 	}
 
-    async function handleQuestionCardUpdate(model) {
+	async function handleQuestionCardUpdate(model) {
 		const response = await fetch(`/api/server/question`, {
 			method: 'PUT',
 			body: JSON.stringify(model),
@@ -257,16 +257,38 @@
 		console.log(question);
 		if (question.HttpCode === 200) {
 			closeModel('Card', question);
-            errors ={};
-            invalidateAll();
-            return;
+			errors = {};
+			invalidateAll();
+			return;
 		}
 
-        errors = question?.Errors || {};
-        if (Object.keys(errors).length === 0) {
-            toastMessage(question);
-        }
-        invalidateAll();
+		errors = question?.Errors || {};
+		if (Object.keys(errors).length === 0) {
+			toastMessage(question);
+		}
+		invalidateAll();
+	}
+
+	async function handleSectionUpdate(model) {
+		const response = await fetch(`/api/server/section`, {
+			method: 'PUT',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const section = await response.json();
+		console.log(section);
+		if (section.HttpCode === 200) {
+			closeModel('Section', section);
+			errors = {};
+			invalidateAll();
+			return;
+		}
+
+		errors = section?.Errors || {};
+		if (Object.keys(errors).length === 0) {
+			toastMessage(section);
+		}
+		invalidateAll();
 	}
 </script>
 
@@ -275,14 +297,15 @@
 		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
 	>
 		<SectionEditorForm
-			{closeModel}
-			handleCancel={closeSectionForm}
+			bind:errors
+			{handleSectionUpdate}
+			{closeSectionForm}
 			sectionData={sectionToOpen}
 		/>
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper  {closeModel} {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors={errors}/>
+	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors />
 {/if}
 
 <div class="bg-green-5 flex min-h-screen flex-row">

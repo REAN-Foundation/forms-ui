@@ -1,6 +1,6 @@
 import {  json, type RequestEvent } from '@sveltejs/kit';
 import { createQuestion, deleteQuestion, updateQuestion } from '../../services/question';
-import { questionSchema } from '$lib/components/forms/question.schema';
+import { questionSchema } from '$lib/components/forms/question-schema';
 
 //////////////////////////////////////////////////////////////
 // interface CustomError extends Error {

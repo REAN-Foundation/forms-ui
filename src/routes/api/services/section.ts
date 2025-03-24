@@ -78,11 +78,14 @@ export const updateSection = async (
 ) => {
 	const body = {
 		// ParentFormTemplateId: parentTemplateId,
-		SectionIdentifier: sectionIdentifier,
+		// SectionIdentifier: sectionIdentifier,
+		...(sectionIdentifier && { SectionIdentifier: sectionIdentifier }),
 		Title: title,
-		Description: description ? description : null,
+		// Description: description ? description : null,
+		...(description && { Description: description }),
 		// Sequence: sequence ? sequence : null,
-		ParentSectionId: parentSectionId ? parentSectionId : null,
+		// ParentSectionId: parentSectionId ? parentSectionId : null,
+		...(parentSectionId && { ParentSectionId: parentSectionId }),
 	};
 
 	const url = BACKEND_API_URL + `/form-sections/${id}`;

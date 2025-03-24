@@ -4,24 +4,17 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import { questionSchema } from '$lib/components/forms/question.schema';
-	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { questionSchema } from '../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let {
-		questionCard = $bindable(),
-		errors = $bindable(),
-		closeModel,
-		handleQuestionCardUpdate
-	} = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
 		console.log(questionCard.Title);
 
-		const model: QuestionUpdateModel = {
+		const model = {
 			id: questionCard.id,
 			Title: questionCard.Title,
 			Description: questionCard.Description,
@@ -30,6 +23,8 @@
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
 			QuestionImageUrl: questionCard.QuestionImageUrl,
+			RangeMin: questionCard.RangeMin,
+			RangeMax: questionCard.RangeMax,
 			IsRequired: questionCard.IsRequired
 		};
 
@@ -48,21 +43,8 @@
 			console.log('Called handleQuestionCardUpdate');
 			handleQuestionCardUpdate(model);
 		}
-		// const response = await fetch(`/api/server/question`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify(model),
-		// 	headers: { 'content-type': 'application/json' }
-		// });
-		// const question = await response.json();
-		// console.log(question);
-		// if (question.HttpCode === 200) {
-		// 	closeModel('Card', question);
-		// }
 	}
 </script>
-
-<!-- method="POST" -->
-<!-- use:enhance -->
 
 <Card.Root class="rounded-lg border p-4">
 	<form
@@ -118,16 +100,6 @@
 		</div>
 		<p class="error">{errors?.IsRequired}</p>
 
-		<!-- <div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-            <div class="col-span-11 space-x-2">
-                <Label>Is Required</Label>
-                <Checkbox bind:checked={questionCard.IsRequired}  aria-labelledby="terms-label" />
-                <input name="defaultSectionNumbering" value={questionCard.IsRequired} hidden />
-            </div>
-       
-        </div>
-		<p class="error">{errors?.IsRequired}</p>  -->
-
 		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
 			<div class="relative col-span-1">
@@ -136,6 +108,26 @@
 			</div>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Minimum Range<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.RangeMin} type="number" />
+		<p class="error">{errors?.RangeMin}</p>
+
+		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Maximim Range<span class="text-red-600">*</span></Label>
+			<div class="relative col-span-1">
+				<!-- Replace div with a button and handle keyboard accessibility -->
+				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
+			</div>
+		</div>
+		<Input bind:value={questionCard.RangeMax} type="number" />
+		<p class="error">{errors?.RangeMax}</p>
 
 		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Score</Label>
