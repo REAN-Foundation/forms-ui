@@ -27,9 +27,10 @@ export const getFormSubmission = async (
 	return await get_(url);
 }
 
-export const getSubmission = async (
+export const searchFormSubmission = async (
 	searchParams?: any
 ) => {
+    console.log('Search params are ', searchParams);
 	let searchString = '';
 	if (searchParams) {
 		const keys = Object.keys(searchParams);
@@ -45,6 +46,7 @@ export const getSubmission = async (
 			searchString += params.join('&');
 		}
 	}
+    console.log('Search string is ', searchString);
 	const url = BACKEND_API_URL + `/form-submissions/search${searchString}`;
 	const res = await get_(url);
 	console.log(res, 'result from submission')
