@@ -10,7 +10,7 @@
 
 {#each sections ?? [] as s,index}
 	<!-- {#if s?.Sections?.length > 0 || s?.Questions?.length > 0} -->
-	<fieldset class="mt-2 border-2 p-2">
+	<fieldset class="mt-2 border p-4 border-gray-400 rounded-md">
 		<legend class="mx-auto px-5">{s?.Title ?? 'Section Name'}</legend>
 
 		{#each s?.Questions ?? [] as sq, index}
