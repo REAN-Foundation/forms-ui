@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
-	let { q, answers = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable() } = $props();
 	function handleInput(event, id) {
 		const value = event.target.value;
 		if (value.length > 20) {
@@ -33,9 +33,11 @@
 		class="w-full"
 		bind:value={answers[q.id]}
 		name={q.id}
-		{...(q.IsRequired ? { required: true } : {})}
 		/>
 		<!-- oninput={(e) => handleInput(e, q.id)} -->
+	{#if errors[q.id]}
+		<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
+	{/if}
 	{#if q.Hint}
 		<div class="flex justify-end">
 			<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">Hint: {q.Hint}</Label>

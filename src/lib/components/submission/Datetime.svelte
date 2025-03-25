@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
-	let { q, answers = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable() } = $props();
 </script>
 
 {#if q.ResponseType === 'DateTime'}
@@ -20,6 +20,9 @@
 			<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
 		{/if}
 		<Input type="datetime-local" class="w-full" name={q.id} bind:value={answers[q.id]} />
+		{#if errors[q.id]}
+			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
+		{/if}
 		{#if q.Hint}
 			<div class="flex justify-end">
 				<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2"

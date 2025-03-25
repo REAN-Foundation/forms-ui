@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	let { q, answers = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable()} = $props();
 	let optionsArray: any =$state();
 
 	// Ensure q.Options is defined, is an array, and contains at least one non-empty string
@@ -53,6 +53,9 @@
 			{/each}
 		{:else}
 			<p>No options are available for this question.</p>
+		{/if}
+		{#if errors[q.id]}
+			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
 		{/if}
 
 		<div class="flex justify-end">

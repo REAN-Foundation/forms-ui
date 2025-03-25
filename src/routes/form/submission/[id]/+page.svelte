@@ -2,7 +2,7 @@
 	import type { PageServerData } from './$types';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
-	import { save, submit } from './apiFunctions';
+	import { createSchema, questionResponses, save, submit } from './apiFunctions';
 	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
 	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
 	import Text from '$lib/components/submission/Text.svelte';
@@ -15,6 +15,7 @@
 	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
 	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
+	import { z } from 'zod';
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -24,10 +25,11 @@
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	// const questions = data.assessmentTemplate.Questions;
-	$inspect(sections);
+	$inspect('Sections data---', sections);
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
+	let errors = $state({});
 	// let displayQuestions = $state([]);
 
 	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
@@ -122,33 +124,50 @@
 		isCollapsed = !isCollapsed;
 	}
 
-	// Save the current answers to the backend
-	// function handleSave(event) {
-	// 	event.preventDefault();
-	// 	const FormSubmissionId = $page.params.id;
-	// 	save({ Data: answers, FormSubmissionId: FormSubmissionId });
-	// }
-
 	async function handleSave() {
-		const FormSubmissionId = $page.params.id;
-		const url = `/api/server/question-response`;
-		const headers = { 'Content-Type': 'application/json' };
-		const res = await fetch(url, {
-			method: 'POST',
-			body: JSON.stringify({ Data: answers, FormSubmissionId: FormSubmissionId }),
-			headers
-		});
-		const saveData = await res.json();
-		console.log('saveData: ', saveData);
-		toastMessage(saveData);
+		const formSubmissionId = data.submissionId;
+
+		const schema = createSchema(sections);
+
+		const validationResult = schema.safeParse(answers);
+
+		console.log('validationResult: ', validationResult);
+
+		if (!validationResult.success) {
+			errors = Object.fromEntries(
+				Object.entries(validationResult.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || 'This field is required'
+				])
+			);
+
+			addToast({
+				message: 'Please fill in all required fields before saving.',
+				type: 'error',
+				timeout: 3000
+			});
+			return;
+		}
+
+		try {
+			
+			const questionResponseModels = await questionResponses(sections, answers, formSubmissionId);
+			const url = `/api/server/question-response`;
+			const headers = { 'Content-Type': 'application/json' };
+			const res = await fetch(url, {
+				method: 'POST',
+				body: JSON.stringify({ Data: questionResponseModels, FormSubmissionId: formSubmissionId }),
+				headers
+			});
+
+			const saveData = await res.json();
+			toastMessage(saveData);
+			console.log('saveData: ', saveData);
+		} catch (error) {
+			console.error('Error saving data:', error);
+			toastMessage('Save failed. Please try again.');
+		}
 	}
-	// Submit the form to the backend
-	// function handleSubmit() {
-	// 	const FormSubmissionId = $page.params.id;
-	// 	const response = submit(FormSubmissionId);
-	// 	toastMessage(response);
-	// 	console.log('response: ', response);
-	// }
 
 	async function handleSubmit() {
 		const FormSubmissionId = $page.params.id;
@@ -164,40 +183,23 @@
 		console.log('submissionData: ', submissionData);
 	}
 
-	const componentsMap = {
-		Text: Text,
-		Float: FloatInteger,
-		Integer: FloatInteger,
-		Boolean: Bool,
-		Object: Text,
-		TextArray: Text,
-		File: File,
-		SingleChoiceSelection: SingleChoice,
-		MultiChoiceSelection: MultipleChoices,
-		Date: DateTime,
-		DateTime: DateTime,
-		Rating: Rating,
-		Range: Range,
-		Temperature: BloodOxygen,
-		BloodPressure: BloodOxygen,
-		Glucose: BloodOxygen,
-		BloodOxygenSaturation: BloodOxygen,
-		PulseRate: BloodOxygen,
-		Hematocrit: BloodOxygen,
-		Cholesterol: BloodOxygen,
-		Weight: BloodOxygen,
-		Height: BloodOxygen,
-		RespiratoryRate: BloodOxygen,
-		Electrolytes: BloodOxygen,
-		KidneyFunction: BloodOxygen,
-		Lipoprotein: BloodOxygen,
-		CReactiveProtein: BloodOxygen,
-		Sleep: BloodOxygen,
-		HemoglobinA1C: BloodOxygen,
-		WaistCircumference: BloodOxygen
-	};
-	$inspect('ansers in page-----------', answers);
+	function handleValidationErrors(error: any): void {
+    let errors = $state({});
+    errors = Object.fromEntries(
+        Object.entries(error.flatten().fieldErrors).map(([key, val]) => [
+            key,
+            val?.[0] || "This field is required"
+        ])
+    );
 
+    addToast({
+        message: "Please fill in all required fields before saving.",
+        type: "error",
+        timeout: 3000,
+    });
+}
+
+	$inspect('ansers in page-----------', answers);
 </script>
 
 <div class="flex flex-row">
@@ -242,7 +244,7 @@
 			</div>
 
 			<div class="min-h-[390px]">
-				<QuestionPaper {sections} bind:answers={answers} />
+				<QuestionPaper {sections} bind:answers bind:errors />
 				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">
@@ -337,7 +339,7 @@
 			</div> -->
 			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
 				<Button type="submit" variant="outline" class="w-full">Save</Button>
-				<Button  onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
+				<Button onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
 					>Submit</Button
 				>
 			</div>

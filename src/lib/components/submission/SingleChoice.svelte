@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Label } from '$lib/components/ui/label/index.js';
-	let { q, answers = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable()} = $props();
 	let optionsArray: any = $state();
 
 	// Ensure q.Options is defined and is an array with at least one element
@@ -42,11 +42,13 @@
 					bind:group={selected}
 					value={o}
 					id={o}
-					{...(q.IsRequired ? { required: true } : {})} 
 				/>
 				<Label for={o}>{o}</Label><br />
 			</div>
 		{/each}
+		{#if errors[q.id]}
+			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
+		{/if}
 		<div class="flex justify-end">
 			<Label for="hint" class="float-right ml-auto mt-4 justify-end  p-2">{q.Hint || ''}</Label>
 		</div>

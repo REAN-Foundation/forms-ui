@@ -51,8 +51,9 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
     console.log('Assessment template details ', assessmentTemplate);
     console.log('Submission status ', submissionStatus);
+    let submissionId = submission.Id;
     let questionResponse = null;
-    if (submissionStatus === 'LinkShared') {
+    if (submissionStatus === 'InProgress') {
         console.log('Submission is saved');
         questionResponse = await searchquestionResponse({ formSubmissionId: submission.Id });
         console.log('Question response ', questionResponse);
@@ -63,7 +64,8 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
         assessmentTemplate,
         message: response.Message,
         questionResponse,
-        submissionStatus
+        submissionStatus,
+        submissionId
     };
    
 };
