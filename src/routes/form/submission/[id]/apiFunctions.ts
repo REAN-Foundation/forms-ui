@@ -88,13 +88,13 @@ export async function questionResponseModels(
             ? questionResponseData.find((item) => item.QuestionId === key)
             : null;
 
-            const QuestionResponseId = existingResponse ? existingResponse.ResponseId : null;
+            const questionResponseId = existingResponse ? existingResponse.id : null;
 
             return {
+                id :questionResponseId,
                 FormSubmissionId,
                 ResponseType,
                 QuestionId: key,
-                QuestionResponseId,
                 IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
                     ? (value !== undefined ? Number(value) : null)
                     : null,
