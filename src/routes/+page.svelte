@@ -72,7 +72,7 @@
 									{#if password !== ''}
 										<button
 											type="button"
-											class="absolute right-4 cursor-pointer border-none bg-none"
+											class="absolute right-4 top-11 cursor-pointer border-none bg-none"
 											onclick={togglePasswordVisibility}
 										>
 											<Icon
