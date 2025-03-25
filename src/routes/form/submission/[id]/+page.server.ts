@@ -51,19 +51,19 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
     console.log('Assessment template details ', assessmentTemplate);
     console.log('Submission status ', submissionStatus);
-    let submissionId = submission.Id;
-    let questionResponse = null;
+    let submissionId = submission.id;
+    let questionResponses = null;
     if (submissionStatus === 'InProgress') {
         console.log('Submission is saved');
-        questionResponse = await searchquestionResponse({ formSubmissionId: submission.Id });
-        console.log('Question response ', questionResponse);
-        questionResponse = questionResponse.Data?.Items || [];
+        questionResponses = await searchquestionResponse({ formSubmissionId: submission.Id });
+        console.log('Question response ', questionResponses);
+        questionResponses = questionResponses.Data?.Items || [];
     }
 
     return {
         assessmentTemplate,
         message: response.Message,
-        questionResponse,
+        questionResponses,
         submissionStatus,
         submissionId
     };

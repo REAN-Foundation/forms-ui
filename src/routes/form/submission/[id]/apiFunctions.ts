@@ -58,7 +58,7 @@ export async function submit(FormSubmissionId: string) {
 
 }
 
-type QuestionResponseCreateModel = {
+export type QuestionResponseCreateModel = {
     FormSubmissionId: string;
     ResponseType: string;
     QuestionId: string;
@@ -69,12 +69,14 @@ type QuestionResponseCreateModel = {
     Url: string | null;
     TextValue: string | null;
     FileResourceId: any | null;
+    QuestionResponseId: string | null;
 };
 
-export async function questionResponses(
+export async function questionResponseModels(
     sections,
     answers,
-    FormSubmissionId
+    FormSubmissionId,
+    questionResponseData
 ): Promise<QuestionResponseCreateModel[]> {
     return sections.flatMap((section) =>
         (section.Questions || []).map((question) => {
@@ -82,10 +84,17 @@ export async function questionResponses(
             const value = answers[key];
             const { ResponseType } = question;
 
+            const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
+            ? questionResponseData.find((item) => item.QuestionId === key)
+            : null;
+
+            const QuestionResponseId = existingResponse ? existingResponse.ResponseId : null;
+
             return {
                 FormSubmissionId,
                 ResponseType,
                 QuestionId: key,
+                QuestionResponseId,
                 IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
                     ? (value !== undefined ? Number(value) : null)
                     : null,

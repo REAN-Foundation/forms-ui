@@ -2,7 +2,7 @@
 	import type { PageServerData } from './$types';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
-	import { createSchema, questionResponses, save, submit } from './apiFunctions';
+	import { createSchema, questionResponseModels, save, submit } from './apiFunctions';
 	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
 	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
 	import Text from '$lib/components/submission/Text.svelte';
@@ -30,6 +30,10 @@
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
 	let errors = $state({});
+
+	let submissionId = data.submissionId;
+	let questionResponseData = data.questionResponses;
+	$inspect('Submission id-',submissionId)
 	// let displayQuestions = $state([]);
 
 	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
@@ -127,6 +131,8 @@
 	async function handleSave() {
 		const formSubmissionId = data.submissionId;
 
+		const formSubmissionKey = $page.params.id;
+
 		const schema = createSchema(sections);
 
 		const validationResult = schema.safeParse(answers);
@@ -151,12 +157,12 @@
 
 		try {
 			
-			const questionResponseModels = await questionResponses(sections, answers, formSubmissionId);
+			const questionResponses = await questionResponseModels(sections, answers, formSubmissionId, questionResponseData);
 			const url = `/api/server/question-response`;
 			const headers = { 'Content-Type': 'application/json' };
 			const res = await fetch(url, {
 				method: 'POST',
-				body: JSON.stringify({ Data: questionResponseModels, FormSubmissionId: formSubmissionId }),
+				body: JSON.stringify({ questionResponses: questionResponses, formSubmissionKey: formSubmissionKey }),
 				headers
 			});
 

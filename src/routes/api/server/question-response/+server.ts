@@ -47,8 +47,8 @@ export const POST = async (event: RequestEvent) => {
 
         console.log('Data from api/server/submit', data);
         const response = await createQuestionResponse(
-                        data.FormSubmissionId,
-                        data.Data
+                        data.formSubmissionKey,
+                        data.questionResponses
                     );
         console.log('Response from save form:', response);
         return new Response(JSON.stringify(response));
