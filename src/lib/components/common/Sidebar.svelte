@@ -29,12 +29,11 @@
 	export let typeOfQuestion;
 	export let changeTypes;
 </script>
-
+<!-- sidebar -->
 <div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
 	<div class="fixed space-y-4 px-4 py-1">
 		<Card.Root class="rounded-lg border p-4">
 			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
-			<!-- Section selection -->
 			<div
 				class="flex cursor-grab items-center justify-center"
 				use:draggable={{ ...SectionTemplate, type: 'section' }}
@@ -51,28 +50,10 @@
 					Add Section
 				</Button>
 			</div>
-			<!-- Sub Section selection -->
-			<!-- <div
-				class="flex cursor-grab items-center justify-center mt-2"
-				use:draggable={{ ...SubSectionTemplate, type: 'SubSection' }}
-				role="button"
-				aria-label="Draggable new section template"
-			>
-				<Button class="w-full space-x-2" variant="secondary">
-					<Icon
-						icon="teenyicons:section-add-outline"
-						width="16"
-						height="16"
-						class=" mr-2 text-primary"
-					/>
-					Add SubSection
-				</Button>
-			</div> -->
 		</Card.Root>
 
-		<!-- Layout selection -->
 		<Card.Root class="space-y-3 rounded-lg border p-4">
-			<Card.Title class="text-md">Question </Card.Title>
+			<Card.Title class="text-md">Question</Card.Title>
 			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-3">
 				<label class="flex cursor-pointer items-center">
 					<input
@@ -156,10 +137,6 @@
 					{/if}
 				</ul>
 			</div>
-			<!-- <form class="mb-4 flex w-full items-center space-x-2">
-				<Input type="text" placeholder="Search element ..." class="flex-grow" />
-				<Icon icon="zondicons:search" width="18" height="18" />
-			</form> -->
 		</Card.Root>
 	</div>
 </div>

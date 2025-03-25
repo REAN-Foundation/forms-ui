@@ -101,7 +101,7 @@
 <Menubar.Root class="bg-cya-500 sticky z-50 flex w-full items-center justify-between">
 	<div class="fixed flex space-x-4 lg:space-x-6">
 		<div class="left-0 flex">
-			<Menubar.Menu>
+			<!-- <Menubar.Menu>
 				<Menubar.Trigger>File</Menubar.Trigger>
 				<Menubar.Content>
 					<Menubar.Item>
@@ -185,7 +185,7 @@
 					<Menubar.Separator />
 					<Menubar.Item inset>Add Profile...</Menubar.Item>
 				</Menubar.Content>
-			</Menubar.Menu>
+			</Menubar.Menu> -->
 		</div>
 	</div>
 

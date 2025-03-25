@@ -308,6 +308,7 @@
 	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors />
 {/if}
 
+<!-- Section -->
 <div class="bg-green-5 flex min-h-screen flex-row">
 	<div class="flex flex-1 overflow-hidden">
 		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} />
@@ -327,22 +328,9 @@
 				<div class="ml-auto flex items-center">
 					<Dialog.Root>
 						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">
-							<!-- <Tooltip.Root>
-								<Tooltip.Trigger>
-									<Icon
-										icon="icon-park-outline:preview-open"
-										width="16"
-										height="16"
-										class="text-primary"
-									/>
-								</Tooltip.Trigger>
-								<Tooltip.Content>
-									<p>Preview</p>
-								</Tooltip.Content>
-							</Tooltip.Root> -->
+						
 						</Dialog.Trigger>
 						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
-							<!-- <Template {templateInfo} {sections} /> -->
 							<p>assa</p>
 						</Dialog.Content>
 					</Dialog.Root>
@@ -364,7 +352,6 @@
 					role="region"
 					aria-label="Drop Area"
 				>
-					<!-- This componet is used to render all the sections/subsections/question cards -->
 					<Sections
 						bind:uiSections
 						{handleDragAndDrop}
