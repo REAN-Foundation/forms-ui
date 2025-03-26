@@ -1,4 +1,4 @@
-import { type Actions, type RequestEvent, type ServerLoadEvent } from "@sveltejs/kit";
+import { error, type Actions, type RequestEvent, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { createFormTemplate, getFormTemplateById } from '../../../api/services/form-template';
 import { superValidate } from "sveltekit-superforms";
@@ -19,13 +19,25 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 	try {
 		const ownerUserId = userId;
-		const response = await getFormTemplateById({ ownerUserId });
+		const response = await getFormTemplateById({
+			ownerUserId:ownerUserId,
+			orderBy: "Title",
+			order: "ascending"
+		});
 
-		const assessmentTemplate = response?.Data?.Items ?? [];
-
-		// const initialData = {
-		// 	defaultSectionNumbering: true
-		// };
+		
+		// depends('app:assessmentTemplate')
+		// const response = await searchAssessmentTemplates(sessionId, {
+			// 	orderBy: "Title",
+			// 	order: "ascending"
+			// });
+			if (response.Status === 'failure' || response.HttpCode !== 200) {
+				throw error(response.HttpCode, response.Message);
+			}
+		// const assessmentTemplate = response?.Data?.Items ?? [];
+		const assessmentTemplate = response.Data ?? [];
+			console.log(assessmentTemplate)
+		// const assessmentTemplate = response.Data.AssessmentTemplateRecords;
 		return {
 			assessmentTemplate,
 			message: response.Message,

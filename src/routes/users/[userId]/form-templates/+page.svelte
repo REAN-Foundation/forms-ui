@@ -7,6 +7,7 @@
 	import { columns } from '$lib/components/template/data.table/column';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import TemplateTable from '$lib/components/template/templateTable.svelte';
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -113,7 +114,8 @@
 					</div>
 					<AssessmentForm {data} />
 				</div>
-				<DataTable data={assessments} {columns} />
+				<DataTable data={assessments.Items} {columns} />
+				<!-- <TemplateTable {data} /> -->
 			</div>
 		{:else if selectedSubmenu === 'viewForms'}
 			<div class="container mx-auto">

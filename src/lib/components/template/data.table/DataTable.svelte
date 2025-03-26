@@ -18,6 +18,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Icon from '@iconify/svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { writable } from 'svelte/store';
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +29,13 @@
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let rowSelection = $state<RowSelectionState>({});
 	let columnVisibility = $state<VisibilityState>({});
+	const assessmentRecords = writable(data);
+	// Update the data store whenever `data` changes.
+	$assessmentRecords = data;
 
+	console.log(data,"this is data");
+	console.log(assessmentRecords,"this is assessmentRecords");
+	
 	const table = createSvelteTable({
 		get data() {
 			return data;
