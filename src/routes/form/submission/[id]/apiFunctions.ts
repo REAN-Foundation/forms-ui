@@ -72,54 +72,54 @@ export type QuestionResponseCreateModel = {
     QuestionResponseId: string | null;
 };
 
-export async function questionResponseModels(
-    sections,
-    answers,
-    FormSubmissionId,
-    questionResponseData
-): Promise<QuestionResponseCreateModel[]> {
-    return sections.flatMap((section) =>
-        (section.Questions || []).map((question) => {
-            const key = question.id;
-            const value = answers[key];
-            const { ResponseType } = question;
+// export async function questionResponseModels(
+//     sections,
+//     answers,
+//     FormSubmissionId,
+//     questionResponseData
+// ): Promise<QuestionResponseCreateModel[]> {
+//     return sections.flatMap((section) =>
+//         (section.Questions || []).map((question) => {
+//             const key = question.id;
+//             const value = answers[key];
+//             const { ResponseType } = question;
 
-            const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
-            ? questionResponseData.find((item) => item.Question.id === key)
-            : null;
+//             const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
+//             ? questionResponseData.find((item) => item.Question.id === key)
+//             : null;
 
-            const questionResponseId = existingResponse ? existingResponse.id : null;
+//             const questionResponseId = existingResponse ? existingResponse.id : null;
 
-            return {
-                id :questionResponseId,
-                FormSubmissionId,
-                ResponseType,
-                QuestionId: key,
-                IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
-                    ? (value !== undefined ? Number(value) : null)
-                    : null,
-                FloatValue: ResponseType === "Float"
-                    ? (value !== undefined ? parseFloat(value) : null)
-                    : null,
-                BooleanValue: ResponseType === "Boolean"
-                    ? (value !== undefined ? Boolean(value) : null)
-                    : null,
-                DateTimeValue: ["Date", "DateTime"].includes(ResponseType)
-                    ? (value ? new Date(value).toISOString() : null)
-                    : null,
-                Url: ResponseType === "URL"
-                    ? (value !== undefined ? value : null)
-                    : null,
-                TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object"].includes(ResponseType)
-                    ? (value !== undefined ? (Array.isArray(value) ? value.join(", ") : value) : null)
-                    : null,
-                FileResourceId: ResponseType === "File"
-                    ? (value !== undefined ? value : null)
-                    : null,
-            };
-        })
-    );
-}
+//             return {
+//                 id :questionResponseId,
+//                 FormSubmissionId,
+//                 ResponseType,
+//                 QuestionId: key,
+//                 IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
+//                     ? (value !== undefined ? Number(value) : null)
+//                     : null,
+//                 FloatValue: ResponseType === "Float"
+//                     ? (value !== undefined ? parseFloat(value) : null)
+//                     : null,
+//                 BooleanValue: ResponseType === "Boolean"
+//                     ? (value !== undefined ? Boolean(value) : null)
+//                     : null,
+//                 DateTimeValue: ["Date", "DateTime"].includes(ResponseType)
+//                     ? (value ? new Date(value).toISOString() : null)
+//                     : null,
+//                 Url: ResponseType === "URL"
+//                     ? (value !== undefined ? value : null)
+//                     : null,
+//                 TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object"].includes(ResponseType)
+//                     ? (value !== undefined ? (Array.isArray(value) ? value.join(", ") : value) : null)
+//                     : null,
+//                 FileResourceId: ResponseType === "File"
+//                     ? (value !== undefined ? value : null)
+//                     : null,
+//             };
+//         })
+//     );
+// }
 
 export function createSchema(sections) {
     let schemaObj = {};
@@ -221,4 +221,66 @@ export function createSchema(sections) {
     console.log('schemaObj:----------- ', schemaObj);
     return z.object(schemaObj);
 };
+
+export async function questionResponseModels(
+    sections,
+    answers,
+    FormSubmissionId,
+    questionResponseData
+): Promise<QuestionResponseCreateModel[]> {
+
+    function extractQuestions(sectionList) {
+        return sectionList.flatMap((section) => {
+            const questions = section.Questions || [];
+
+            // Recursively process nested subsections if they exist
+            const nestedQuestions = section.Subsections ? extractQuestions(section.Subsections) : [];
+
+            return [...questions, ...nestedQuestions];
+        });
+    }
+
+    const allQuestions = extractQuestions(sections);
+
+    return allQuestions.map((question) => {
+        const key = question.id;
+        const value = answers[key];
+        const { ResponseType } = question;
+
+        const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
+            ? questionResponseData.find((item) => item.Question.id === key)
+            : null;
+
+        const questionResponseId = existingResponse ? existingResponse.id : null;
+
+        return {
+            id: questionResponseId,
+            FormSubmissionId,
+            ResponseType,
+            QuestionId: key,
+            IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
+                ? (value !== undefined ? Number(value) : null)
+                : null,
+            FloatValue: ResponseType === "Float"
+                ? (value !== undefined ? parseFloat(value) : null)
+                : null,
+            BooleanValue: ResponseType === "Boolean"
+                ? (value !== undefined ? Boolean(value) : null)
+                : null,
+            DateTimeValue: ["Date", "DateTime"].includes(ResponseType)
+                ? (value ? new Date(value).toISOString() : null)
+                : null,
+            Url: ResponseType === "URL"
+                ? (value !== undefined ? value : null)
+                : null,
+            TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object"].includes(ResponseType)
+                ? (value !== undefined ? (Array.isArray(value) ? value.join(", ") : value) : null)
+                : null,
+            FileResourceId: ResponseType === "File"
+                ? (value !== undefined ? value : null)
+                : null,
+        };
+    });
+}
+
 

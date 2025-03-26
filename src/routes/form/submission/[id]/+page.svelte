@@ -21,6 +21,7 @@
 	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
+	const formSubmissionKey = $page.params.id;
 	console.log('sections');
 	$inspect(data.assessmentTemplate);
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
@@ -33,12 +34,42 @@
 	let errors = $state({});
 	let formSubmissionId = data.submissionId;
 	let questionResponseData = $derived(data.questionResponses);
+
 	let submissionStatus = $derived(data.submissionStatus);
 	
-	$inspect('Submission data--', questionResponseData);
+	$inspect('Response data--', questionResponseData);
 	$inspect('Submission id-',formSubmissionId)
 
 	$inspect('Submission status--', submissionStatus);
+
+	$inspect('answers in page form--', answers);
+
+	const responseTypeMap = {
+		Integer: "IntegerValue",
+		Float: "FloatValue",
+		Boolean: "BooleanValue",
+		Text: "TextValue",
+		TextArray: "TextValue",
+		SingleChoiceSelection: "TextValue",
+		MultiChoiceSelection: "TextValue",
+		Object: "TextValue",
+		File: "FileResourceId",
+		Date: "DateTimeValue",
+		DateTime: "DateTimeValue",
+		Rating: "IntegerValue",
+		Location: "DateTimeValue",
+		Range: "IntegerValue"
+	};
+
+	$effect(() => {
+		answers = Object.fromEntries(
+			questionResponseData.map(item => {
+			const responseTypeKey = responseTypeMap[item.Question.ResponseType] || "TextValue";
+			return [item.Question.id, item[responseTypeKey] ?? null];
+		})
+		);
+	})
+
 	// let displayQuestions = $state([]);
 
 	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
@@ -133,9 +164,9 @@
 		isCollapsed = !isCollapsed;
 	}
 
-	async function handleSave() {
-	
-		const formSubmissionKey = $page.params.id;
+	async function handleSave(e) {
+		e.preventDefault();
+		console.log('Saved answers: ', answers);
 
 		const schema = createSchema(sections);
 
@@ -185,7 +216,7 @@
 			const headers = { 'Content-Type': 'application/json' };
 			const res = await fetch(url, {
 				method: 'POST',
-				body: JSON.stringify(formSubmissionId),
+				body: JSON.stringify({submissionKey:formSubmissionKey}),
 				headers
 			});
 			const submissionData = await res.json();
@@ -218,7 +249,7 @@
 	</div> -->
 
 	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1">
-		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
+		<form onsubmit={(e) => handleSave(e)} class="mx-auto w-[80%] space-y-3">
 			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
 				{#if templateInfo}
 					<div>

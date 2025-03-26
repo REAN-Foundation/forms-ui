@@ -17,7 +17,7 @@ export const  createQuestionResponse = async (
 	return await post_(url, body);
 };
 
-export const searchquestionResponse = async (
+export const searchQuestionResponse = async (
     searchParams?: any
 ) => {
     console.log('Search params are ', searchParams);

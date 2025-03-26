@@ -2,7 +2,7 @@ import { error, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { getFormTemplateDetails } from "../../../api/services/form-template";
 import { getFormSubmission, searchFormSubmission } from "../../../api/services/submission";
-import { searchquestionResponse } from "../../../api/services/question-response";
+import { searchQuestionResponse as searchQuestionResponse } from "../../../api/services/question-response";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,9 +53,9 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     console.log('Submission status ', submissionStatus);
     let submissionId = submission.id;
     let questionResponses = null;
-    if (submissionStatus === 'InProgress') {
+    if (submissionStatus === 'InProgress' || submissionStatus === 'Submitted') {
         console.log('Submission is saved');
-        questionResponses = await searchquestionResponse({ formSubmissionId: submission.id });
+        questionResponses = await searchQuestionResponse({ formSubmissionId: submission.id });
         console.log('Question response ', questionResponses);
         questionResponses = questionResponses.Data?.Items || [];
     }

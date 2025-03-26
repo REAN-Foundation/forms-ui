@@ -6,6 +6,8 @@
 
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
 
+	$inspect('answers in text type', answers);
+
 </script>
 
 <div class="flex w-full flex-col px-4 py-2">
