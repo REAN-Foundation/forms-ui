@@ -7,7 +7,7 @@
 	import Icon from '@iconify/svelte';
 	import { formComponents } from './response.types/index';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-    import Sections from './Sections.svelte';
+	import Sections from './Sections.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -35,7 +35,7 @@
 	function handleDragLeave(sectionId: number) {
 		if (highlightedSection === sectionId) {
 			highlightedSection = null;
-            highlightedSubSection = null;
+			highlightedSubSection = null;
 		}
 	}
 
@@ -54,7 +54,7 @@
 	function handleDragLeaveSubsection(subSectionId: number) {
 		if (highlightedSubSection === subSectionId) {
 			highlightedSubSection = null;
-            highlightedSection = null;
+			highlightedSection = null;
 		}
 	}
 
@@ -92,7 +92,7 @@
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 border p-3 {highlightedSection === section.id ? 'highlight' : ''}"
+		class="my-4 rounded-md border border-gray-400 p-3 {highlightedSection === section.id ? ' border-1 border-blue-600' : ''}"
 		ondragenter={() => handleDragEnter(section.id)}
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
@@ -126,7 +126,11 @@
 				</div>
 
 				<div class="flex h-full w-full flex-row">
-					<Button variant="outline" class="h-full w-full p-2"onclick={()=>openSectionForm(section)}>
+					<Button
+						variant="outline"
+						class="h-full w-full p-2"
+						onclick={() => openSectionForm(section)}
+					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
 						<div class="flex-col">
 							{#if section.Title}
@@ -141,7 +145,7 @@
 					</Button>
 
 					<AlertDialog.Root>
-						<AlertDialog.Trigger class="{buttonVariants({ variant: 'outline' })} bg-red400">
+						<AlertDialog.Trigger class="{buttonVariants} bg-red400">
 							<Button variant="ghost" class="ml-1 h-full w-full "
 								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 							</Button>
@@ -172,7 +176,6 @@
 						<p class="text-center text-sm text-slate-500">Drop response type cards here</p>
 					{/if}
 
-					<!-- {#each [...section.cards].sort((a, b) => a.localId - b.localId) as card, index (card.localId)} -->
 					{#each section.Questions as card, index (card.id)}
 						<div
 							class="hover-container items-center justify-between"
@@ -183,7 +186,7 @@
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
-							<div class="relative mt-1 flex w-[95%]">
+							<div class="relative my-2 mt-1 flex w-[95%] rounded-md border  ">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}
@@ -192,7 +195,7 @@
 									onclick={() => openDeleteModal(card.id)}
 									aria-label="Delete card"
 								>
-									<Icon icon="weui:delete-outlined" width="18" height="18" style="color: red" />
+									<Icon icon="weui:delete-outlined" width="18" height="18" style="color: red " />
 								</button>
 							</div>
 						</div>
@@ -228,19 +231,19 @@
 				</div>
 
 				{#if section.Subsections.length > 0}
-                    <Sections
-                        bind:uiSections={section.Subsections}
-                        {handleDragAndDrop}
-                        {highlightedSection}
-                        {highlightedSubSection}
-                        {deleteButtonClicked}
-                        {deleteSubButtonClicked}                        
-                        {openSheet}
-                        {subSectionForm}
-                        {handleDeleteCard}
-                        {openSectionForm}
-                        {closeSheet}
-                    />
+					<Sections
+						bind:uiSections={section.Subsections}
+						{handleDragAndDrop}
+						{highlightedSection}
+						{highlightedSubSection}
+						{deleteButtonClicked}
+						{deleteSubButtonClicked}
+						{openSheet}
+						{subSectionForm}
+						{handleDeleteCard}
+						{openSectionForm}
+						{closeSheet}
+					/>
 				{/if}
 			</Collapsible.Content>
 		</Collapsible.Root>
@@ -248,19 +251,18 @@
 {/each}
 
 <style>
+	
 	.delete-button {
-		@apply absolute -right-7 top-[40%] hidden border p-1 text-white;
+		@apply absolute -right-7 top-[40%] hidden p-1 text-white;
 	}
 
 	.hover-container:hover .delete-button {
 		@apply block;
 	}
 
-	.highlight {
-		border: 2px solid blue; /* You can change the border style and color */
-	}
 
-	:global(.dialog-content.dialog-content) {
+
+	 :global(.dialog-content.dialog-content) {
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 		overflow-y: scroll;
@@ -270,5 +272,5 @@
 		width: 0;
 		height: 0;
 		display: none;
-	}
+	} 
 </style>
