@@ -85,7 +85,7 @@ export async function questionResponseModels(
             const { ResponseType } = question;
 
             const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
-            ? questionResponseData.find((item) => item.QuestionId === key)
+            ? questionResponseData.find((item) => item.Question.id === key)
             : null;
 
             const questionResponseId = existingResponse ? existingResponse.id : null;
