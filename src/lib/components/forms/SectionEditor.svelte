@@ -42,21 +42,21 @@
 	}
 </script>
 
-<Card.Root class="rounded-lg border p-4">
+<Card.Root class=" rounded-md p-4 bg-[#fafaf9] dark:bg-[#0a0a0b]  ">
 	<form
 		method="post"
 		use:enhance
-		class="custom-scrollbar mx-auto max-h-[90vh] w-[100vh] overflow-y-auto border-2 px-10 py-4 shadow-lg"
+		class="custom-scrollbar mx-auto max-h-[90vh] w-[100vh] overflow-y-auto px-6 py-4 "
 	>
 		<Card.Title>
-			<div class="flex justify-end">
+			<div class="flex justify-end  ">
 				<Button type="button" variant="destructive" size="icon" onclick={closeSectionForm}>
-					<Icon icon="iwwa:delete" width="16" height="16" />
+					<Icon icon="iwwa:delete"  />
 				</Button>
 			</div>
 		</Card.Title>
 
-		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+		<div class="relative my-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -65,7 +65,7 @@
 		</div>
 		<Input bind:value={sectionData.id} class="hidden" />
 
-		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+		<div class="relative my-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">ParentSectionId<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -74,7 +74,7 @@
 		</div>
 		<Input bind:value={sectionData.ParentSectionId} class="hidden" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -84,7 +84,7 @@
 		<Input bind:value={sectionData.Title} />
 		<p class="text-destructive">{errors?.Title}</p>
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -94,7 +94,7 @@
 		<Input bind:value={sectionData.Description} />
 		<p class="text-destructive">{errors?.Description}</p>
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Section Identifier<span class="text-red-600">*</span></Label>
 			<div class="relative col-span-1">
 				<!-- Replace div with a button and handle keyboard accessibility -->
@@ -104,7 +104,7 @@
 		<Input bind:value={sectionData.SectionIdentifier} disabled/>
 		<p class="text-destructive">{errors?.SectionIdentifier}</p>
 
-		<Button type="submit" class="mx-auto mt-5 w-full" onclick={handleSubmit}>Submit</Button>
+		<Button type="submit" class="mx-auto mt-6 w-full" onclick={handleSubmit}>Submit</Button>
 	</form>
 </Card.Root>
 

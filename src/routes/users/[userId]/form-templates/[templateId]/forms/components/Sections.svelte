@@ -92,7 +92,7 @@
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md border border-gray-400 p-3 {highlightedSection === section.id ? ' border-1 border-blue-600' : ''}"
+		class="my-4 rounded-md shadow-lg border border-gray-300 dark:border-gray-800 bg-[#f3f4f6] dark:bg-[#0a0a0b]  p-4 {highlightedSection === section.id ? ' border-1 border-blue-600' : ''}"
 		ondragenter={() => handleDragEnter(section.id)}
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
@@ -104,13 +104,13 @@
 	>
 		<Collapsible.Root class=" space-y-2">
 			<div class="flex flex-row">
-				<div class="flex items-center justify-between space-x-4 px-4">
+				<div class="flex items-center justify-between space-x-4 px-4 ">
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
 					>
 						<Tooltip.Provider>
-							<Tooltip.Root>
-								<Tooltip.Trigger>
+							<Tooltip.Root >
+								<Tooltip.Trigger >
 									<Button variant="ghost" size="sm" class="w-9 p-0">
 										<Icon icon="fluent:chevron-up-down-24-regular" width="16" height="16" />
 
@@ -125,20 +125,20 @@
 					</Collapsible.Trigger>
 				</div>
 
-				<div class="flex h-full w-full flex-row">
+				<div class="flex h-full w-full flex-row   ">
 					<Button
 						variant="outline"
-						class="h-full w-full p-2"
+						class="h-full w-full p-2  hover:bg-[#f9fafb] hover:dark:bg-[#262626]"
 						onclick={() => openSectionForm(section)}
 					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
-						<div class="flex-col">
+						<div class="flex-col  ">
 							{#if section.Title}
 								<p>{section.Title}</p>
 							{:else}
 								<p>{`Section ${index + 1}`}</p>
 							{/if}
-							<p class="text-sm text-gray-300 dark:text-gray-500">
+							<p class="text-sm font-normal text-gray-400 dark:text-gray-500   ">
 								Drop the Subsection and response type cards here
 							</p>
 						</div>
@@ -171,14 +171,14 @@
 				</div>
 			</div>
 			<Collapsible.Content class="space-y-2">
-				<div class="h-fit w-full p-1" role="list" aria-label={`Cards in section: ${section.Title}`}>
+				<div class="h-fit w-full p-1 " role="list" aria-label={`Cards in section: ${section.Title}`}>
 					{#if section.Questions.length === 0}
 						<p class="text-center text-sm text-slate-500">Drop response type cards here</p>
 					{/if}
 
 					{#each section.Questions as card, index (card.id)}
 						<div
-							class="hover-container items-center justify-between"
+							class="hover-container items-center justify-between "
 							draggable="true"
 							ondragover={(event) => {
 								event.preventDefault();
@@ -186,7 +186,8 @@
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
-							<div class="relative my-2 mt-1 flex w-[95%] rounded-md border  ">
+						<!-- Subsection -->
+							<div class="relative my-4 mt-1 flex w-[95%] rounded-md border  bg-white  dark:bg-black shadow-md">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}

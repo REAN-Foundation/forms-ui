@@ -59,15 +59,15 @@
 	}
 </script>
 
-<div class="relative flex h-screen w-full flex-col md:flex-row">
+<div class="relative flex h-screen w-full flex-col md:flex-row my-10">
 	<!-- Sidebar -->
-	<div class="flex h-auto w-full flex-col justify-between border-r bg-white p-4 md:h-full md:w-1/4">
+	<div class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] dark:bg-[#0a0a0b] p-4 md:h-full md:w-1/4">
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>
 					<div class="group relative">
 						<Button
-							class="w-full justify-start space-x-2 px-5 py-3 text-sm duration-500 md:text-base"
+							class="w-full justify-start space-x-2 px-5 py-3 text-sm duration-500 md:text-base "
 							onclick={() => toggleExpand(item.name)}
 							variant="outline"
 						>

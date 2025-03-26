@@ -29,7 +29,7 @@
 	<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} my-2 w-28 md:ml-auto">
 		Add New
 	</Dialog.Trigger>
-	<Dialog.Content class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] ">
+	<Dialog.Content class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] bg-[#fafaf9] dark:bg-[#0a0a0b]">
 		<Dialog.Header>
 			<Dialog.Title>Add New</Dialog.Title>
 			<Dialog.Description>
