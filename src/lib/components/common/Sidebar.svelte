@@ -53,7 +53,7 @@
 		</Card.Root>
 
 		<Card.Root class="space-y-3 rounded-lg border p-4">
-			<Card.Title class="text-md">Question</Card.Title>
+			<Card.Title class="text-md">Question Type</Card.Title>
 			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-3">
 				<label class="flex cursor-pointer items-center">
 					<input
@@ -99,7 +99,7 @@
 		</Card.Root>
 
 		<Card.Root class="rounded-lg border p-4">
-			<Card.Title class="text-md  ">Question Response Types</Card.Title>
+			<Card.Title class="text-md  ">Drag Question Response Type</Card.Title>
 			<div class="scrollbar-hide max-h-80 overflow-y-auto pt-3">
 				<ul class="space-y-2">
 					{#if typeOfQuestion === 'Advanced'}

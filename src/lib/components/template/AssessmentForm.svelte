@@ -13,7 +13,7 @@
 	/////////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
-	console.log(data.form, 'This is data from section form editor');
+	// console.log(data.form, 'This is data from section form editor');
 	data.form.errors = {};
 
 	// Initialize superForm

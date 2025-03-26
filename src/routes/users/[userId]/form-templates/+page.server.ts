@@ -14,7 +14,8 @@ import { successMessage } from "$lib/components/toast/message.utils.js";
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	const { userId } = event.params;
-	event.depends('app:assessmentTemplate');
+	console.log('Form template load called.............');
+	event.depends('app:template');
 
 	try {
 		const ownerUserId = userId;
