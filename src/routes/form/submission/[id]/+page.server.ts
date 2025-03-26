@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     let questionResponses = null;
     if (submissionStatus === 'InProgress') {
         console.log('Submission is saved');
-        questionResponses = await searchquestionResponse({ formSubmissionId: submission.Id });
+        questionResponses = await searchquestionResponse({ formSubmissionId: submission.id });
         console.log('Question response ', questionResponses);
         questionResponses = questionResponses.Data?.Items || [];
     }

@@ -25,6 +25,7 @@
 	{/if}
 
 	<Input name={q.id} bind:value={answers[q.id]} type="text" class="mt-2"/>
+
 	{#if errors[q.id]}
 		<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
 	{/if}

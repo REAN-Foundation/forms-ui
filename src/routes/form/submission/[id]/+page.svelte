@@ -16,6 +16,7 @@
 	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
 	import { z } from 'zod';
+	import { invalidate } from '$app/navigation';
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -24,16 +25,20 @@
 	$inspect(data.assessmentTemplate);
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
-	// const questions = data.assessmentTemplate.Questions;
 	$inspect('Sections data---', sections);
+
 	let answers = $state({});
 	let currentIndex = $state(0); // Used for pagination
 	let isCollapsed = $state(false);
 	let errors = $state({});
+	let formSubmissionId = data.submissionId;
+	let questionResponseData = $derived(data.questionResponses);
+	let submissionStatus = $derived(data.submissionStatus);
+	
+	$inspect('Submission data--', questionResponseData);
+	$inspect('Submission id-',formSubmissionId)
 
-	let submissionId = data.submissionId;
-	let questionResponseData = data.questionResponses;
-	$inspect('Submission id-',submissionId)
+	$inspect('Submission status--', submissionStatus);
 	// let displayQuestions = $state([]);
 
 	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
@@ -129,8 +134,7 @@
 	}
 
 	async function handleSave() {
-		const formSubmissionId = data.submissionId;
-
+	
 		const formSubmissionKey = $page.params.id;
 
 		const schema = createSchema(sections);
@@ -156,7 +160,6 @@
 		}
 
 		try {
-			
 			const questionResponses = await questionResponseModels(sections, answers, formSubmissionId, questionResponseData);
 			const url = `/api/server/question-response`;
 			const headers = { 'Content-Type': 'application/json' };
@@ -168,6 +171,7 @@
 
 			const saveData = await res.json();
 			toastMessage(saveData);
+			invalidate('app:allNodes');
 			console.log('saveData: ', saveData);
 		} catch (error) {
 			console.error('Error saving data:', error);
@@ -176,34 +180,26 @@
 	}
 
 	async function handleSubmit() {
-		const FormSubmissionId = $page.params.id;
-		const url = `/api/server/submit`;
-		const headers = { 'Content-Type': 'application/json' };
-		const res = await fetch(url, {
-			method: 'POST',
-			body: JSON.stringify(FormSubmissionId),
-			headers
-		});
-		const submissionData = await res.json();
-		toastMessage(submissionData);
-		console.log('submissionData: ', submissionData);
+		if (submissionStatus === 'InProgress') {
+			const url = `/api/server/submit`;
+			const headers = { 'Content-Type': 'application/json' };
+			const res = await fetch(url, {
+				method: 'POST',
+				body: JSON.stringify(formSubmissionId),
+				headers
+			});
+			const submissionData = await res.json();
+			toastMessage(submissionData);
+			invalidate('app:allNodes');
+			console.log('submissionData: ', submissionData);
+		} else {
+			addToast({
+				message: 'Please save form before submitting.',
+				type: 'error',
+				timeout: 3000
+			});
+		}
 	}
-
-	function handleValidationErrors(error: any): void {
-    let errors = $state({});
-    errors = Object.fromEntries(
-        Object.entries(error.flatten().fieldErrors).map(([key, val]) => [
-            key,
-            val?.[0] || "This field is required"
-        ])
-    );
-
-    addToast({
-        message: "Please fill in all required fields before saving.",
-        type: "error",
-        timeout: 3000,
-    });
-}
 
 	$inspect('ansers in page-----------', answers);
 </script>
@@ -344,9 +340,9 @@
 				</Button>
 			</div> -->
 			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
-				<Button type="submit" variant="outline" class="w-full">Save</Button>
+				<Button type="submit" variant="outline" class="w-full" disabled={submissionStatus === 'Submitted'}>Save</Button>
 				<Button onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
-					>Submit</Button
+				disabled={submissionStatus === 'Submitted'}>Submit</Button
 				>
 			</div>
 		</form>
