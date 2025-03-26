@@ -1,22 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
 	import type { PageServerData } from './$types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { AssessmentForm, DataTable } from '$lib/index';
-	// import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	// import { toast } from 'svelte-sonner';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	// import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+
 	import { columns } from '$lib/components/template/data.table/column';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
 	//////////////////////////////////////////////////////////////////////
 
-	// let data: PageServerData = $props();
 	let { data }: { data: PageServerData } = $props();
 
 	const userId = page.params.userId;
@@ -48,51 +41,8 @@
 					action: () => selectSubmenu('createForm')
 				},
 				{ name: 'View Forms', icon: 'mdi-light:eye', action: () => selectSubmenu('viewForms') }
-				// {
-				// 	name: 'Library',
-				// 	icon: 'bx:library',
-				// 	action: () => selectSubmenu('library')
-				// },
-				// {
-				// 	name: 'Import Forms',
-				// 	icon: 'prime:file-import',
-				// 	action: () => selectSubmenu('importForm')
-				// }
 			]
 		}
-
-		// {
-		// 	name: 'Responses',
-		// 	icon: 'fluent-mdl2:responses-menu',
-		// 	subMenuItems: [
-		// 		{
-		// 			name: 'View Responses',
-		// 			icon: 'carbon:task-view',
-		// 			action: () => selectSubmenu('viewResponses')
-		// 		},
-		// 		{
-		// 			name: 'Export Responses',
-		// 			icon: 'mdi:export',
-		// 			action: () => selectSubmenu('exportResponses')
-		// 		}
-		// 	]
-		// },
-		// {
-		// 	name: 'Setting',
-		// 	icon: 'weui:setting-outlined',
-		// 	subMenuItems: [
-		// 		{
-		// 			name: 'Profile Settings',
-		// 			icon: 'mdi:account-cog-outline',
-		// 			action: () => selectSubmenu('profileSettings')
-		// 		},
-		// 		{
-		// 			name: 'App Settings',
-		// 			icon: 'weui:setting-outlined',
-		// 			action: () => selectSubmenu('appSettings')
-		// 		}
-		// 	]
-		// }
 	];
 
 	function toggleExpand(itemName: string) {
@@ -104,34 +54,43 @@
 	}
 
 	function templateEditRoute() {
-		console.log(userId,"This is template edit router");
+		console.log(userId, 'This is template edit router');
 		goto(`/users/${userId}/form-templates/create`);
 	}
 </script>
 
-<div class="relative flex h-[95vh] w-full flex-row">
+<div class="relative flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div class="flex h-full w-1/4 flex-col justify-between border-r p-4">
+	<div class="flex h-auto w-full flex-col justify-between border-r bg-white p-4 md:h-full md:w-1/4">
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>
 					<div class="group relative">
 						<Button
-							class="w-full justify-start space-x-2 px-5 py-3 duration-500"
+							class="w-full justify-start space-x-2 px-5 py-3 text-sm duration-500 md:text-base"
 							onclick={() => toggleExpand(item.name)}
 							variant="outline"
 						>
-							<Icon icon={item.icon} width="25" height="25" class="text-primary" />
+							<Icon icon={item.icon} width="20" height="20" class="text-primary md:h-6 md:w-6" />
 							<p>{item.name}</p>
 						</Button>
 					</div>
 
 					{#if expandedItem === item.name}
-						<div class="ml-8 mt-2 flex flex-col space-y-2">
+						<div class=" mt-2 flex flex-col space-y-2">
 							{#each item.subMenuItems as subItem}
-								<Button class="flex justify-start" variant="ghost" onclick={subItem.action}>
-									<Icon icon={subItem.icon} width="20" height="20" class="text-primary" />
-									<p class="px-2 text-left">{subItem.name}</p>
+								<Button
+									class="flex justify-start text-sm md:text-base"
+									variant="ghost"
+									onclick={subItem.action}
+								>
+									<Icon
+										icon={subItem.icon}
+										width="16"
+										height="16"
+										class="text-primary md:h-5 md:w-5"
+									/>
+									<p class=" text-left">{subItem.name}</p>
 								</Button>
 							{/each}
 						</div>
@@ -141,59 +100,51 @@
 		</div>
 	</div>
 
-	<div class="h-full w-full">
-		<div class="container mx-auto py-10">
-			{#if selectedSubmenu === 'createForm'}
-				<div class="h-full w-full">
-					<div class="container mx-auto">
-						<div class="mb-4 flex flex-row">
-							<div>
-								<h2 class="text-2xl font-bold tracking-tight">Welcome...!</h2>
-								<p class="text-muted-foreground">Here's a list of your Assessments!</p>
-							</div>
-							<!-- <Button
-								class="{buttonVariants({ variant: 'default' })} ml-auto w-28"
-								onclick={templateEditRoute}
-							>
-								Add New</Button
-							> -->
-						
-											<AssessmentForm {data} />
+	<!-- Main Content -->
+	<div class="h-full w-full overflow-auto md:p-6">
+		{#if selectedSubmenu === 'createForm'}
+			<div class="container mx-auto">
+				<div class=" flex flex-col md:flex-row md:items-center">
+					<div>
+						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
+						<p class="my-2 text-sm text-muted-foreground md:text-base">
+							Here's a list of your Assessments!
+						</p>
 					</div>
-
-						<DataTable data={assessments} {columns} />
-					</div>
+					<AssessmentForm {data} />
 				</div>
-			{:else if selectedSubmenu === 'viewForms'}
-				<div class="container mx-auto">
-					<h2 class="text-2xl font-bold tracking-tight">View Forms</h2>
-					<p class="text-muted-foreground">Here's a list of your Assessments!</p>
-					<!-- <DataTable data={assessments} {columns} /> -->
-				</div>
-			{:else if selectedSubmenu === 'library'}
-				<h2 class="text-2xl font-bold tracking-tight">Make library</h2>
-				<p class="text-muted-foreground">Here's a list of your Assessments!</p>
-			{:else if selectedSubmenu === 'importForm'}
-				<h2 class="text-2xl font-bold tracking-tight">Import Form</h2>
-				<p class="text-muted-foreground">Here's a list of your Assessments!</p>
-			{:else if selectedSubmenu === 'viewResponses'}
-				<h2 class="text-2xl font-bold tracking-tight">Responses</h2>
-				<p class="text-muted-foreground">Here's a list of responses to your forms.</p>
-			{:else if selectedSubmenu === 'exportResponses'}
-				<h2 class="text-2xl font-bold tracking-tight">Export Responses</h2>
-				<p class="text-muted-foreground">Export responses for offline use.</p>
-			{:else if selectedSubmenu === 'profileSettings'}
-				<h2 class="text-2xl font-bold tracking-tight">Profile Settings</h2>
-				<p class="text-muted-foreground">Adjust your profile details here.</p>
-			{:else if selectedSubmenu === 'appSettings'}
-				<h2 class="text-2xl font-bold tracking-tight">App Settings</h2>
-				<p class="text-muted-foreground">Configure application settings here.</p>
-			{:else}
-				<h2 class="text-2xl font-bold tracking-tight">Welcome back...!</h2>
-				<p class="text-muted-foreground">Here's a list of your Assessments!</p>
-				<p class="text-muted-foreground">Error in loading this page</p>
-			{/if}
-		</div>
+				<DataTable data={assessments} {columns} />
+			</div>
+		{:else if selectedSubmenu === 'viewForms'}
+			<div class="container mx-auto">
+				<h2 class="text-lg font-bold tracking-tight md:text-2xl">View Forms</h2>
+				<p class="text-sm text-muted-foreground md:text-base">Here's a list of your Assessments!</p>
+			</div>
+		{:else if selectedSubmenu === 'library'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Make library</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Here's a list of your Assessments!</p>
+		{:else if selectedSubmenu === 'importForm'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Import Form</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Here's a list of your Assessments!</p>
+		{:else if selectedSubmenu === 'viewResponses'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Responses</h2>
+			<p class="text-sm text-muted-foreground md:text-base">
+				Here's a list of responses to your forms.
+			</p>
+		{:else if selectedSubmenu === 'exportResponses'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Export Responses</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Export responses for offline use.</p>
+		{:else if selectedSubmenu === 'profileSettings'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Profile Settings</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Adjust your profile details here.</p>
+		{:else if selectedSubmenu === 'appSettings'}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">App Settings</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Configure application settings here.</p>
+		{:else}
+			<h2 class="text-lg font-bold tracking-tight md:text-2xl">Welcome back...!</h2>
+			<p class="text-sm text-muted-foreground md:text-base">Here's a list of your Assessments!</p>
+			<p class="text-sm text-muted-foreground md:text-base">Error in loading this page</p>
+		{/if}
 	</div>
 </div>
 

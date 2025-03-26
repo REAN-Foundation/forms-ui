@@ -213,7 +213,7 @@
 </div> -->
 
 <div class="w-full">
-	<div class="flex items-center py-4">
+	<div class="flex items-center py-2 md:py-4">
 		<Input
 			placeholder="Filter titles..."
 			value={(table.getColumn('Title')?.getFilterValue() as string) ?? ''}
