@@ -309,7 +309,7 @@
 {/if}
 
 <!-- Section -->
-<div class="bg-green-5 flex min-h-screen flex-row">
+<div class="bg-green-5 flex min-h-screen flex-row my-12">
 	<div class="flex flex-1 overflow-hidden">
 		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} />
 		<div class="mx-10 my-1 w-8/12 space-y-2 p-2">

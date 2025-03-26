@@ -30,7 +30,7 @@
 	></button>
 
 	<div
-		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[46%] overflow-y-auto rounded-sm shadow-lg"
+		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[46%] overflow-y-auto rounded-sm shadow-lg " 
 		in:fly={{ x: 500, duration: 500 }}
 		out:fly={{ x: 500, duration: 500 }}
 		role="dialog"

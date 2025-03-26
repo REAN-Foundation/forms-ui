@@ -83,7 +83,7 @@
 	}
 </script>
 
-<Card.Root class="rounded-lg border p-4">
+<Card.Root class="rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b]">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
 		onsubmit={(event) => {
@@ -128,7 +128,7 @@
 					type="checkbox"
 					bind:checked={questionCard.IsRequired}
 					aria-labelledby="isRequired"
-					class="h-5 w-5"
+					class="h-4 w-4"
 				/>
 			</div>
 			<div class="relative col-span-1">
@@ -142,7 +142,7 @@
 			<Button
 				type="button"
 				onclick={addOption}
-				class="mt-2 w-fit"
+				class="my-4 w-fit"
 				disabled={questionCard.ResponseType === 'Boolean' && options.length >= 2}
 			>
 				Add Option
