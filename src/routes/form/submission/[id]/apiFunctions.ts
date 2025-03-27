@@ -64,7 +64,7 @@ export type QuestionResponseCreateModel = {
     QuestionId: string;
     IntegerValue: number | null;
     FloatValue: number | null;
-    BooleanValue: boolean | null;
+    BooleanValue: string|null;
     DateTimeValue: string | null;
     Url: string | null;
     TextValue: string | null;
@@ -149,7 +149,7 @@ export function createSchema(sections) {
                         break;
 
                     case 'Boolean':
-                        schemaObj[q.id] = z.boolean({
+                        schemaObj[q.id] = z.string({
                             required_error: 'This field is required',
                             invalid_type_error: 'Please select an option'
                         });
@@ -265,7 +265,7 @@ export async function questionResponseModels(
                 ? (value !== undefined ? parseFloat(value) : null)
                 : null,
             BooleanValue: ResponseType === "Boolean"
-                ? (value !== undefined ? Boolean(value) : null)
+                ? (value !== undefined ? value : null)
                 : null,
             DateTimeValue: ["Date", "DateTime"].includes(ResponseType)
                 ? (value ? new Date(value).toISOString() : null)

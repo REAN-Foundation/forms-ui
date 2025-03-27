@@ -2,7 +2,7 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
-	let optionsArray: string[] = $state([]);
+	let optionsArray = $state([]);
 	$inspect('Selected answers:', answers);
 	// Extract options from `q.Options`
 	if (q.Options && q.Options.length > 0) {
@@ -16,11 +16,11 @@
 	let selected: string = $state(answers[q.id] || '');
 
 	// Handle radio button change
-	function handleRadioChange(event: Event) {
-		const value = (event.target as HTMLInputElement).value; // Get selected value
-		selected = value; // Update local `selected` state
-		answers[q.id] = value; // Update the `answers` object dynamically
-	}
+    function handleRadioChange(event) {
+        const value = event.target.value;
+        selected = value; // Update local state
+        answers[q.id] = value; // Synchronize with answers object
+    }
 
 	// Debugging logs (optional, for development)
 	$inspect('Selected:', selected);
@@ -49,8 +49,9 @@
 					name={q.id}
 					value={o}
 					id={o}
-					checked={selected === o}
-					{...q.IsRequired ? { required: true } : {}}
+					   bind:group={selected} 
+				checked={answers[q.id] === o}
+				
 				/>
 				<Label for={o}>{o}</Label><br />
 			</div>
