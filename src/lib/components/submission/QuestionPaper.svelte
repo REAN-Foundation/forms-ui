@@ -14,12 +14,6 @@
 	/////////////////////////////////////////////////////////////////////////////////
 
 	let { sections, answers = $bindable(), errors= $bindable()} = $props();
-	// export let sections;
-	// export let questions;
-	// export let answers;
-	// export let textValues
-	$inspect('ansers data-----------', answers);
-
 
 	const componentsMap = {
 		Text: Text,

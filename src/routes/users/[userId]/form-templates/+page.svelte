@@ -61,7 +61,7 @@
 
 <div class="relative flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div class="flex h-auto w-full flex-col justify-between border-r bg-white p-4 md:h-full md:w-1/4">
+	<div class="flex h-auto w-full flex-col justify-between border-r  p-4 md:h-full md:w-1/4">
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>

@@ -218,7 +218,7 @@ export function createSchema(sections) {
         console.warn('Schema is empty. Ensure sections have required fields.');
         return z.object({});
     }
-    console.log('schemaObj:----------- ', schemaObj);
+    // console.log('schemaObj:----------- ', schemaObj);
     return z.object(schemaObj);
 };
 

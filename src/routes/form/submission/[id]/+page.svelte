@@ -22,27 +22,16 @@
 
 	let { data }: { data: PageServerData } = $props();
 	const formSubmissionKey = $page.params.id;
-	console.log('sections');
-	$inspect(data.assessmentTemplate);
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
-	$inspect('Sections data---', sections);
-
 	let answers = $state({});
-	let currentIndex = $state(0); // Used for pagination
-	let isCollapsed = $state(false);
+	// let currentIndex = $state(0); // Used for pagination
+	// let isCollapsed = $state(false);
 	let errors = $state({});
 	let formSubmissionId = data.submissionId;
 	let questionResponseData = $derived(data.questionResponses);
 
 	let submissionStatus = $derived(data.submissionStatus);
-	
-	$inspect('Response data--', questionResponseData);
-	$inspect('Submission id-',formSubmissionId)
-
-	$inspect('Submission status--', submissionStatus);
-
-	$inspect('answers in page form--', answers);
 
 	const responseTypeMap = {
 		Integer: "IntegerValue",
@@ -160,9 +149,9 @@
 	// }
 
 	// Toggle the sidebar's collapsed state
-	function toggleSidebar() {
-		isCollapsed = !isCollapsed;
-	}
+	// function toggleSidebar() {
+	// 	isCollapsed = !isCollapsed;
+	// }
 
 	async function handleSave(e) {
 		e.preventDefault();
@@ -232,7 +221,6 @@
 		}
 	}
 
-	$inspect('ansers in page-----------', answers);
 </script>
 
 <div class="flex flex-row">
@@ -258,7 +246,7 @@
 						</p>
 						<div class="flex h-full flex-col items-center justify-center">
 							<h2
-								class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+								class=" capitalize scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
 							>
 								{templateInfo.Title}
 							</h2>
