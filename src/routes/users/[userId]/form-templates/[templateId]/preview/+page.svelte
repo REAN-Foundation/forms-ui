@@ -14,7 +14,7 @@
 	let templateInfo = $state(data.assessmentTemplate);
 </script>
 
-<div class="card container h-full w-full px-6 md:px-16 pt-4">
+<div class="card container h-full w-full px-6 md:px-16 pt-4 mt-10">
 	<Breadcrumb.Root>
 		<Breadcrumb.List class="flex">
 			<Breadcrumb.Item>
@@ -27,23 +27,23 @@
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 
-	<div class="m-10 mx-auto w-full rounded-sm border-2 p-5">
+	<div class="m-10 mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#f3f4f6] dark:bg-[#0a0a0b] p-5">
 
 		{#if templateInfo}
 			<Card.Root>
-				<div class="border-1 relative mx-auto h-fit rounded-md border pb-7 pt-5">
-					<Card.Title class="absolute right-2 top-2 mr-0 mt-0 text-2xl font-semibold">
+				<div class=" relative mx-auto h-fit rounded-md border border-gray-400  pb-7 pt-5 bg-[#f9fafb] dark:bg-[#0a0a0b] ">
+					<Card.Title class="absolute right-3 top-2 mr-0 mt-0  text-base sm:text-2xl font-semibold">
 						{templateInfo.Type}
 					</Card.Title>
-					<div class="flex h-full flex-col items-center justify-center">
-						<h2 class="mt-5 text-center text-3xl font-bold">
+					<div class="flex h-full flex-col items-center justify-center  ">
+						<h2 class="mt-5 text-center text-3xl font-bold   ">
 							{templateInfo.Title}
 						</h2>
 						<div class="mt-2 flex w-full flex-row justify-center">
 							<Card.Description class="ml-auto text-sm">
 								{templateInfo.Description || ''}
 							</Card.Description>
-							<p class="ml-auto mr-2 text-sm">
+							<p class="ml-auto mr-3 text-base">
 								Version: {templateInfo.CurrentVersion}
 							</p>
 						</div>
