@@ -88,11 +88,12 @@
 		deleteSubButtonClicked = false;
 		cardToDelete = null;
 	}
+	let isRotated = false;
 </script>
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md shadow-lg border border-gray-300 dark:border-gray-800 bg-[#f3f4f6] dark:bg-[#0a0a0b]  p-4 {highlightedSection === section.id ? ' border-1 border-blue-600' : ''}"
+		class="my-4 rounded-md shadow-lg border border-gray-300 dark:border-gray-800 bg-[#f5f5f4]  dark:bg-[#0a0a0b]  p-4 {highlightedSection === section.id ? ' border-1 border-blue-600' : ''}"
 		ondragenter={() => handleDragEnter(section.id)}
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
@@ -111,8 +112,8 @@
 						<Tooltip.Provider>
 							<Tooltip.Root >
 								<Tooltip.Trigger >
-									<Button variant="ghost" size="sm" class="w-9 p-0">
-										<Icon icon="fluent:chevron-up-down-24-regular" width="16" height="16" />
+									<Button variant="ghost" size="sm" class="w-9 p-0 ">
+										<Icon icon="grommet-icons:down" width="16" height="16" />
 
 										<span class="sr-only">Toggle</span>
 									</Button>
@@ -187,7 +188,7 @@
 							aria-label={`Card: ${card.Title}`}
 						>
 						<!-- Subsection -->
-							<div class="relative my-4 mt-1 flex w-[95%] rounded-md border  bg-white  dark:bg-black shadow-md">
+							<div class="relative my-4 mt-1 flex w-[95%] rounded-md border   bg-[#fafaf9] dark:bg-black ">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}

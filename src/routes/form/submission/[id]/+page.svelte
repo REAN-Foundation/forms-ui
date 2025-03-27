@@ -213,9 +213,9 @@
 		{/if}
 	</div> -->
 
-	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1">
+	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1 mt-20">
 		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
-			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
+			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5  bg-[#f3f4f6] dark:bg-[#0a0a0b]">
 				{#if templateInfo}
 					<div>
 						<p class="absolute right-2 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
@@ -241,7 +241,7 @@
 				{/if}
 			</div>
 
-			<div class="min-h-[390px]">
+			<div class="min-h-[390px] bg-[#f9fafb] dark:bg-[#0a0a0b]">
 				<QuestionPaper {sections} bind:answers={answers} />
 				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">

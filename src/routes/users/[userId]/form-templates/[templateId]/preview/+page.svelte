@@ -14,7 +14,7 @@
 	let templateInfo = $state(data.assessmentTemplate);
 </script>
 
-<div class="card container h-full w-full px-6 md:px-16 pt-4 mt-10">
+<div class="card container h-full w-full px-6 md:px-16 pt-4 mt-10 ">
 	<Breadcrumb.Root>
 		<Breadcrumb.List class="flex">
 			<Breadcrumb.Item>
@@ -27,7 +27,7 @@
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 
-	<div class="m-10 mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#f3f4f6] dark:bg-[#0a0a0b] p-5">
+	<div class="mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#f3f4f6] dark:bg-[#0a0a0b] p-5 my-10  ">
 
 		{#if templateInfo}
 			<Card.Root>

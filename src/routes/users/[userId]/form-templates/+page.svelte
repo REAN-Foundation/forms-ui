@@ -108,7 +108,7 @@
 					<div>
 						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
 						<p class="my-2 text-sm text-muted-foreground md:text-base">
-							Here's a list of your Assessments!
+							Here's a Form Template !
 						</p>
 					</div>
 					<AssessmentForm {data} />
