@@ -8,6 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import TemplateTable from '$lib/components/template/templateTable.svelte';
+	import TemplateForm from '$lib/components/template/TemplateForm.svelte';
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -15,7 +16,8 @@
 
 	const userId = page.params.userId;
 	let assessments = data.assessmentTemplate;
-
+	let errors: Record<string, string> = $state({});
+	let templateData={};
 	let expandedItem: string | null = $state();
 	let selectedSubmenu: string | null = $state('createForm');
 
@@ -112,7 +114,8 @@
 							Here's a list of your Assessments!
 						</p>
 					</div>
-					<AssessmentForm {data} />
+					<!-- <AssessmentForm {data} /> -->
+					<TemplateForm {templateData} bind:errors />
 				</div>
 				<DataTable data={assessments.Items} {columns} />
 				<!-- <TemplateTable {data} /> -->
