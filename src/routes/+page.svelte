@@ -23,9 +23,9 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center">
-	<div class="rounded shadow dark:border dark:bg-transparent">
+	<div class="rounded shadow dark:border dark:bg-transparent ">
 		<div>
-			<Card.Root class="w-[350px]  rounded-xl">
+			<Card.Root class="w-[350px]  rounded-xl bg-[#fafaf9] dark:bg-[#0a0a0b]">
 				<Card.Header>
 					<Card.Title>Sign In</Card.Title>
 				</Card.Header>
@@ -86,7 +86,7 @@
 								</div>
 							</div>
 						</div>
-						<Button class="w-full" type="submit">Login</Button>
+						<Button class="w-full" type="submit" >Login</Button>
 					</form>
 				</Card.Content>
 			</Card.Root>

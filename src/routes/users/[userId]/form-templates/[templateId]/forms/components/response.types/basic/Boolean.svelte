@@ -20,13 +20,13 @@
 </script>
 
 <Button
-	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500"
+	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500 hover:bg-[#f9fafb] hover:dark:bg-[#262626]"
 	onclick={() => {
 		openSheet(card);
 	}}
 	variant="ghost"
 >
-	<div class="flex w-full items-center justify-between">
+	<div class="flex w-full items-center justify-between ">
 		<h1 class="text-md font-bold text-slate-400">{card?.Title || 'Enter question here'}</h1>
 	</div>
 	<div class="flex h-fit w-full flex-col rounded p-1">

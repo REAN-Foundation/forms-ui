@@ -127,7 +127,7 @@
 		{/snippet}
 	</DropdownMenu.Trigger>
 
-	<DropdownMenu.Content class="w-44 space-y-2">
+	<DropdownMenu.Content class="w-44 space-y-2 ">
 		<DropdownMenu.Group>
 			<DropdownMenu.GroupHeading class="text-sm text-gray-500">Actions</DropdownMenu.GroupHeading>
 			<DropdownMenu.Item  class="">
