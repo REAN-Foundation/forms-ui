@@ -6,7 +6,7 @@
 	<div class="fixed top-0 z-50 w-full bg-emerald-500">
 		<!-- <Navbar /> -->
 	</div>
-	<div class="h-full overflow-y-auto bg-sl">
+	<div class="h-full  bg-sl">
 		{@render children()}
 	</div>
 </div>

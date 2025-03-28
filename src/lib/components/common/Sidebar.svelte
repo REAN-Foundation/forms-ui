@@ -31,8 +31,8 @@
 </script>
 <!-- sidebar -->
 <div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
-	<div class="fixed space-y-4 px-4 py-1">
-		<Card.Root class="rounded-lg border p-4">
+	<div class="fixed space-y-4 px-4 py-6 ">
+		<Card.Root class="rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md ">
 			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 			<div
 				class="flex cursor-grab items-center justify-center"
@@ -40,22 +40,22 @@
 				role="button"
 				aria-label="Draggable new section template"
 			>
-				<Button class="w-full space-x-2" variant="secondary">
+				<Button class="w-full space-x-2 rounded-md border" variant="secondary">
 					<Icon
 						icon="teenyicons:section-add-outline"
 						width="16"
 						height="16"
-						class=" mr-2 text-primary"
+						class=" mr-2 text-primary "
 					/>
 					Add Section
 				</Button>
 			</div>
 		</Card.Root>
 
-		<Card.Root class="space-y-3 rounded-lg border p-4">
-			<Card.Title class="text-md">Question Type</Card.Title>
-			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-3">
-				<label class="flex cursor-pointer items-center">
+		<Card.Root class="space-y-3 rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md">
+			<Card.Title class="text-md">Question</Card.Title>
+			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-2 ">
+				<label class="flex cursor-pointer items-center ">
 					<input
 						type="radio"
 						name="layoutType"
@@ -98,15 +98,15 @@
 			</div>
 		</Card.Root>
 
-		<Card.Root class="rounded-lg border p-4">
-			<Card.Title class="text-md  ">Drag Question Response Type</Card.Title>
-			<div class="scrollbar-hide max-h-80 overflow-y-auto pt-3">
+		<Card.Root class="rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md">
+			<Card.Title class="text-md  ">Question Response Types</Card.Title>
+			<div class="scrollbar-hide max-h-80 overflow-y-auto py-4">
 				<ul class="space-y-2">
 					{#if typeOfQuestion === 'Advanced'}
 						{#each measurements as card}
 							<li>
 								<div
-									class="w-full cursor-grab"
+									class="w-full cursor-grab "
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}
@@ -122,7 +122,7 @@
 						{#each cards as card}
 							<li>
 								<div
-									class="w-full cursor-grab"
+									class="w-full cursor-grab  "
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}

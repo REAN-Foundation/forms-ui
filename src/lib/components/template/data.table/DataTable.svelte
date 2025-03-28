@@ -222,12 +222,12 @@
 			value={(table.getColumn('Title')?.getFilterValue() as string) ?? ''}
 			oninput={(e) => table.getColumn('Title')?.setFilterValue(e.currentTarget.value)}
 			onchange={(e) => table.getColumn('Title')?.setFilterValue(e.currentTarget.value)}
-			class="max-w-sm"
+			class="max-w-sm bg-[#fafaf9] dark:bg-[#0a0a0b]"
 		/>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
-					<Button {...props} variant="outline" class="ml-auto">
+					<Button {...props} variant="outline" class="ml-auto bg-[#fafaf9] dark:bg-[#0a0a0b]">
 						Columns <Icon icon="iconamoon:arrow-down-2-light" class="ml-2 size-4" />
 					</Button>
 				{/snippet}
@@ -250,9 +250,9 @@
 			<Table.Header>
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 					<Table.Row>
-						<Table.Head class="pl-3"></Table.Head>
+						<Table.Head class="pl-3  bg-[#f3f4f6] dark:bg-[#0a0a0b]"></Table.Head>
 						{#each headerGroup.headers as header (header.id)}
-							<Table.Head class="[&:has([role=checkbox])]:pl-3">
+							<Table.Head class="[&:has([role=checkbox])]:pl-3 bg-[#f3f4f6] dark:bg-[#0a0a0b]">
 								{#if !header.isPlaceholder}
 									<FlexRender
 										content={header.column.columnDef.header}
@@ -296,6 +296,7 @@
 				size="sm"
 				onclick={() => table.previousPage()}
 				disabled={!table.getCanPreviousPage()}
+				class="bg-[#fafaf9] dark:bg-[#0a0a0b] border border-gray-300"
 			>
 				Previous
 			</Button>
@@ -304,6 +305,7 @@
 				size="sm"
 				onclick={() => table.nextPage()}
 				disabled={!table.getCanNextPage()}
+					class="bg-[#fafaf9] dark:bg-[#0a0a0b] border border-gray-300" 
 			>
 				Next
 			</Button>
