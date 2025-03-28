@@ -17,7 +17,10 @@
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
 	import { z } from 'zod';
 	import { invalidate } from '$app/navigation';
-
+	import { onMount } from 'svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import { show } from '$lib/components/toast/message.utils';
 	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
@@ -34,6 +37,9 @@
 	let submissionStatus = $derived(data.submissionStatus);
 
 	$inspect('submission status', submissionStatus);
+
+	let showDialog = $state(false);
+
 
 	const responseTypeMap = {
 		Integer: 'IntegerValue',
@@ -53,6 +59,12 @@
 	};
 
 	$effect(() => {
+
+		
+	if (submissionStatus === 'Submitted') {
+		showDialog = true;
+		$inspect('Ia am dialog', showDialog);
+	}
 		answers = Object.fromEntries(
 			(questionResponseData ?? []).map((item) => {
 				const responseTypeKey = responseTypeMap[item.Question.ResponseType] || 'TextValue';
@@ -187,7 +199,7 @@
 			});
 			return false;
 		}
-		 errors = {};
+		errors = {};
 
 		try {
 			const questionResponses = await questionResponseModels(
@@ -252,6 +264,7 @@
 		}
 	}
 </script>
+
 
 <div class="flex flex-row">
 	<!-- Collapsible Sidebar -->
@@ -406,3 +419,25 @@
 		</form>
 	</div>
 </div>
+{#if showDialog}
+<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+	<div
+		class="relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full h "
+	>
+		<div class="flex flex-col space-y-2 text-center sm:text-left">
+			<h1 class="text-lg font-semibold">This form has been submitted</h1>
+			<!-- <p class="text-sm text-muted-foreground">
+				This action cannot be undone. This will permanently delete your question and
+				remove your data from our servers.
+			</p> -->
+		</div>
+
+		<!-- <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+			<Button variant="outline" onclick={()=>{showDialog = false}}>Cancel</Button>
+			
+		</div> -->
+	</div>
+</div>
+{/if}
