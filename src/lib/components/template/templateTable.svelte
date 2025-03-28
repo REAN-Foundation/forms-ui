@@ -1,12 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-
-	// import BreadCrumbs from '$lib/components/breadcrumbs/breadcrums.svelte';
-	// import Confirm from '$lib/components/modal/confirmModal.svelte';
-	import { Helper } from '$lib/utils/helper';
 	import Icon from '@iconify/svelte';
-	// import { Paginator, type PaginationSettings } from '@skeletonlabs/skeleton';
-	// import type { PageServerData } from './$types';
 	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Button } from '../ui/button';
@@ -17,7 +10,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { enhance } from '$app/forms';
 	import TemplateForm from './TemplateForm.svelte';
 
