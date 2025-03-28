@@ -187,6 +187,7 @@
 			});
 			return false;
 		}
+		 errors = {};
 
 		try {
 			const questionResponses = await questionResponseModels(
