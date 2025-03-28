@@ -3,25 +3,67 @@
 	import { Label } from '$lib/components/ui/label';
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
 
-	function formatDate(value: string, type: 'date' | 'datetime-local') {
-		if (!value) return '';
-		const date = new Date(value);
 
-		if (isNaN(date.getTime())) {
-			console.error('Invalid date:', value);
-			return '';
+	$inspect('Question:', answers);
+	// console.log('Answers for this question:', typeof answers[q.id]);
+
+	function convertToDateTimeLocalFormat(dateString: string): string {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+
+	if (isNaN(date.getTime())) {
+		console.error('Invalid date:', dateString);
+		return '';
+	}
+
+	// Extract YYYY-MM-DD and HH:MM in local time
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+
+	return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+	// let selectedDate = $state();
+	$effect(() => {
+		if (q.ResponseType === 'Date') {
+		answers[q.id] = answers[q.id]?.split('T')[0] || '';
 		}
-
-		return type === 'date'
-			? date.toISOString().split('T')[0]
-			: date.toISOString().slice(0, 16);
+		if (q.ResponseType === 'DateTime') {
+			answers[q.id] = convertToDateTimeLocalFormat(answers[q.id]);
 	}
+		
 
-	// Format on load
-	if ((q.ResponseType === 'Date' || q.ResponseType === 'DateTime') && answers[q.id]) {
-		const type = q.ResponseType === 'Date' ? 'date' : 'datetime-local';
-		answers[q.id] = formatDate(answers[q.id], type);
-	}
+		// answers[q.id] = selectedDate;
+	})
+	
+
+	$inspect('Formatted Date:', answers[q.id]);
+
+// answers[q.id] = '2025-03-13'
+	
+
+	// function formatDate(value: string, type: 'date' | 'datetime-local') {
+	// 	if (!value) return '';
+	// 	const date = new Date(value);
+
+	// 	if (isNaN(date.getTime())) {
+	// 		console.error('Invalid date:', value);
+	// 		return '';
+	// 	}
+
+	// 	return type === 'date'
+	// 		? date.toISOString().split('T')[0]
+	// 		: date.toISOString().slice(0, 16);
+	// }
+
+	// // Format on load
+	// if ((q.ResponseType === 'Date' || q.ResponseType === 'DateTime') && answers[q.id]) {
+	// 	const type = q.ResponseType === 'Date' ? 'date' : 'datetime-local';
+	// 	answers[q.id] = formatDate(answers[q.id], type);
+	// }
 	
 </script>
 
@@ -77,7 +119,7 @@
 			type="date"
 			class="w-full"
 			name={q.id}
-			bind:value={answers[q.id]}
+			bind:value={answers[q.id]} 
 		/>
 
 		{#if errors[q.id]}

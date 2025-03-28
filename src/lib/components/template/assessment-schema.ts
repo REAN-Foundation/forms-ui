@@ -2,6 +2,7 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const assessmentSchema = z.object({
+    id:z.string(),
     Title: z
         .string()
         .min(8, { message: "Title must be at least 8 characters long." })

@@ -13,7 +13,7 @@
 	/////////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: { form: SuperValidated<Infer<AssessmentSchema>> } } = $props();
-	console.log(data.form, 'This is data from section form editor');
+	// console.log(data.form, 'This is data from section form editor');
 	data.form.errors = {};
 
 	// Initialize superForm
@@ -33,7 +33,7 @@
 		<Dialog.Header>
 			<Dialog.Title>Add New</Dialog.Title>
 			<Dialog.Description>
-				Make changes to your Assessment Template here. Click save when you're done.
+				Make changes to your Form Template here. Click save when you're done.
 			</Dialog.Description>
 		</Dialog.Header>
 		<form method="POST" action="?/newAssessment" use:enhance>

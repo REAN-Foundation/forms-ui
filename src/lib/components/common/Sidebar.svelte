@@ -29,10 +29,10 @@
 	export let typeOfQuestion;
 	export let changeTypes;
 </script>
-<!-- sidebar -->
+<!-- sidebar add section -->
 <div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
-	<div class="fixed space-y-4 px-4 py-6 ">
-		<Card.Root class="rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md ">
+	<div class="fixed  space-y-4 px-4 py-6 ">
+		<Card.Root class="rounded-lg border p-4  w-64 2xl:w-full">
 			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 			<div
 				class="flex cursor-grab items-center justify-center"
@@ -40,7 +40,7 @@
 				role="button"
 				aria-label="Draggable new section template"
 			>
-				<Button class="w-full space-x-2 rounded-md border" variant="secondary">
+				<Button class="w-full space-x-2 rounded-md border bg-[#F6F8FA] dark:bg-[#0a0a0b]" variant="secondary">
 					<Icon
 						icon="teenyicons:section-add-outline"
 						width="16"
@@ -51,10 +51,10 @@
 				</Button>
 			</div>
 		</Card.Root>
-
-		<Card.Root class="space-y-3 rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md">
+<!-- Sidebar question -->
+		<Card.Root class="space-y-3 rounded-lg border p-4  shadow-md w-64 2xl:w-full">
 			<Card.Title class="text-md">Question</Card.Title>
-			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-14 py-2 ">
+			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-4 2xl:px-14 py-2  bg-[#F6F8FA] dark:bg-[#0a0a0b]">
 				<label class="flex cursor-pointer items-center ">
 					<input
 						type="radio"
@@ -65,7 +65,7 @@
 						class="sr-only"
 					/>
 					<span
-						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
+						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary "
 					>
 						<span
 							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Basic'
@@ -97,8 +97,8 @@
 				</label>
 			</div>
 		</Card.Root>
-
-		<Card.Root class="rounded-lg border p-4 bg-[#fafaf9] dark:bg-[#0a0a0b] shadow-md">
+<!-- sidebar question response time -->
+		<Card.Root class="rounded-lg border p-4  shadow-md w-64 2xl:w-full">
 			<Card.Title class="text-md  ">Question Response Types</Card.Title>
 			<div class="scrollbar-hide max-h-80 overflow-y-auto py-4">
 				<ul class="space-y-2">

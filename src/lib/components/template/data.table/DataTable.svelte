@@ -13,26 +13,29 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { FlexRender, createSvelteTable } from '$lib/components/ui/data-table/index.js';
 	import type { DataTableProps } from './column';
-	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Icon from '@iconify/svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { writable } from 'svelte/store';
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, columns }: DataTableProps<TData, TValue> = $props();
-
+	// let data = $state<TData[]>([]);
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let sorting = $state<SortingState>([]);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let rowSelection = $state<RowSelectionState>({});
 	let columnVisibility = $state<VisibilityState>({});
-
-	const assessmentRecords = writable(columns);
+	const assessmentRecords = writable(data);
 	// Update the data store whenever `data` changes.
-	$assessmentRecords = columns;
+	$assessmentRecords = data;
 
+	console.log(data,"this is data");
+	console.log(assessmentRecords,"this is assessmentRecords");
+	
 	const table = createSvelteTable({
 		get data() {
 			return data;
@@ -219,12 +222,12 @@
 			value={(table.getColumn('Title')?.getFilterValue() as string) ?? ''}
 			oninput={(e) => table.getColumn('Title')?.setFilterValue(e.currentTarget.value)}
 			onchange={(e) => table.getColumn('Title')?.setFilterValue(e.currentTarget.value)}
-			class="max-w-sm bg-[#fafaf9] dark:bg-[#0a0a0b]"
+			class="max-w-sm bg-[#F6F8FA] dark:bg-[#0a0a0b]"
 		/>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
-					<Button {...props} variant="outline" class="ml-auto bg-[#fafaf9] dark:bg-[#0a0a0b]">
+					<Button {...props} variant="outline" class="ml-auto bg-[#F6F8FA] dark:bg-[#0a0a0b]">
 						Columns <Icon icon="iconamoon:arrow-down-2-light" class="ml-2 size-4" />
 					</Button>
 				{/snippet}
@@ -247,9 +250,9 @@
 			<Table.Header>
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 					<Table.Row>
-						<Table.Head class="pl-3  bg-[#f3f4f6] dark:bg-[#0a0a0b]"></Table.Head>
+						<Table.Head class="bg-[#F6F8FA]  pl-3 dark:bg-[#0a0a0b]"></Table.Head>
 						{#each headerGroup.headers as header (header.id)}
-							<Table.Head class="[&:has([role=checkbox])]:pl-3 bg-[#f3f4f6] dark:bg-[#0a0a0b]">
+							<Table.Head class="bg-[#F6F8FA] dark:bg-[#0a0a0b] [&:has([role=checkbox])]:pl-3">
 								{#if !header.isPlaceholder}
 									<FlexRender
 										content={header.column.columnDef.header}
@@ -293,7 +296,7 @@
 				size="sm"
 				onclick={() => table.previousPage()}
 				disabled={!table.getCanPreviousPage()}
-				class="bg-[#fafaf9] dark:bg-[#0a0a0b] border border-gray-300"
+				class="border border-gray-300 bg-[#F6F8FA] dark:bg-[#0a0a0b]"
 			>
 				Previous
 			</Button>
@@ -302,10 +305,16 @@
 				size="sm"
 				onclick={() => table.nextPage()}
 				disabled={!table.getCanNextPage()}
-					class="bg-[#fafaf9] dark:bg-[#0a0a0b] border border-gray-300" 
+				class="border border-gray-300 bg-[#F6F8FA] dark:bg-[#0a0a0b]"
 			>
 				Next
 			</Button>
 		</div>
 	</div>
 </div>
+
+<style>
+	.alert-overlay {
+		@apply fixed inset-1 bg-black/100 backdrop-blur-sm; /* Smooth blur with semi-transparent background */
+	}
+</style>

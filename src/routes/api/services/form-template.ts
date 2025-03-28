@@ -4,6 +4,7 @@ import { delete_, get_, post_, put_ } from './common';
 ////////////////////////////////////////////////////////////////
 
 export const createFormTemplate = async (
+	id: string,
 	title: string,
 	description: string,
 	currentVersion: number,
@@ -26,6 +27,10 @@ export const createFormTemplate = async (
 		OwnerUserId: ownerUserId ? ownerUserId : null,
 		DefaultSectionNumbering: defaultSectionNumbering ? defaultSectionNumbering : false
 	};
+	if (id) {
+		const url = BACKEND_API_URL + `/form-templates/${id}`;
+		return await put_(url, body);
+	}
 	const url = BACKEND_API_URL + '/form-templates';
 	return await post_(url, body);
 };

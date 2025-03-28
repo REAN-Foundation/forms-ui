@@ -279,36 +279,33 @@
 		{/if}
 	</div> -->
 
-	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1">
-		<form onsubmit={(e) => handleSave(e)} class="mx-auto w-[80%] space-y-3">
-			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
+	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1 mt-20  ">
+		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
+			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5  bg-[#F6F8FA] dark:bg-[#0a0a0b]">
 				{#if templateInfo}
 					<div>
-						<p class="absolute right-2 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
+						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
 							{templateInfo.Type}
 						</p>
 						<div class="flex h-full flex-col items-center justify-center">
 							<h2
-								class=" scroll-m-20 border-b pb-2 text-3xl font-semibold capitalize tracking-tight transition-colors first:mt-0"
+								class="scroll-m-20 pt-8  py-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
 							>
-								{templateInfo.Title}
-							</h2>
-							<div class="mt-2 flex w-full flex-row items-center justify-center">
 								<p class="mx-auto [&:not(:first-child)]:mt-6">
-									{templateInfo.Description}
 								</p>
-								<p class="ml-auto mr-2 text-sm">
+								<p class="ml-auto mr-4 text-sm">
 									Version: {templateInfo.CurrentVersion}
 								</p>
-							</div>
+							</h2>
+							
 							<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
 						</div>
 					</div>
 				{/if}
 			</div>
 
-			<div class="min-h-[390px]">
-				<QuestionPaper {sections} bind:answers bind:errors />
+			<div class="min-h-[390px] bg-[#f9fafb] dark:bg-[#0a0a0b] border rounded-md border-gray-500">
+				<QuestionPaper {sections} bind:answers={answers} />
 				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">
@@ -401,19 +398,10 @@
 					Next
 				</Button>
 			</div> -->
-			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
-				<Button
-					type="submit"
-					variant="outline"
-					class="w-full"
-					disabled={submissionStatus === 'Submitted'}>Save Draft</Button
-				>
-				<Button
-					onclick={handleSubmit}
-					type="button"
-					variant="secondary"
-					class="btn h-10 w-full"
-					disabled={submissionStatus === 'Submitted'}>Submit</Button
+			<div class="mx-auto pt-6 pb-32 flex flex-col space-x-5 md:flex-row">
+				<Button type="submit" variant="outline" class="w-full border">Save</Button>
+				<Button  onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full border"
+					>Submit</Button
 				>
 			</div>
 		</form>
