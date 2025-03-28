@@ -6,3 +6,6 @@ export { default as DataTableRowActions } from "./data.table/DataTableActions.sv
 // export { default as DataTableColumnHeader } from "./data-table/data-table-column-header.svelte";
 // export { default as DataTableViewOptions } from "./data-table/data-table-view-options.svelte";
 // export { default as DataTableFacetedFilter } from "./data-table/data-table-faceted-filter.svelte";
+
+export { default as TemplateForm } from "./TemplateForm.svelte";
+export { default as TemplateTable } from './data.table/TemplateTable.svelte';

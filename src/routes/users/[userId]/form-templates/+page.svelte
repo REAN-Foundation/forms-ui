@@ -8,8 +8,7 @@
 	import { columns } from '$lib/components/template/data.table/column';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import TemplateTable from '$lib/components/template/TemplateTable.svelte';
-	import TemplateForm from '$lib/components/template/TemplateForm.svelte';
+	import { TemplateTable, TemplateForm } from '$lib/components/template/index';
 	import { enhance } from '$app/forms';
 
 	//////////////////////////////////////////////////////////////////////
@@ -66,9 +65,11 @@
 	}
 </script>
 
-<div class="relative flex h-screen w-full flex-col md:flex-row my-10">
+<div class="relative my-10 flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] dark:bg-[#0a0a0b] p-4 md:h-full md:w-1/4">
+	<div
+		class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] p-4 dark:bg-[#0a0a0b] md:h-full md:w-1/4"
+	>
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>

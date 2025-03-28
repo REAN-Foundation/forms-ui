@@ -9,9 +9,9 @@
 	// import type { PageServerData } from './$types';
 	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { Button } from '../ui/button';
-	import { errorMessage, successMessage } from '../toast/message.utils';
-	import { toastMessage } from '../toast/toast.store';
+	import { Button } from '../../ui/button';
+	import { errorMessage, successMessage } from '../../toast/message.utils';
+	import { toastMessage } from '../../toast/toast.store';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	// import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input';
@@ -19,7 +19,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { enhance } from '$app/forms';
-	import TemplateForm from './TemplateForm.svelte';
+	import TemplateForm from '../TemplateForm.svelte';
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
