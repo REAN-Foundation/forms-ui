@@ -44,10 +44,12 @@
 		<div
 			class="sticky top-0 z-20 flex items-center justify-between bg-[#fafaf9] px-5 py-4 dark:bg-[#0a0a0b]"
 		>
-			<div class="flex flex-col mt-2">
+			<div class="mt-2 flex flex-col">
 				<h2 class="text-lg font-semibold text-black dark:text-white">Edit Question</h2>
 
-				<p class="text-sm text-black dark:text-white">Make changes to your Question Template here.</p>
+				<p class="text-sm text-black dark:text-white">
+					Make changes to your Question Template here.
+				</p>
 			</div>
 			<Button type="button" variant="ghost" size="icon" onclick={() => closeSheet()}>
 				<Icon icon="mdi:close" class="text-gray-600 " />

@@ -27,7 +27,7 @@
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 
-	<div class="mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#f3f4f6] dark:bg-[#0a0a0b] p-5 my-10  ">
+	<div class="mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#F6F8FA] dark:bg-[#0a0a0b]  p-5 my-10  ">
 
 		{#if templateInfo}
 			<Card.Root>
