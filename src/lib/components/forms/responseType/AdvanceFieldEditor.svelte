@@ -7,6 +7,7 @@
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	// import InfoIcon from '';
 	// import { Label } from '../ui/label';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -39,103 +40,70 @@
 	}
 </script>
 
-<Card.Root class="rounded-lg border p-4">
+<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
 		method="POST"
 		use:enhance
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 py-4"
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
 		onsubmit={handleSubmit}
 	>
-		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is id of Question.'} cls={'w-20'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.Title} />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Description for Question.'} cls={'text-primary'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.Description} />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<div class="col-span-11 space-x-2">
+		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
+			<div class="col-span-11 flex items-center space-x-2">
 				<Label for="isRequired">Is Required</Label>
 				<input
 					id="isRequired"
 					type="checkbox"
 					bind:checked={questionCard.IsRequired}
 					aria-labelledby="isRequired"
-					class="h-5 w-5"
+					class="h-4 w-4"
 				/>
-			</div>
-			<div class="relative col-span-1">
-				<InfoIcon title={'This is title of Question.'} cls={'w-20'} />
 			</div>
 		</div>
 		<p class="error">{errors?.IsRequired}</p>
 
-		<div class="relative mt-5 hidden grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is ResponseType for Question.'} cls={'text-primary'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Score</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Question Score for Question.'} cls={'text-primary'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.Score} type="number" />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Hint</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Question Hint for Question.'} cls={'text-primary'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.Hint} />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question CorrectAnswer</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is CorrectAnswer for Question.'} cls={'text-primary'} />
-			</div>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
 
-		<div class="relative mt-5 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question QuestionImageUrl</Label>
-			<div class="relative col-span-1">
-				<!-- Replace div with a button and handle keyboard accessibility -->
-				<InfoIcon title={'This is Question QuestionImageUrl for Question.'} cls={'text-primary'} />
-			</div>
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
+			<Label class="col-span-11 ">Question Image Url</Label>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
 
-		<Button type="submit" class="mx-auto mt-5 w-full">Add Question</Button>
+		<Dialog.Footer class="mt-4">
+			<Button type="submit">Save changes</Button>
+		</Dialog.Footer>
 	</form>
 </Card.Root>
 

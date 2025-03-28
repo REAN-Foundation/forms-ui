@@ -67,9 +67,7 @@
 
 <div class="relative my-10 flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div
-		class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] p-4 dark:bg-[#0a0a0b] md:h-full md:w-1/4"
-	>
+	<div class="flex h-auto w-full flex-col justify-between border-r bg-[#F6F8FA] dark:bg-[#0a0a0b] p-4 md:h-full md:w-1/4">
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>
@@ -116,7 +114,7 @@
 					<div>
 						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
 						<p class="my-2 text-sm text-muted-foreground md:text-base">
-							Here's a list of your Assessments!
+							Here's a Form Template !
 						</p>
 					</div>
 					<!-- <AssessmentForm {data} /> -->
