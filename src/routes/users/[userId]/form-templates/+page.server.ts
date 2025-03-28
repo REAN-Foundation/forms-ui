@@ -9,6 +9,7 @@ import { zod } from "sveltekit-superforms/adapters";
 import { assessmentSchema } from '$lib/components/template/assessment-schema';
 import { redirect } from 'sveltekit-flash-message/server';
 import { successMessage } from "$lib/components/toast/message.utils.js";
+import type { z } from "zod";
 
 ////////////////////////////////////////////////////////
 
@@ -36,7 +37,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 			}
 		// const assessmentTemplate = response?.Data?.Items ?? [];
 		const assessmentTemplate = response.Data ?? [];
-			console.log(assessmentTemplate)
+			// console.log(assessmentTemplate)
 		// const assessmentTemplate = response.Data.AssessmentTemplateRecords;
 		return {
 			assessmentTemplate,
@@ -59,33 +60,51 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
 export const actions = {
 	newAssessment: async (event: RequestEvent) => {
-		// const request = event.request;
-		// const data = await request.formData();
+		const request = event.request;
+		const data = await request.formData();
+		const formDataValue = Object.fromEntries(data);
+		
+		// const form = await superValidate(event, zod(assessmentSchema));
+		
+		type AssessmentTemplateSchema = z.infer<typeof assessmentSchema>;
 
-		// console.log(Object.fromEntries(data));
-		// console.log(data)
-		const form = await superValidate(event, zod(assessmentSchema));
-		if (!form.valid) {
-			return fail(400, {
-				form,
-			});
+		let result: AssessmentTemplateSchema = {};
+		try {
+			result = assessmentSchema.parse(formDataValue);
+			console.log('result', result);
+		} catch (err) {
+			const { fieldErrors: errors } = err.flatten();
+			console.log(errors);
+			const { ...rest } = formDataValue;
+			return {
+				data: rest,
+				errors
+			};
 		}
+
+		// if (!form.valid) {
+		// 	return fail(400, {
+		// 		form,
+		// 	});
+		// }
 		// const request = event.request;
 		const userId = event.params.userId
 
 		const response = await createFormTemplate(
-			form.data.Title,
-			form.data.Description,
-			form.data.CurrentVersion,
-			form.data.TenantCode,
-			form.data.ItemsPerPage,
-			form.data.Type,
+			result.id,
+			result.Title,
+			result.Description,
+			result.CurrentVersion,
+			result.TenantCode,
+			result.ItemsPerPage,
+			result.Type,
 			userId,
-			form.data.DefaultSectionNumbering
+			result.DefaultSectionNumbering
 		);
 
 		const templateId = response.Data.id;
 
+		console.log(response,"I am response ");
 		if (response.Status === 'failure' || response.HttpCode !== 201) {
 			throw redirect(
 				303,
