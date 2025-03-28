@@ -13,26 +13,29 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { FlexRender, createSvelteTable } from '$lib/components/ui/data-table/index.js';
 	import type { DataTableProps } from './column';
-	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Icon from '@iconify/svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { writable } from 'svelte/store';
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, columns }: DataTableProps<TData, TValue> = $props();
-
+	// let data = $state<TData[]>([]);
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let sorting = $state<SortingState>([]);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let rowSelection = $state<RowSelectionState>({});
 	let columnVisibility = $state<VisibilityState>({});
-
-	const assessmentRecords = writable(columns);
+	const assessmentRecords = writable(data);
 	// Update the data store whenever `data` changes.
-	$assessmentRecords = columns;
+	$assessmentRecords = data;
 
+	console.log(data,"this is data");
+	console.log(assessmentRecords,"this is assessmentRecords");
+	
 	const table = createSvelteTable({
 		get data() {
 			return data;
@@ -309,3 +312,9 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.alert-overlay {
+		@apply fixed inset-1 bg-black/100 backdrop-blur-sm; /* Smooth blur with semi-transparent background */
+	}
+</style>
