@@ -33,31 +33,42 @@
 
 	let submissionStatus = $derived(data.submissionStatus);
 
+	$inspect('submission status', submissionStatus);
+
 	const responseTypeMap = {
-		Integer: "IntegerValue",
-		Float: "FloatValue",
-		Boolean: "BooleanValue",
-		Text: "TextValue",
-		TextArray: "TextValue",
-		SingleChoiceSelection: "TextValue",
-		MultiChoiceSelection: "TextValue",
-		Object: "TextValue",
-		File: "FileResourceId",
-		Date: "DateTimeValue",
-		DateTime: "DateTimeValue",
-		Rating: "IntegerValue",
-		Location: "DateTimeValue",
-		Range: "IntegerValue"
+		Integer: 'IntegerValue',
+		Float: 'FloatValue',
+		Boolean: 'BooleanValue',
+		Text: 'TextValue',
+		TextArray: 'TextValue',
+		SingleChoiceSelection: 'TextValue',
+		MultiChoiceSelection: 'TextValue',
+		Object: 'TextValue',
+		File: 'FileResourceId',
+		Date: 'DateTimeValue',
+		DateTime: 'DateTimeValue',
+		Rating: 'IntegerValue',
+		Location: 'DateTimeValue',
+		Range: 'IntegerValue'
 	};
 
 	$effect(() => {
 		answers = Object.fromEntries(
-			questionResponseData.map(item => {
-			const responseTypeKey = responseTypeMap[item.Question.ResponseType] || "TextValue";
-			return [item.Question.id, item[responseTypeKey] ?? null];
-		})
+			(questionResponseData ?? []).map((item) => {
+				const responseTypeKey = responseTypeMap[item.Question.ResponseType] || 'TextValue';
+				return [item.Question.id, item[responseTypeKey] ?? null];
+			})
 		);
-	})
+	});
+
+	// $effect(() => {
+	// 	answers = Object.fromEntries(
+	// 		questionResponseData.map(item => {
+	// 		const responseTypeKey = responseTypeMap[item.Question.ResponseType] || "TextValue";
+	// 		return [item.Question.id, item[responseTypeKey] ?? null];
+	// 	})
+	// 	);
+	// })
 
 	// let displayQuestions = $state([]);
 
@@ -153,9 +164,8 @@
 	// 	isCollapsed = !isCollapsed;
 	// }
 
-	async function handleSave(e) {
+	async function handleSave(e, showToast = true) {
 		e.preventDefault();
-		console.log('Saved answers: ', answers);
 
 		const schema = createSchema(sections);
 
@@ -170,57 +180,76 @@
 					val?.[0] || 'This field is required'
 				])
 			);
-
 			addToast({
 				message: 'Please fill in all required fields before saving.',
 				type: 'error',
 				timeout: 3000
 			});
-			return;
+			return false;
 		}
 
 		try {
-			const questionResponses = await questionResponseModels(sections, answers, formSubmissionId, questionResponseData);
+			const questionResponses = await questionResponseModels(
+				sections,
+				answers,
+				formSubmissionId,
+				questionResponseData
+			);
 			const url = `/api/server/question-response`;
 			const headers = { 'Content-Type': 'application/json' };
 			const res = await fetch(url, {
 				method: 'POST',
-				body: JSON.stringify({ questionResponses: questionResponses, formSubmissionKey: formSubmissionKey }),
+				body: JSON.stringify({
+					questionResponses: questionResponses,
+					formSubmissionKey: formSubmissionKey
+				}),
 				headers
 			});
 
 			const saveData = await res.json();
-			toastMessage(saveData);
+			if (showToast) {
+				toastMessage(saveData);
+			}
 			invalidate('app:allNodes');
 			console.log('saveData: ', saveData);
+			return true;
 		} catch (error) {
 			console.error('Error saving data:', error);
-			toastMessage('Save failed. Please try again.');
+			addToast({
+				message: 'Save failed. Please try again.',
+				type: 'error',
+				timeout: 3000
+			});
+			return false;
 		}
 	}
 
 	async function handleSubmit() {
-		if (submissionStatus === 'InProgress') {
+		try {
+			const saveSuccess = await handleSave(new Event('submit'), false);
+			if (!saveSuccess) return;
+
 			const url = `/api/server/submit`;
 			const headers = { 'Content-Type': 'application/json' };
 			const res = await fetch(url, {
 				method: 'POST',
-				body: JSON.stringify({submissionKey:formSubmissionKey}),
+				body: JSON.stringify({ submissionKey: formSubmissionKey }),
 				headers
 			});
+
 			const submissionData = await res.json();
 			toastMessage(submissionData);
 			invalidate('app:allNodes');
 			console.log('submissionData: ', submissionData);
-		} else {
+		} catch (error) {
+			console.error('Error during submission:', error);
 			addToast({
-				message: 'Please save form before submitting.',
+				message: 'Submission failed. Please try again.',
 				type: 'error',
 				timeout: 3000
 			});
 		}
 	}
-
 </script>
 
 <div class="flex flex-row">
@@ -246,7 +275,7 @@
 						</p>
 						<div class="flex h-full flex-col items-center justify-center">
 							<h2
-								class=" capitalize scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
+								class=" scroll-m-20 border-b pb-2 text-3xl font-semibold capitalize tracking-tight transition-colors first:mt-0"
 							>
 								{templateInfo.Title}
 							</h2>
@@ -359,9 +388,18 @@
 				</Button>
 			</div> -->
 			<div class="mx-auto mt-2 flex flex-col space-x-5 md:flex-row">
-				<Button type="submit" variant="outline" class="w-full" disabled={submissionStatus === 'Submitted'}>Save</Button>
-				<Button onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full"
-				disabled={submissionStatus === 'Submitted'}>Submit</Button
+				<Button
+					type="submit"
+					variant="outline"
+					class="w-full"
+					disabled={submissionStatus === 'Submitted'}>Save Draft</Button
+				>
+				<Button
+					onclick={handleSubmit}
+					type="button"
+					variant="secondary"
+					class="btn h-10 w-full"
+					disabled={submissionStatus === 'Submitted'}>Submit</Button
 				>
 			</div>
 		</form>
