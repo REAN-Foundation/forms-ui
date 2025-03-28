@@ -1,23 +1,29 @@
 <script lang="ts">
-	import type { PageServerData } from './$types';
+	import type { ActionData, PageServerData } from './$types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { AssessmentForm, DataTable } from '$lib/index';
-
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import { columns } from '$lib/components/template/data.table/column';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { TemplateTable, TemplateForm } from '$lib/components/template/index';
+	import { enhance } from '$app/forms';
 
 	//////////////////////////////////////////////////////////////////////
 
-	let { data }: { data: PageServerData } = $props();
+	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
 	const userId = page.params.userId;
-	let assessments = data.assessmentTemplate;
-
+	// let assessments = data.assessmentTemplate;
+	let errors = $state({});
+	let templateData = {};
 	let expandedItem: string | null = $state();
 	let selectedSubmenu: string | null = $state('createForm');
 
+	// console.log("This is form data", form,"And this is errors", errors);
+	$inspect(errors);
 	type SubMenuItem = {
 		name: string;
 		icon: string;
@@ -59,9 +65,11 @@
 	}
 </script>
 
-<div class="relative flex h-screen w-full flex-col md:flex-row my-10">
+<div class="relative my-10 flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] dark:bg-[#0a0a0b] p-4 md:h-full md:w-1/4">
+	<div
+		class="flex h-auto w-full flex-col justify-between border-r bg-[#fafaf9] p-4 dark:bg-[#0a0a0b] md:h-full md:w-1/4"
+	>
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>
@@ -111,9 +119,29 @@
 							Here's a list of your Assessments!
 						</p>
 					</div>
-					<AssessmentForm {data} />
+					<!-- <AssessmentForm {data} /> -->
+					<Dialog.Root>
+						<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} my-2 w-28 md:ml-auto">
+							Add New
+						</Dialog.Trigger>
+						<Dialog.Content class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] ">
+							<Dialog.Header>
+								<Dialog.Title>Add New</Dialog.Title>
+								<Dialog.Description>
+									Make changes to your Assessment Template here. Click save when you're done.
+								</Dialog.Description>
+							</Dialog.Header>
+							<form method="POST" action="?/newAssessment" use:enhance>
+								<TemplateForm {templateData} bind:errors />
+								<Dialog.Footer>
+									<Button type="submit">Create</Button>
+								</Dialog.Footer>
+							</form>
+						</Dialog.Content>
+					</Dialog.Root>
 				</div>
-				<DataTable data={assessments} {columns} />
+				<!-- <DataTable data={assessments.Items} {columns} /> -->
+				<TemplateTable {data} bind:errors />
 			</div>
 		{:else if selectedSubmenu === 'viewForms'}
 			<div class="container mx-auto">
