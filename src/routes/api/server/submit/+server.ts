@@ -32,7 +32,7 @@ export const POST = async (event: RequestEvent) => {
         console.log('Data from api/server/submit', data);
 
         const response = await submit(
-       data
+        data.submissionKey
         );
 
         console.log('Response from submit:', response);

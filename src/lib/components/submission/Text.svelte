@@ -4,11 +4,7 @@
 
 	///////////////////////////////////////////////////////////////////////////
 
-	let { q, answers = $bindable() } = $props();
-
-	function handleInput(event, id) {
-		answers[id] = +event.target.value;
-	}
+	let { q, answers = $bindable(), errors = $bindable() } = $props();
 
 </script>
 
@@ -28,7 +24,11 @@
 		<Label class="text-xs text-gray-500">{q.Description}</Label>
 	{/if}
 
-	<Input name={q.id} bind:value={answers[q.id]} type="text" class="mt-2" {...(q.IsRequired ? { required: true } : {})} />
+	<Input name={q.id} bind:value={answers[q.id]} type="text" class="mt-2"/>
+
+	{#if errors[q.id]}
+		<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
+	{/if}
 
 	{#if q.Hint}
 		<Label class="self-end text-xs text-gray-400">Hint: {q.Hint}</Label>

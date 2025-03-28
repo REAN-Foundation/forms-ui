@@ -2,7 +2,7 @@ import { error, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { getFormTemplateDetails } from "../../../api/services/form-template";
 import { getFormSubmission, searchFormSubmission } from "../../../api/services/submission";
-import { searchquestionResponse } from "../../../api/services/question-response";
+import { searchQuestionResponse as searchQuestionResponse } from "../../../api/services/question-response";
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,19 +51,21 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 
     console.log('Assessment template details ', assessmentTemplate);
     console.log('Submission status ', submissionStatus);
-    let questionResponse = null;
-    if (submissionStatus === 'LinkShared') {
+    let submissionId = submission.id;
+    let questionResponses = null;
+    if (submissionStatus === 'InProgress' || submissionStatus === 'Submitted') {
         console.log('Submission is saved');
-        questionResponse = await searchquestionResponse({ formSubmissionId: submission.Id });
-        console.log('Question response ', questionResponse);
-        questionResponse = questionResponse.Data?.Items || [];
+        questionResponses = await searchQuestionResponse({ formSubmissionId: submission.id });
+        console.log('Question response ', questionResponses);
+        questionResponses = questionResponses.Data?.Items || [];
     }
 
     return {
         assessmentTemplate,
         message: response.Message,
-        questionResponse,
-        submissionStatus
+        questionResponses,
+        submissionStatus,
+        submissionId
     };
    
 };

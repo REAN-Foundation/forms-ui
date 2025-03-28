@@ -2,7 +2,7 @@
 	import type { PageServerData } from './$types';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
-	import { save, submit } from './apiFunctions';
+	import { createSchema, questionResponseModels, save, submit } from './apiFunctions';
 	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
 	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
 	import Text from '$lib/components/submission/Text.svelte';
@@ -15,19 +15,73 @@
 	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
 	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
-
+	import { z } from 'zod';
+	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/index.js';
+	import { show } from '$lib/components/toast/message.utils';
 	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
-	console.log('sections');
-	$inspect(data.assessmentTemplate);
+	const formSubmissionKey = $page.params.id;
 	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
-	// const questions = data.assessmentTemplate.Questions;
-	$inspect(sections);
 	let answers = $state({});
-	let currentIndex = $state(0); // Used for pagination
-	let isCollapsed = $state(false);
+	// let currentIndex = $state(0); // Used for pagination
+	// let isCollapsed = $state(false);
+	let errors = $state({});
+	let formSubmissionId = data.submissionId;
+	let questionResponseData = $derived(data.questionResponses);
+
+	let submissionStatus = $derived(data.submissionStatus);
+
+	$inspect('submission status', submissionStatus);
+
+	let showDialog = $state(false);
+
+
+	const responseTypeMap = {
+		Integer: 'IntegerValue',
+		Float: 'FloatValue',
+		Boolean: 'BooleanValue',
+		Text: 'TextValue',
+		TextArray: 'TextValue',
+		SingleChoiceSelection: 'TextValue',
+		MultiChoiceSelection: 'TextValue',
+		Object: 'TextValue',
+		File: 'FileResourceId',
+		Date: 'DateTimeValue',
+		DateTime: 'DateTimeValue',
+		Rating: 'IntegerValue',
+		Location: 'DateTimeValue',
+		Range: 'IntegerValue'
+	};
+
+	$effect(() => {
+
+		
+	if (submissionStatus === 'Submitted') {
+		showDialog = true;
+		$inspect('Ia am dialog', showDialog);
+	}
+		answers = Object.fromEntries(
+			(questionResponseData ?? []).map((item) => {
+				const responseTypeKey = responseTypeMap[item.Question.ResponseType] || 'TextValue';
+				return [item.Question.id, item[responseTypeKey] ?? null];
+			})
+		);
+	});
+
+	// $effect(() => {
+	// 	answers = Object.fromEntries(
+	// 		questionResponseData.map(item => {
+	// 		const responseTypeKey = responseTypeMap[item.Question.ResponseType] || "TextValue";
+	// 		return [item.Question.id, item[responseTypeKey] ?? null];
+	// 	})
+	// 	);
+	// })
+
 	// let displayQuestions = $state([]);
 
 	// // Display option from backend (e.g., OneQuestion, FiveQuestions, etc.)
@@ -118,87 +172,99 @@
 	// }
 
 	// Toggle the sidebar's collapsed state
-	function toggleSidebar() {
-		isCollapsed = !isCollapsed;
-	}
-
-	// Save the current answers to the backend
-	// function handleSave(event) {
-	// 	event.preventDefault();
-	// 	const FormSubmissionId = $page.params.id;
-	// 	save({ Data: answers, FormSubmissionId: FormSubmissionId });
+	// function toggleSidebar() {
+	// 	isCollapsed = !isCollapsed;
 	// }
 
-	async function handleSave() {
-		const FormSubmissionId = $page.params.id;
-		const url = `/api/server/question-response`;
-		const headers = { 'Content-Type': 'application/json' };
-		const res = await fetch(url, {
-			method: 'POST',
-			body: JSON.stringify({ Data: answers, FormSubmissionId: FormSubmissionId }),
-			headers
-		});
-		const saveData = await res.json();
-		console.log('saveData: ', saveData);
-		toastMessage(saveData);
+	async function handleSave(e, showToast = true) {
+		e.preventDefault();
+
+		const schema = createSchema(sections);
+
+		const validationResult = schema.safeParse(answers);
+
+		console.log('validationResult: ', validationResult);
+
+		if (!validationResult.success) {
+			errors = Object.fromEntries(
+				Object.entries(validationResult.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || 'This field is required'
+				])
+			);
+			addToast({
+				message: 'Please fill in all required fields before saving.',
+				type: 'error',
+				timeout: 3000
+			});
+			return false;
+		}
+		errors = {};
+
+		try {
+			const questionResponses = await questionResponseModels(
+				sections,
+				answers,
+				formSubmissionId,
+				questionResponseData
+			);
+			const url = `/api/server/question-response`;
+			const headers = { 'Content-Type': 'application/json' };
+			const res = await fetch(url, {
+				method: 'POST',
+				body: JSON.stringify({
+					questionResponses: questionResponses,
+					formSubmissionKey: formSubmissionKey
+				}),
+				headers
+			});
+
+			const saveData = await res.json();
+			if (showToast) {
+				toastMessage(saveData);
+			}
+			invalidate('app:allNodes');
+			console.log('saveData: ', saveData);
+			return true;
+		} catch (error) {
+			console.error('Error saving data:', error);
+			addToast({
+				message: 'Save failed. Please try again.',
+				type: 'error',
+				timeout: 3000
+			});
+			return false;
+		}
 	}
-	// Submit the form to the backend
-	// function handleSubmit() {
-	// 	const FormSubmissionId = $page.params.id;
-	// 	const response = submit(FormSubmissionId);
-	// 	toastMessage(response);
-	// 	console.log('response: ', response);
-	// }
 
 	async function handleSubmit() {
-		const FormSubmissionId = $page.params.id;
-		const url = `/api/server/submit`;
-		const headers = { 'Content-Type': 'application/json' };
-		const res = await fetch(url, {
-			method: 'POST',
-			body: JSON.stringify(FormSubmissionId),
-			headers
-		});
-		const submissionData = await res.json();
-		toastMessage(submissionData);
-		console.log('submissionData: ', submissionData);
+		try {
+			const saveSuccess = await handleSave(new Event('submit'), false);
+			if (!saveSuccess) return;
+
+			const url = `/api/server/submit`;
+			const headers = { 'Content-Type': 'application/json' };
+			const res = await fetch(url, {
+				method: 'POST',
+				body: JSON.stringify({ submissionKey: formSubmissionKey }),
+				headers
+			});
+
+			const submissionData = await res.json();
+			toastMessage(submissionData);
+			invalidate('app:allNodes');
+			console.log('submissionData: ', submissionData);
+		} catch (error) {
+			console.error('Error during submission:', error);
+			addToast({
+				message: 'Submission failed. Please try again.',
+				type: 'error',
+				timeout: 3000
+			});
+		}
 	}
-
-	const componentsMap = {
-		Text: Text,
-		Float: FloatInteger,
-		Integer: FloatInteger,
-		Boolean: Bool,
-		Object: Text,
-		TextArray: Text,
-		File: File,
-		SingleChoiceSelection: SingleChoice,
-		MultiChoiceSelection: MultipleChoices,
-		Date: DateTime,
-		DateTime: DateTime,
-		Rating: Rating,
-		Range: Range,
-		Temperature: BloodOxygen,
-		BloodPressure: BloodOxygen,
-		Glucose: BloodOxygen,
-		BloodOxygenSaturation: BloodOxygen,
-		PulseRate: BloodOxygen,
-		Hematocrit: BloodOxygen,
-		Cholesterol: BloodOxygen,
-		Weight: BloodOxygen,
-		Height: BloodOxygen,
-		RespiratoryRate: BloodOxygen,
-		Electrolytes: BloodOxygen,
-		KidneyFunction: BloodOxygen,
-		Lipoprotein: BloodOxygen,
-		CReactiveProtein: BloodOxygen,
-		Sleep: BloodOxygen,
-		HemoglobinA1C: BloodOxygen,
-		WaistCircumference: BloodOxygen
-	};
-	$inspect('ansers in page-----------', answers);
-
 </script>
+
 
 <div class="flex flex-row">
 	<!-- Collapsible Sidebar -->
@@ -225,16 +291,13 @@
 							<h2
 								class="scroll-m-20 pt-8  py-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
 							>
-								{templateInfo.Title}
-							</h2>
-							<div class="mt-2 flex w-full flex-row items-center justify-center">
 								<p class="mx-auto [&:not(:first-child)]:mt-6">
-									{templateInfo.Description}
 								</p>
 								<p class="ml-auto mr-4 text-sm">
 									Version: {templateInfo.CurrentVersion}
 								</p>
-							</div>
+							</h2>
+							
 							<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
 						</div>
 					</div>
@@ -344,3 +407,25 @@
 		</form>
 	</div>
 </div>
+{#if showDialog}
+<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+	<div
+		class="relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full h "
+	>
+		<div class="flex flex-col space-y-2 text-center sm:text-left">
+			<h1 class="text-lg font-semibold">This form has been submitted</h1>
+			<!-- <p class="text-sm text-muted-foreground">
+				This action cannot be undone. This will permanently delete your question and
+				remove your data from our servers.
+			</p> -->
+		</div>
+
+		<!-- <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+			<Button variant="outline" onclick={()=>{showDialog = false}}>Cancel</Button>
+			
+		</div> -->
+	</div>
+</div>
+{/if}

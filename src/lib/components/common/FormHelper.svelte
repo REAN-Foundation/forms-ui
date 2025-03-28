@@ -59,29 +59,29 @@
 
 		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
 		{#if questionCard.ResponseType === 'Text'}
-			<TextForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<TextForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Float'}
-			<FloatForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<FloatForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Integer'}
-			<IntegerForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<IntegerForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Boolean'}
-			<BooleanForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<BooleanForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Object'}
-			<ObjectForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<ObjectForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'TextArray'}
-			<TextArrayForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<TextArrayForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
 		{:else if questionCard.ResponseType === 'MultiChoiceSelection'}
-			<MultipleChoiceSelectionForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<MultipleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'SingleChoiceSelection'}
-			<SingleChoiceSelectionForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<SingleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Date'}
-			<DateForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<DateForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'DateTime'}
-			<DateTimeForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
-			<RatingForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<RatingForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Range'}
-			<RangeForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<RangeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else}
 			<AdvanceForm {questionCard} />
 		{/if}
