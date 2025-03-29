@@ -14,7 +14,11 @@
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
-		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Give us a rating'}</h1>
+		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Give us a rating'}
+			{#if card.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
+		</h1>
 	</div>
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
