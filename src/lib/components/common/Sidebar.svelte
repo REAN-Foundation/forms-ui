@@ -6,6 +6,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 
+	let { cards, healthCarePlugins, typeOfQuestion, changeTypes } = $props();
 	let SectionTemplate = {
 		id: number,
 		localId: number,
@@ -24,15 +25,16 @@
 		cards: []
 	};
 
-	export let cards;
-	export let measurements;
-	export let typeOfQuestion;
-	export let changeTypes;
+	// export let cards;
+	// export let measurements;
+	// export let typeOfQuestion;
+	// export let changeTypes;
 </script>
+
 <!-- sidebar add section -->
 <div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
-	<div class="fixed  space-y-4 px-4 py-6 ">
-		<Card.Root class="rounded-lg border p-4  w-64 2xl:w-full">
+	<div class="fixed space-y-4 px-4 py-6">
+		<Card.Root class="w-64 rounded-lg border  p-4 2xl:w-full">
 			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 			<div
 				class="flex cursor-grab items-center justify-center"
@@ -40,7 +42,10 @@
 				role="button"
 				aria-label="Draggable new section template"
 			>
-				<Button class="w-full space-x-2 rounded-md border bg-[#F6F8FA] dark:bg-[#0a0a0b]" variant="secondary">
+				<Button
+					class="w-full space-x-2 rounded-md border bg-[#F6F8FA] dark:bg-[#0a0a0b]"
+					variant="secondary"
+				>
 					<Icon
 						icon="teenyicons:section-add-outline"
 						width="16"
@@ -51,11 +56,13 @@
 				</Button>
 			</div>
 		</Card.Root>
-<!-- Sidebar question -->
-		<Card.Root class="space-y-3 rounded-lg border p-4  shadow-md w-64 2xl:w-full">
+		<!-- Sidebar question -->
+		<Card.Root class="w-64 space-y-3 rounded-lg border  p-4 shadow-md 2xl:w-full">
 			<Card.Title class="text-md">Question</Card.Title>
-			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-4 2xl:px-14 py-2  bg-[#F6F8FA] dark:bg-[#0a0a0b]">
-				<label class="flex cursor-pointer items-center ">
+			<div
+				class="mx-auto flex w-fit flex-row space-x-8 rounded-md border bg-[#F6F8FA] px-4 py-2 dark:bg-[#0a0a0b] 2xl:px-14"
+			>
+				<label class="flex cursor-pointer items-center">
 					<input
 						type="radio"
 						name="layoutType"
@@ -65,7 +72,7 @@
 						class="sr-only"
 					/>
 					<span
-						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary "
+						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
 					>
 						<span
 							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Basic'
@@ -97,16 +104,16 @@
 				</label>
 			</div>
 		</Card.Root>
-<!-- sidebar question response time -->
-		<Card.Root class="rounded-lg border p-4  shadow-md w-64 2xl:w-full">
+		<!-- sidebar question response time -->
+		<Card.Root class="w-64 rounded-lg border  p-4 shadow-md 2xl:w-full">
 			<Card.Title class="text-md  ">Question Response Types</Card.Title>
 			<div class="scrollbar-hide max-h-80 overflow-y-auto py-4">
 				<ul class="space-y-2">
 					{#if typeOfQuestion === 'Advanced'}
-						{#each measurements as card}
+						{#each healthCarePlugins as card}
 							<li>
 								<div
-									class="w-full cursor-grab "
+									class="w-full cursor-grab"
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}
@@ -122,7 +129,7 @@
 						{#each cards as card}
 							<li>
 								<div
-									class="w-full cursor-grab  "
+									class="w-full cursor-grab"
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}

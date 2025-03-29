@@ -15,10 +15,16 @@ export const POST = async (event: RequestEvent) => {
 
         console.log('Data from api/server/question POST:', data);
 
-        const response = await createQuestion(
-            data.parentFormTemplateId,
-            data.parentSectionId,
-            data.responseType
+        const model = {
+            ParentTemplateId: data.parentFormTemplateId,
+            ParentSectionId: data.parentSectionId,
+            ResponseType: data.responseType
+        }
+
+        if(data.responseType === 'BloodPressure'){
+            model['Title']='What is your Blood Pressure?';
+        }
+        const response = await createQuestion(model
         );
 
         console.log('Response from createQuestion:', response);

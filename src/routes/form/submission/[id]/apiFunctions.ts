@@ -273,7 +273,7 @@ export async function questionResponseModels(
             Url: ResponseType === "URL"
                 ? (value !== undefined ? value : null)
                 : null,
-            TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object"].includes(ResponseType)
+            TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object", 'BloodPressure'].includes(ResponseType)
                 ? (value !== undefined ? (Array.isArray(value) ? value.join(", ") : value) : null)
                 : null,
             FileResourceId: ResponseType === "File"

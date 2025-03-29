@@ -305,7 +305,7 @@
 			</div>
 
 			<div class="min-h-[390px] bg-[#f9fafb] dark:bg-[#0a0a0b] border rounded-md border-gray-500">
-				<QuestionPaper {sections} bind:answers={answers} bind:errors={errors}/>
+				<QuestionPaper {sections} bind:answers={answers} bind:errors/>
 				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">

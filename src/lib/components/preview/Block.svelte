@@ -3,6 +3,7 @@
 	import SingleChoice from './SingleChoice.svelte';
 	import Question from './Question.svelte';
 	import Boolean from './BooleanChoice.svelte';
+	import BloodPressurePreview from './BloodPressurePreview.svelte';
 
 	export let q;
 	// console.log(q)
@@ -29,7 +30,9 @@
 		<Question question={q} />
 	{:else if q.ResponseType === 'Rating'}
 		<Question question={q} />
-	{:else if q.ResponseType === 'Temperature' || q.ResponseType === 'BloodPressure' || q.ResponseType === 'Glucose' || q.ResponseType === 'BloodOxygenSaturation' || q.ResponseType === 'PulseRate' || q.ResponseType === 'Hematocrit' || q.ResponseType === 'Cholesterol' || q.ResponseType === 'Height' || q.ResponseType === 'Weight' || q.ResponseType === 'RespiratoryRate' || q.ResponseType === 'Electrolytes' || q.ResponseType === 'KidneyFunction' || q.ResponseType === 'WaistCircumference' || q.ResponseType === 'Sleep' || q.ResponseType === 'CReactiveProtein' || q.ResponseType === 'Lipoprotein'}
+	{:else if q.ResponseType === 'BloodPressure'}
+		<BloodPressurePreview question={q} />
+	{:else if q.ResponseType === 'Temperature' || q.ResponseType === 'Glucose' || q.ResponseType === 'BloodOxygenSaturation' || q.ResponseType === 'PulseRate' || q.ResponseType === 'Hematocrit' || q.ResponseType === 'Cholesterol' || q.ResponseType === 'Height' || q.ResponseType === 'Weight' || q.ResponseType === 'RespiratoryRate' || q.ResponseType === 'Electrolytes' || q.ResponseType === 'KidneyFunction' || q.ResponseType === 'WaistCircumference' || q.ResponseType === 'Sleep' || q.ResponseType === 'CReactiveProtein' || q.ResponseType === 'Lipoprotein'}
 		<Question question={q} />
 	{/if}
 </div>

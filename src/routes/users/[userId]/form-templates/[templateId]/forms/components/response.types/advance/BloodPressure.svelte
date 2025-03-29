@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 
 	////////////////////////////////////////////////////////////////
 
@@ -19,20 +20,22 @@
 			{card.Title || 'Enter blood pressure'}
 		</h1>
 	</div>
-	<Input type="text" disabled placeholder="Enter Blood Pressure here..." class="w-full  p-2" />
+	<!-- <Input type="text" disabled placeholder="Enter Blood Pressure here..." class="w-full  p-2" /> -->
+
+
 	<div class="h-fit w-full p-2">
 		<div
 			class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
 		>
-			<p>Select Type :</p>
+			<!-- <p>Types </p> -->
 			<div class="flex flex-col items-start justify-start space-y-2">
-				<div>
-					<input type="checkbox" name="Celsius" value="Celsius" placeholder="Celsius" />
-					<label for="Celsius">Systolic (Under 120 mmHg)</label>
+				<div class=" flex flex-row">
+					<Label for="Celsius">Systolic </Label>
+					<Input type="text" name="Celsius" value="Celsius" placeholder="Celsius" />
 				</div>
-				<div>
-					<input type="checkbox" name="Fahrenheit" value="Fahrenheit" placeholder="Fahrenheit" />
-					<label for="Fahrenheit">Distolic (Under 80 mmHg)</label>
+				<div class=" flex flex-row">
+					<Label for="Fahrenheit">Distolic</Label>
+					<Input type="text" name="Fahrenheit" value="Fahrenheit" placeholder="Fahrenheit" />
 				</div>
 			</div>
 		</div>

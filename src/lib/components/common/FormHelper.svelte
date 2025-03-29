@@ -15,6 +15,7 @@
 	import RatingForm from '../forms/responseType/RatingFieldEditor.svelte';
 	import RangeForm from '../forms/responseType/RangeFieldEditor.svelte';
 	import AdvanceForm from '../forms/responseType/AdvanceFieldEditor.svelte';
+	import BloodPressureFieldEditor from '../forms/responseType/BloodPressureFieldEditor.svelte';
 
 	let {
 		questionCard = $bindable(),
@@ -80,10 +81,11 @@
 			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
 			<RatingForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
-		{:else if questionCard.ResponseType === 'Range'}
-			<RangeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+		
+			{:else if questionCard.ResponseType === 'BloodPressure'}
+			<BloodPressureFieldEditor bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else}
-			<AdvanceForm {questionCard} />
+			<AdvanceForm {questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
 		{/if}
 	</div>
 </div>

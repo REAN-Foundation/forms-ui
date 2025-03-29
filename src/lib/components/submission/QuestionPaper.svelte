@@ -11,6 +11,7 @@
 	import BloodOxygen from './BloodOxygen.svelte';
 	import QuestionPaper from './QuestionPaper.svelte';
 
+	import BloodPressureSubmission from './BloodPressureSubmission.svelte'
 	/////////////////////////////////////////////////////////////////////////////////
 
 	let { sections, answers = $bindable(), errors= $bindable()} = $props();
@@ -30,7 +31,7 @@
 		Rating: Rating,
 		Range: Range,
 		Temperature: BloodOxygen,
-		BloodPressure: BloodOxygen,
+		BloodPressure: BloodPressureSubmission,
 		Glucose: BloodOxygen,
 		BloodOxygenSaturation: BloodOxygen,
 		PulseRate: BloodOxygen,

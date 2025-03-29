@@ -51,7 +51,7 @@
 
 <Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
@@ -66,13 +66,13 @@
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
 		</div>
 		<Input bind:value={questionCard.Title} />
-			<p class="text-destructive">{errors?.Title}</p>
+		<p class="text-destructive">{errors?.Title}</p>
 
 		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
 		</div>
 		<Input bind:value={questionCard.Description} />
-			<p class="text-destructive">{errors?.Description}</p>
+		<p class="text-destructive">{errors?.Description}</p>
 
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 flex items-center space-x-2">
@@ -92,29 +92,6 @@
 			<Label class="col-span-11 ">Response Type</Label>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
-
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Score</Label>
-		</div>
-		<Input bind:value={questionCard.Score} type="number" />
-				<p class="text-destructive">{errors?.Score}</p>
-
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Hint</Label>
-		</div>
-		<Input bind:value={questionCard.Hint} />
-			<p class="text-destructive">{errors?.Hint}</p>
-
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question CorrectAnswer</Label>
-		</div>
-		<Input bind:value={questionCard.CorrectAnswer} />
-			<p class="text-destructive">{errors?.CorrectAnswer}</p>
-
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Image Url</Label>
-		</div>
-		<Input bind:value={questionCard.QuestionImageUrl} />
 
 		<Dialog.Footer class="mt-4">
 			<Button type="submit">Save changes</Button>
