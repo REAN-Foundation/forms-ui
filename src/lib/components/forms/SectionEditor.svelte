@@ -52,7 +52,7 @@
 	</div>
 
 	<p class="px-6 text-sm text-gray-500">
-		Make changes to your Section Template here. Click save when you're done.
+		Make changes to your section here. Click save when you're done.
 	</p>
 	<form
 		method="post"
