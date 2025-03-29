@@ -8,6 +8,7 @@
 	import { formComponents } from './response.types/index';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
+	import { writable } from 'svelte/store';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -88,9 +89,17 @@
 		deleteSubButtonClicked = false;
 		cardToDelete = null;
 	}
-	import { writable } from 'svelte/store';
 
-	const isOpen = writable(false);
+	const isOpen = writable<Record<number, boolean>>({}); 
+
+	function toggleSection(sectionId: number) {
+		isOpen.update((map) => ({
+			...map,
+			[sectionId]: !map[sectionId]
+		}));
+	}
+
+
 </script>
 
 {#each uiSections as section, index (section.id)}
@@ -122,13 +131,14 @@
 											variant="ghost"
 											size="sm"
 											class="w-9 p-0"
-											onclick={() => isOpen.update((v) => !v)}
+											onclick={() => toggleSection(section.id)}
 										>
 											<Icon
 												icon="grommet-icons:down"
-												width="16"
-												height="16"
-												class={`transition-transform duration-300 ${$isOpen ? 'rotate-180' : 'rotate-0'}`}
+												style="width: 12px; height: 12px;"
+												class={`transition-transform duration-300 ${
+													$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
+												}`}
 											/>
 											<span class="sr-only">Toggle</span>
 										</Button>
