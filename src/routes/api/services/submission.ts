@@ -1,5 +1,5 @@
 import { BACKEND_API_URL } from "$env/static/private";
-import { get_, post_ } from "./common";
+import { get_, post_, put_ } from "./common";
 
 export const createSubmission = async (
 	templateId: string,
@@ -13,11 +13,13 @@ export const createSubmission = async (
 };
 
 export const submit = async (
-	submissionId: string,
+	submissionKey: string,
 ) => {
-	const body = {};
-	const url = BACKEND_API_URL + `/form-submissions/${submissionId}/submit`;
-	return await post_(url, body);
+	const body = {
+		SubmissionKey: submissionKey
+	};
+	const url = BACKEND_API_URL + `/form-submissions/submit`;
+	return await put_(url, body);
 }
 
 export const getFormSubmission = async (

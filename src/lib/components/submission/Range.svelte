@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable()} = $props();
 </script>
 
 <!-- {#if q.Title} -->
@@ -20,7 +20,11 @@
 		{#if q.Description}
 			<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
 		{/if}
-		<Input type="range" class="w-full " name={q.id} bind:value={answers[q.id]} {...(q.IsRequired ? { required: true } : {})}/>
+		
+		<Input type="range" class="w-full " name={q.id} bind:value={answers[q.id]}/>
+		{#if errors[q.id]}
+			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
+		{/if}
 		{#if q.Hint}
 			<div class="flex justify-end">
 				<Label for="hint" class="float-right ml-auto mt-4 justify-end  p-2">Hint: {q.Hint}</Label>

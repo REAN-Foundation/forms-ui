@@ -1,20 +1,23 @@
 import { BACKEND_API_URL } from "$env/static/private";
+import type { QuestionResponseCreateModel } from "../../form/submission/[id]/apiFunctions";
 import { get_, post_ } from "./common";
 
 export const  createQuestionResponse = async (
-	FormSubmissionId: string,
-	Data: { [key: string]: string }
+	formSubmissionKey: string,
+	questionResponses: QuestionResponseCreateModel[]
 ) => {
 	const body = {
-		FormSubmissionId: FormSubmissionId,
-		Data: Data
+		FormSubmissionKey: formSubmissionKey,
+		QuestionResponses: questionResponses
 	};
+
+    console.log('ResponseBode========',body )
 
 	const url = BACKEND_API_URL + `/question-responses/save`;
 	return await post_(url, body);
 };
 
-export const searchquestionResponse = async (
+export const searchQuestionResponse = async (
     searchParams?: any
 ) => {
     console.log('Search params are ', searchParams);

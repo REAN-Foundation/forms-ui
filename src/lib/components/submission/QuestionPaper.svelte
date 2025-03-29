@@ -13,13 +13,7 @@
 
 	/////////////////////////////////////////////////////////////////////////////////
 
-	let { sections, answers = $bindable() } = $props();
-	// export let sections;
-	// export let questions;
-	// export let answers;
-	// export let textValues
-	$inspect('ansers data-----------', answers);
-
+	let { sections, answers = $bindable(), errors= $bindable()} = $props();
 
 	const componentsMap = {
 		Text: Text,
@@ -66,7 +60,7 @@
 
 		{#each s?.Questions ?? [] as sq, index}
 			<div class="mt-2 border p-3">
-				<svelte:component this={componentsMap[sq.ResponseType]} q={sq} bind:answers />
+				<svelte:component this={componentsMap[sq.ResponseType]} q={sq} bind:answers bind:errors />
 			</div>
 		{/each}
 
@@ -86,7 +80,7 @@
 									</div>
 								{/each}
 							{/each} -->
-				<QuestionPaper sections={s.Subsections} bind:answers />
+				<QuestionPaper sections={s.Subsections} bind:answers bind:errors/>
 				<!-- <p>subsection</p> -->
 			{/if}
 		</div>
