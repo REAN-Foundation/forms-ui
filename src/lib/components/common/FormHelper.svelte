@@ -48,7 +48,7 @@
 				<h2 class="text-lg font-semibold text-black dark:text-white">Edit Question</h2>
 
 				<p class="text-sm text-black dark:text-white">
-					Make changes to your Question Template here.
+					Make changes to your question here.
 				</p>
 			</div>
 			<Button type="button" variant="ghost" size="icon" onclick={() => closeSheet()}>

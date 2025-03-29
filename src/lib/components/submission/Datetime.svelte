@@ -104,7 +104,11 @@
 	</div>
 {:else if q.ResponseType === 'Date'}
 	<div class="flex w-full flex-col gap-1.5 p-4">
-		<Label for="title">{q.Title || 'No title provided'}</Label>
+		<Label for="title">{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
 		{#if q.Score}
 			<Label for="score" class="float-right">{q.Score}</Label>
