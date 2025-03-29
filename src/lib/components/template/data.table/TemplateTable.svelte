@@ -286,26 +286,26 @@
 	{/if}
 </div> -->
 
-<div class="mt-4 w-full overflow-x-auto">
-	<table class="w-full table-auto border-collapse border border-slate-200">
-		<thead class="border">
-			<tr class="">
-				<th class="p-4 text-center">Sr No</th>
-				<th class="p-4 text-center">
+<div class="mt-4 w-full overflow-x-auto  rounded-md border ">
+	<table class="w-full table-auto border-collapse border  border-slate-200">
+		<thead class="border ">
+			<tr class="bg-[#F6F8FA] dark:bg-[#0a0a0b]">
+				<th class="p-2 text-center">Sr No</th>
+				<th class="p-2 text-center">
 					<Button variant="ghost" class="" onclick={() => sortTable('Title')}>
 						Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
 					</Button>
 				</th>
-				<th class="p-4 text-center">
+				<th class="p-2 text-center">
 					<Button variant="ghost" onclick={() => sortTable('Type')}>
 						Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
 					</Button>
 				</th>
 				<!-- <th class="p-4 text-center">Description</th>
 				<th class="p-4 text-center">Tenant Code</th> -->
-				<th class="p-4 text-center">Created At</th>
-				<th class="p-4 text-center">Version</th>
-				<th class="p-4 text-center">Actions</th>
+				<th class="p-2 text-center">Created At</th>
+				<th class="p-2 text-center">Version</th>
+				<th class="p-2 text-center">Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -315,7 +315,7 @@
 				<tr><td colspan="8" class="p-4 text-center">No records found</td></tr>
 			{:else}
 				{#each assessmentTemplates as row, index}
-					<tr class="border-b p-4">
+					<tr class="border-b border-r border-l p-4">
 						<td class=" text-center">{index + 1}</td>
 						<td class="text-center capitalize">
 							<a

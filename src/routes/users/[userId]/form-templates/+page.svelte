@@ -132,7 +132,7 @@
 							<form method="POST" action="?/newAssessment" use:enhance>
 								<TemplateForm {templateData} bind:errors />
 								<Dialog.Footer>
-									<Button type="submit">Create</Button>
+									<Button class="my-4" type="submit">Create</Button>
 								</Dialog.Footer>
 							</form>
 						</Dialog.Content>
