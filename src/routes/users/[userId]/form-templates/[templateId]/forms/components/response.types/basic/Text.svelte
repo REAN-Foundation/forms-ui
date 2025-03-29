@@ -15,7 +15,11 @@
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
-		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Enter question here'}</h1>
+		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Enter question here'}
+			{#if card.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
+		</h1>
 		<!-- <p>{responseType}</p> -->
 	</div>
 	<div class="h-fit w-full rounded">

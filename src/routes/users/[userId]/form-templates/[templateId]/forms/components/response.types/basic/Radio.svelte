@@ -30,6 +30,9 @@
 	<div class="flex w-full items-center justify-between">
 		<h1 class="text-md text-wrap text-left font-bold text-slate-400">
 			{card.Title || 'Enter single choice question'}
+			{#if card.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
 		</h1>
 		<!-- <p class="relative">{responseType}</p> -->
 	</div>
