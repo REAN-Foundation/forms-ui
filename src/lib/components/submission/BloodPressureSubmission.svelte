@@ -1,31 +1,30 @@
-<script>
+<script lang="ts">
+
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
 
-	// let jsonObject = $state({
-	// 	Systolic: '',
-	// 	Distolic: '',
-	// 	Unit: 'mmHg'
-	// });
-	let selectedBPValues = $state({
+    let selectedBPValues = $state({
 		Systolic: '',
-		Distolic: '',
+		Diastolic: '',
 		Unit: 'mmHg'
 	});
-	// let selectedBPValues = $derived(jsonObject);
-	$effect(() => {
-	// 	jsonObject = JSON.parse(answers[q.id] || null) || {
-	// 		Systolic: '',
-	// 		Distolic: '',
-	// 		Unit: 'mmHg'
-	// 	};
 
-		answers[q.id] = JSON.stringify(selectedBPValues);
-	});
-	$inspect('This is jsonObject', selectedBPValues);
 	$inspect('This is answers', answers[q.id]);
+    $inspect('This is selectedBPValues', selectedBPValues);
+
+    const updateAnswers = (event) => {
+        answers[q.id] = JSON.stringify(selectedBPValues);
+    };
+
+	$effect(() => {
+        if (answers[q.id]) {
+            selectedBPValues = JSON.parse(answers[q.id]);
+        }
+	});
+
+
 </script>
 
 <!-- {#if q.Title} -->
@@ -61,6 +60,7 @@
 						name={q.id}
 						bind:value={selectedBPValues.Systolic}
 						placeholder="Celsius"
+                        oninput={updateAnswers}
 					/>
 				</div>
 				<div class=" flex flex-row">
@@ -68,8 +68,9 @@
 					<Input
 						type="text"
 						name={q.id}
-						bind:value={selectedBPValues.Distolic}
+						bind:value={selectedBPValues.Diastolic}
 						placeholder="Fahrenheit"
+                        oninput={updateAnswers}
 					/>
 				</div>
 			</div>
