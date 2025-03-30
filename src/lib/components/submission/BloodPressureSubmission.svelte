@@ -4,27 +4,27 @@
 
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
 
-	let jsonObject = $state({
-		Systolic: '',
-		Distolic: '',
-		Unit: 'mmHg'
-	});
-	// let selectedBPValues = $state({
+	// let jsonObject = $state({
 	// 	Systolic: '',
 	// 	Distolic: '',
 	// 	Unit: 'mmHg'
 	// });
+	let selectedBPValues = $state({
+		Systolic: '',
+		Distolic: '',
+		Unit: 'mmHg'
+	});
 	// let selectedBPValues = $derived(jsonObject);
 	$effect(() => {
-		jsonObject = JSON.parse(answers[q.id] || null) || {
-			Systolic: '',
-			Distolic: '',
-			Unit: 'mmHg'
-		};
+	// 	jsonObject = JSON.parse(answers[q.id] || null) || {
+	// 		Systolic: '',
+	// 		Distolic: '',
+	// 		Unit: 'mmHg'
+	// 	};
 
-		answers[q.id] = JSON.stringify(jsonObject);
+		answers[q.id] = JSON.stringify(selectedBPValues);
 	});
-	$inspect('This is jsonObject', jsonObject);
+	$inspect('This is jsonObject', selectedBPValues);
 	$inspect('This is answers', answers[q.id]);
 </script>
 
@@ -59,7 +59,7 @@
 					<Input
 						type="text"
 						name={q.id}
-						bind:value={jsonObject.Systolic}
+						bind:value={selectedBPValues.Systolic}
 						placeholder="Celsius"
 					/>
 				</div>
@@ -68,7 +68,7 @@
 					<Input
 						type="text"
 						name={q.id}
-						bind:value={jsonObject.Distolic}
+						bind:value={selectedBPValues.Distolic}
 						placeholder="Fahrenheit"
 					/>
 				</div>
