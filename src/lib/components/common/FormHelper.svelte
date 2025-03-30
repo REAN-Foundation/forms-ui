@@ -81,8 +81,7 @@
 			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
 			<RatingForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
-		
-			{:else if questionCard.ResponseType === 'BloodPressure'}
+		{:else if questionCard.ResponseType === 'BloodPressure'}
 			<BloodPressureFieldEditor bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
 		{:else}
 			<AdvanceForm {questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
