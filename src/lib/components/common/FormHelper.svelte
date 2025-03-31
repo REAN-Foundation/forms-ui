@@ -2,20 +2,30 @@
 	import { fly } from 'svelte/transition';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import TextForm from '../forms/responseType/TextFieldEditor.svelte';
-	import FloatForm from '../forms/responseType/FloatFieldEditor.svelte';
-	import IntegerForm from '../forms/responseType/IntegerFieldEditor.svelte';
-	import BooleanForm from '../forms/responseType/BooleanFieldEditor.svelte';
-	import ObjectForm from '../forms/responseType/ObjectFieldEditor.svelte';
-	import TextArrayForm from '../forms/responseType/TextArrayFieldEditor.svelte';
-	import MultipleChoiceSelectionForm from '../forms/responseType/MultipleChoiceSelectionFieldEditor.svelte';
-	import SingleChoiceSelectionForm from '../forms/responseType/SingleChoiceSelectionFieldEditor.svelte';
-	import DateForm from '../forms/responseType/DateFieldEditor.svelte';
-	import DateTimeForm from '../forms/responseType/DateTimeFieldEditor.svelte';
-	import RatingForm from '../forms/responseType/RatingFieldEditor.svelte';
-	import RangeForm from '../forms/responseType/RangeFieldEditor.svelte';
-	import AdvanceForm from '../forms/responseType/AdvanceFieldEditor.svelte';
-	import BloodPressureFieldEditor from '../forms/responseType/BloodPressureFieldEditor.svelte';
+	import {
+		BooleanForm,
+		DateForm,
+		DateTimeForm,
+		FloatForm,
+		IntegerForm,
+		MultipleChoiceSelectionForm,
+		ObjectForm,
+		RangeForm,
+		RatingForm,
+		SingleChoiceSelectionForm,
+		TextArrayForm,
+		TextForm
+	} from '../forms/responseType/basic/index';
+	import AdvanceForm from '../forms/responseType/healthCare/AdvanceFieldEditor.svelte';
+	import {
+		HeightForm,
+		WeightForm,
+		TemperatureForm,
+		PulseRateForm,
+		BloodPressureForm
+	} from '../forms/responseType/healthCare/index';
+
+	///////////////////////////////////////////////////////////////////////
 
 	let {
 		questionCard = $bindable(),
@@ -48,9 +58,7 @@
 			<div class="mt-2 flex flex-col">
 				<h2 class="text-lg font-semibold text-black dark:text-white">Edit Question</h2>
 
-				<p class="text-sm text-black dark:text-white">
-					Make changes to your question here.
-				</p>
+				<p class="text-sm text-black dark:text-white">Make changes to your question here.</p>
 			</div>
 			<Button type="button" variant="ghost" size="icon" onclick={() => closeSheet()}>
 				<Icon icon="mdi:close" class="text-gray-600 " />
@@ -60,31 +68,41 @@
 
 		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
 		{#if questionCard.ResponseType === 'Text'}
-			<TextForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<TextForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Float'}
-			<FloatForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<FloatForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Integer'}
-			<IntegerForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<IntegerForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Boolean'}
-			<BooleanForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<BooleanForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Object'}
-			<ObjectForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<ObjectForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'TextArray'}
-			<TextArrayForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
+			<TextArrayForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'MultiChoiceSelection'}
-			<MultipleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<MultipleChoiceSelectionForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'SingleChoiceSelection'}
-			<SingleChoiceSelectionForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<SingleChoiceSelectionForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Date'}
-			<DateForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<DateForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'DateTime'}
-			<DateTimeForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<DateTimeForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Rating'}
-			<RatingForm bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<RatingForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+		{:else if questionCard.ResponseType === 'Range'}
+			<RangeForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+		{:else if questionCard.ResponseType === 'Height'}
+			<HeightForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+		{:else if questionCard.ResponseType === 'Weight'}
+			<WeightForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+		{:else if questionCard.ResponseType === 'Temperature'}
+			<TemperatureForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+		{:else if questionCard.ResponseType === 'PulseRate'}
+			<PulseRateForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'BloodPressure'}
-			<BloodPressureFieldEditor bind:questionCard={questionCard} bind:errors={errors}  {handleQuestionCardUpdate} />
+			<BloodPressureForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else}
-			<AdvanceForm {questionCard} bind:errors={errors}  {handleQuestionCardUpdate}/>
+			<AdvanceForm {questionCard} bind:errors {handleQuestionCardUpdate} />
 		{/if}
 	</div>
 </div>

@@ -3,12 +3,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
-	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
 	import Icon from '@iconify/svelte';
-	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question-schema';
+	import type { QuestionUpdateModel } from '../../../common/questionTypes';
+	import { questionSchema } from '../../question-schema';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -84,9 +82,10 @@
 		options = options.filter((_, i) => i !== index);
 	}
 </script>
-<Card.Root class="rounded-none border-none p-4 bg-[#fafaf9] dark:bg-[#0a0a0b]">
+
+<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
@@ -193,7 +192,8 @@
 
 		<Dialog.Footer class="mt-4">
 			<Button type="submit">Save changes</Button>
-		</Dialog.Footer>	</form>
+		</Dialog.Footer>
+	</form>
 </Card.Root>
 
 <style>

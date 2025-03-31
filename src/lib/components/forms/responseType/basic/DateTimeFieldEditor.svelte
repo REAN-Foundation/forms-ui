@@ -3,11 +3,9 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
-	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question-schema';
+	import type { QuestionUpdateModel } from '../../../common/questionTypes';
+	import { questionSchema } from '../../question-schema';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -47,18 +45,15 @@
 	}
 </script>
 
-<!-- use:enhance
-method="POST" -->
-
 <Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
 		}}
 	>
-		<div class="relative my-4 hidden grid-cols-12 items-center gap-4">
+		<div class="relative my-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
@@ -76,15 +71,14 @@ method="POST" -->
 		<p class="error">{errors?.Description}</p>
 
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
-			<div class="col-span-11 space-x-2 flex items-center">
+			<div class="col-span-11 flex items-center space-x-2">
 				<Label for="isRequired">Required</Label>
-
 				<input
 					id="isRequired"
 					type="checkbox"
 					bind:checked={questionCard.IsRequired}
 					aria-labelledby="isRequired"
-					class="h-4 w-4 "
+					class="h-4 w-4"
 				/>
 			</div>
 		</div>

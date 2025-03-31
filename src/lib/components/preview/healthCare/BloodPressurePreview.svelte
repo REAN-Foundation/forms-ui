@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Input from '../ui/input/input.svelte';
-	import Label from '../ui/label/label.svelte';
+	import Input from '../../ui/input/input.svelte';
+	import Label from '../../ui/label/label.svelte';
 
 	let { question } = $props();
 	// console.log(question)

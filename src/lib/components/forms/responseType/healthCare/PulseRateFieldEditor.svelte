@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
-	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
-	import { questionSchema } from '../question-schema';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
+	import { questionSchema } from '../../question-schema';
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -47,36 +45,34 @@
 	}
 </script>
 
-<Card.Root class="rounded-none border-none p-4 bg-[#fafaf9] dark:bg-[#0a0a0b]">
+<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
 		}}
 	>
-		<div class="relative my-2 hidden grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Id</Label>
-	
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
 
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
-	
 		</div>
 		<Input bind:value={questionCard.Title} />
-		<p class="error">{errors?.Title}</p>
+		<p class="text-destructive">{errors?.Title}</p>
 
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
-	
 		</div>
 		<Input bind:value={questionCard.Description} />
-		<p class="error">{errors?.Description}</p>
+		<p class="text-destructive">{errors?.Description}</p>
+
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 flex items-center space-x-2">
-				<Label for="isRequired">Required</Label>
+				<Label for="isRequired">Is Required</Label>
 				<input
 					id="isRequired"
 					type="checkbox"
@@ -88,43 +84,15 @@
 		</div>
 		<p class="error">{errors?.IsRequired}</p>
 
-		<div class="relative my-2  hidden grid-cols-12 items-center gap-4">
+		<div class="relative mt-2 hidden grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Response Type</Label>
-	
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
-		<div class="relative my-2  grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Score</Label>
-
-		</div>
-		<Input bind:value={questionCard.Score} type="number" />
-		<p class="error">{errors?.Score}</p>
-
-		<div class="relative my-2  grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Hint</Label>
-		
-		</div>
-		<Input bind:value={questionCard.Hint} />
-		<p class="error">{errors?.Hint}</p>
-
-		<div class="relative my-2  grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Correct Answer</Label>
-			
-		</div>
-		<Input bind:value={questionCard.CorrectAnswer} />
-		<p class="error">{errors?.CorrectAnswer}</p>
-
-		<div class="relative my-2  grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Question Image Url</Label>
-			
-		</div>
-		<Input bind:value={questionCard.QuestionImageUrl} />
-		<p class="error">{errors?.QuestionImageUrl}</p>
-
 		<Dialog.Footer class="mt-4">
 			<Button type="submit">Save changes</Button>
-		</Dialog.Footer>	</form>
+		</Dialog.Footer>
+	</form>
 </Card.Root>
 
 <style>

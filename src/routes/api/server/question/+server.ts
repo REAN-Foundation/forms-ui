@@ -1,4 +1,4 @@
-import {  json, type RequestEvent } from '@sveltejs/kit';
+import { json, type RequestEvent } from '@sveltejs/kit';
 import { createQuestion, deleteQuestion, updateQuestion } from '../../services/question';
 import { questionSchema } from '$lib/components/forms/question-schema';
 
@@ -21,11 +21,22 @@ export const POST = async (event: RequestEvent) => {
             ResponseType: data.responseType
         }
 
-        if(data.responseType === 'BloodPressure'){
-            model['Title']='What is your Blood Pressure?';
+        if (data.responseType === 'Height') {
+            model['Title'] = 'What is your Height?';
         }
-        const response = await createQuestion(model
-        );
+        if (data.responseType === 'Weight') {
+            model['Title'] = 'What is your Weight?';
+        }
+        if (data.responseType === 'Temperature') {
+            model['Title'] = 'What is your Body Temperature?';
+        }
+        if (data.responseType === 'PulseRate') {
+            model['Title'] = 'What is your Heart Pulse Rate?';
+        }
+        if (data.responseType === 'BloodPressure') {
+            model['Title'] = 'What is your Blood Pressure?';
+        }
+        const response = await createQuestion(model);
 
         console.log('Response from createQuestion:', response);
         return new Response(JSON.stringify(response));

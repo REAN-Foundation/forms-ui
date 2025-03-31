@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	import { questionSchema } from '../question-schema';
+	import type { QuestionUpdateModel } from '../../../common/questionTypes';
+	import { questionSchema } from '../../question-schema';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -15,7 +17,7 @@
 		event.preventDefault();
 		console.log(questionCard.Title);
 
-		const model = {
+		const model: QuestionUpdateModel = {
 			id: questionCard.id,
 			Title: questionCard.Title,
 			Description: questionCard.Description,
@@ -24,8 +26,6 @@
 			CorrectAnswer: questionCard.CorrectAnswer,
 			Hint: questionCard.Hint,
 			QuestionImageUrl: questionCard.QuestionImageUrl,
-			RangeMin: questionCard.RangeMin,
-			RangeMax: questionCard.RangeMax,
 			IsRequired: questionCard.IsRequired
 		};
 
@@ -49,7 +49,7 @@
 
 <Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
 	<form
-		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2 "
+		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
@@ -71,7 +71,6 @@
 		</div>
 		<Input bind:value={questionCard.Description} />
 		<p class="error">{errors?.Description}</p>
-
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 flex items-center space-x-2">
 				<Label for="isRequired">Required</Label>
@@ -90,18 +89,6 @@
 			<Label class="col-span-11 ">Response Type</Label>
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
-
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Minimum Range<span class="text-red-600">*</span></Label>
-		</div>
-		<Input bind:value={questionCard.RangeMin} type="number" />
-		<p class="error">{errors?.RangeMin}</p>
-
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
-			<Label class="col-span-11 ">Maximim Range<span class="text-red-600">*</span></Label>
-		</div>
-		<Input bind:value={questionCard.RangeMax} type="number" />
-		<p class="error">{errors?.RangeMax}</p>
 
 		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Score</Label>
