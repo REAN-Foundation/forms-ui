@@ -22,25 +22,39 @@
 	</div>
 	<!-- <Input type="text" disabled placeholder="Enter Blood Pressure here..." class="w-full  p-2" /> -->
 
-
-	<div class="h-fit w-full p-2">
-		<div
-			class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
-		>
-			<!-- <p>Types </p> -->
-			<div class="flex flex-col items-start justify-start space-y-2">
-				<div class=" flex flex-row">
-					<Label for="Celsius">Systolic </Label>
-					<Input type="text" name="Celsius" value="Celsius" placeholder="Celsius" />
-				</div>
-				<div class=" flex flex-row">
-					<Label for="Fahrenheit">Distolic</Label>
-					<Input type="text" name="Fahrenheit" value="Fahrenheit" placeholder="Fahrenheit" />
-				</div>
-			</div>
+	<div class="w-full space-y-3 rounded-lg">
+		<div class="flex flex-col space-y-2">
+		  <div class="flex items-center space-x-2">
+			<Label for="systolic" class="text-slate-400 mr-2">Systolic</Label>
+			<Input
+			  disabled
+			  type="text"
+			  name="systolic"
+			  placeholder="Enter the systolic blood pressure here..."
+			  class="w-full"
+			/>
+<!-- 
+		 <div class="text-slate-400">
+			mmHg
+		 </div> -->
+			
+		  </div>
+		  <div class="flex items-center space-x-2">
+			<Label for="diastolic" class="text-slate-400">Diastolic</Label>
+			<Input
+			  disabled
+			  type="text"
+			  name="diastolic"
+			  placeholder="Enter the distolic blood pressure here..."
+			  class="w-full"
+			/>
+			<!-- <div class="text-slate-400">
+				mmHg
+			 </div> -->
+		  </div>
+		 
 		</div>
-	</div>
-
+	  </div>
 	<div>
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>
 	</div>

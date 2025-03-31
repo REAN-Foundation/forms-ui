@@ -22,7 +22,7 @@
 	<Input
 		type="text"
 		disabled
-		placeholder="Enter the Height in cm / m /inches here..."
+		placeholder="Enter the height in cm / m /inches here..."
 		class="brder w-full p-2"
 	/>
 

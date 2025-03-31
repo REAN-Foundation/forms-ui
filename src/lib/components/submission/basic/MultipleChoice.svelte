@@ -4,8 +4,6 @@
   // Props from parent component
   let { q, answers = $bindable(), errors = $bindable() } = $props();
 
-
-
   // Extract options using 'Text' field
   let optionsArray: string[] = $state(q.Options?.map((option) => option.Text.trim()) || []);
 

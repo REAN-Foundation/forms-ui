@@ -22,7 +22,7 @@
 	<Input
 		disabled
 		type="text"
-		placeholder="Enter the Weight in kg / lbs here..."
+		placeholder="Enter the weight in kg / lbs here..."
 		class="w-full  p-2"
 	/>
 
