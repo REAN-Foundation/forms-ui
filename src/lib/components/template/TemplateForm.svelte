@@ -13,6 +13,7 @@
 	let { templateData, errors = $bindable() } = $props();
 
 	///////////////////////////////////////////////////////////////
+	
 	$inspect(templateData, 'ghcfszdgvbjkn');
 	// async function handleSubmit(event) {
 	// 	event.preventDefault();

@@ -28,6 +28,10 @@
 	let isLoading = $state(false);
 	// $inspect(data.assessmentTemplate.Items);
 	let assessmentTemplates = $state(data.assessmentTemplate.Items);
+	
+	$effect(() => {
+		 assessmentTemplates = data.assessmentTemplate.Items;
+	});
 	// let retrivedAssessmentTemplates;
 	const userId = page.params.userId;
 
@@ -205,6 +209,7 @@
 			const res = await response.json();
 			console.log('response', res);
 			// toastMessage(res);
+			toastMessage(res);
 			invalidate('app:template');
 			open = false;
 			// return response;
@@ -349,7 +354,7 @@
 												<Dialog.Header>
 													<Dialog.Title>Add New</Dialog.Title>
 													<Dialog.Description>
-														Make changes to your Assessment Template here. Click save when you're
+														Make changes to your form template here. Click save when you're
 														done.
 													</Dialog.Description>
 												</Dialog.Header>
