@@ -20,7 +20,7 @@
 	{#if q.Description}
 		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
 	{/if}
-	<Input type="number" class="w-full" bind:value={answers[q.id]} name={q.id} />
+	<Input type="number" class="w-full" bind:value={answers[q.id]} name={q.id} /><Label>bpm</Label>
 	<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if errors[q.id]}
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>

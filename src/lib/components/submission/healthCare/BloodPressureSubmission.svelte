@@ -62,6 +62,7 @@
 						placeholder="Celsius"
                         oninput={updateAnswers}
 					/>
+					<Label>mmHg</Label>
 				</div>
 				<div class=" flex flex-row">
 					<Label for="Fahrenheit">Distolic</Label>
@@ -72,6 +73,7 @@
 						placeholder="Fahrenheit"
                         oninput={updateAnswers}
 					/>
+						<Label>mmHg</Label>
 				</div>
 			</div>
 		</div>
