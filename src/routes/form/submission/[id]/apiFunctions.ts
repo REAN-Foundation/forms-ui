@@ -140,6 +140,10 @@ export function createSchema(sections) {
 
                     case 'Integer':
                     case 'Float':
+                    case 'Height':
+                    case 'Weight':
+                    case 'PulseRate':
+                    case 'Temperature':
                         schemaObj[q.id] = z
                             .number({
                                 required_error: 'This field is required',

@@ -17,6 +17,9 @@
 	<div class="flex w-full items-center justify-between">
 		<h1 class="text-md font-bold text-slate-400">
 			{card.Title || 'Enter Temperature'}
+			{#if card.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
 		</h1>
 	</div>
 	<Input type="text" disabled placeholder="Enter the temperature here..." class="w-full p-2" />
