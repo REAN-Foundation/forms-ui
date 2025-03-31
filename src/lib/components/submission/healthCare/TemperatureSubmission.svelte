@@ -20,7 +20,9 @@
 	{#if q.Description}
 		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
 	{/if}
-	<Input type="number" class="w-full" bind:value={answers[q.id]} name={q.id} /><Label>Celcius</Label>
+	<div class="flex items-center space-x-2">
+		<Input type="number" class="w-full" bind:value={answers[q.id]} name={q.id} /><Label>Celcius</Label>
+    </div>
 	<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if errors[q.id]}
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>

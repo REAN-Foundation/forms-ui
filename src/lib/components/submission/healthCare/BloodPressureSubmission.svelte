@@ -33,34 +33,6 @@
 		{/if}
 	</Label>
 
-	<div class="w-full space-y-3 rounded-lg">
-		<div class="flex flex-col space-y-2">
-			<div class="flex items-center space-x-2">
-				<Label for="systolic" class=" mr-2">Systolic</Label>
-				<Input
-					type="text"
-					name={q.id}
-					bind:value={selectedBPValues.Systolic}
-					placeholder="Enter the systolic blood pressure here..."
-					oninput={updateAnswers}
-				/>
-
-				<Label for="umit" class="">mmHg</Label>
-			</div>
-			<div class="flex items-center space-x-2">
-				<Label for="diastolic" class="">Diastolic</Label>
-				<Input
-					type="text"
-					name={q.id}
-					bind:value={selectedBPValues.Diastolic}
-					placeholder="Enter the distolic blood pressure here..."
-					oninput={updateAnswers}
-				/>
-				<Label for="umit" class="">mmHg</Label>
-			</div>
-		</div>
-	</div>
-
 	<!-- <Label>Drop file here{q.ResponseType}</Label> -->
 
 	<Label for="score" class="float-right">{q.Score || ''}</Label>
@@ -69,9 +41,7 @@
 	>
 
 	<Input type="text" class="hidden w-full" bind:value={answers[q.id]} />
-	{#if errors[q.id]}
-		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
-	{/if}
+
 	<!-- <div class="h-fit w-full p-2">
 		<div
 			class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
@@ -103,6 +73,37 @@
 		</div>
 	</div> -->
 
+	<div class="w-full space-y-3 rounded-lg">
+		<div class="flex flex-col space-y-2">
+			<div class="flex items-center space-x-2">
+				<Label for="systolic" class=" mr-2">Systolic</Label>
+				<Input
+					type="text"
+					name={q.id}
+					bind:value={selectedBPValues.Systolic}
+					placeholder="Enter the systolic blood pressure here..."
+					oninput={updateAnswers}
+				/>
+
+				<Label for="umit" class="">mmHg</Label>
+			</div>
+			<div class="flex items-center space-x-2">
+				<Label for="diastolic" class="">Diastolic</Label>
+				<Input
+					type="text"
+					name={q.id}
+					bind:value={selectedBPValues.Diastolic}
+					placeholder="Enter the distolic blood pressure here..."
+					oninput={updateAnswers}
+				/>
+				<Label for="umit" class="">mmHg</Label>
+			</div>
+		</div>
+	</div>
+	
+	{#if errors[q.id]}
+		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
+	{/if}
 </div>
 <!-- </div> -->
 <!-- {/if} -->
