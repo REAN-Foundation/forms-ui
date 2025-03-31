@@ -21,7 +21,8 @@
 			<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
 		{/if}
 		
-		<Input type="range" class="w-full " name={q.id} bind:value={answers[q.id]}/>
+		<Input type="range" class="w-full " name={q.id} min={q?.RangeMin} max={q?.RangeMax} bind:value={answers[q.id]}/>
+        <span>{answers[q.id]}</span> 
 		{#if errors[q.id]}
 			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
 		{/if}

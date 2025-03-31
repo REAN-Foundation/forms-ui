@@ -1,30 +1,31 @@
 <script lang="ts">
-  import { Label } from '$lib/components/ui/label/index.js';
+    import { Input } from '$lib/components/ui/input';
+    import { Label } from '$lib/components/ui/label/index.js';
 
-  // Props from parent component
-  let { q, answers = $bindable(), errors = $bindable() } = $props();
+    let { q, answers = $bindable(), errors = $bindable() } = $props();
 
-  // Extract options using 'Text' field
-  let optionsArray: string[] = $state(q.Options?.map((option) => option.Text.trim()) || []);
+    let selectedOptions = $state([]);
 
-  // Convert answers[q.id] from comma-separated string to array
-  if (!Array.isArray(answers[q.id])) {
-    answers[q.id] = answers[q.id] ? answers[q.id].split(',').map((val: string) => val.trim()) : [];
-  }
+    $effect(() => {
+            if (answers[q.id]) {
+                selectedOptions = JSON.parse(answers[q.id]);
+            }
+        });
 
-  // Handle checkbox state changes
-  function handleCheckboxChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const value = target.value;
+    let optionsArray: string[] = $state(q.Options?.map((option) => option.Text.trim()) || []);
 
-    if (target.checked) {
-      if (!answers[q.id].includes(value)) {
-        answers[q.id] = [...answers[q.id], value];
-      }
-    } else {
-      answers[q.id] = answers[q.id].filter((item) => item !== value);
+    function handleCheckboxChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const value = target.value;
+
+        if (target.checked) {
+        selectedOptions = [...selectedOptions, value];
+        answers[q.id] = JSON.stringify(selectedOptions);
+        } else {
+        selectedOptions = selectedOptions.filter((item) => item !== value);
+        answers[q.id] = JSON.stringify(selectedOptions);
+        }
     }
-  }
 </script>
 
 <!-- Render Question with Checkbox Options -->
@@ -38,7 +39,7 @@
 
   <Label for="score" class="float-right">{q.Score || ''}</Label>
   <Label for="description" class="text-xs text-gray-500">{q.Description || ''}</Label>
-
+  <Input type="text" class="hidden w-full" bind:value={answers[q.id]}  />
   {#if optionsArray.length > 0}
     {#each optionsArray as o}
       <div class="flex items-center gap-2">
@@ -49,7 +50,7 @@
           name={q.id}
           value={o}
           id={o}
-          checked={answers[q.id].includes(o)}
+          checked={selectedOptions.includes(o)}
           onchange={handleCheckboxChange}
         />
         <Label for={o}>{o}</Label>
