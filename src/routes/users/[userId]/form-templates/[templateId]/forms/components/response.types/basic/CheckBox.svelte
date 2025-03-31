@@ -31,6 +31,9 @@
 	<div class="flex w-full items-center justify-between">
 		<h1 class="text-md font-bold text-slate-400">
 			{card.Title || 'Enter multiple choice question'}
+			{#if card.IsRequired}
+			<span class="text-red-600 ml-1">*</span>
+			{/if}
 		</h1>
 	</div>
 	<div class=" h-fit w-full rounded p-1">

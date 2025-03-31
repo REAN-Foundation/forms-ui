@@ -12,14 +12,13 @@
 	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
 	import { error } from '@sveltejs/kit';
+	import Icon from '@iconify/svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
 	let errors: Record<string, string> = $state({});
-	// console.log('form data:');
-	// $inspect(errors);
 
 	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
@@ -43,9 +42,6 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 
-	// console.log('uiSections:');
-	// $inspect(uiSections);
-
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.value === 'Basic' || target.value === 'Advanced') {
@@ -67,8 +63,6 @@
 		console.log('subsectionId: ', subsectionId);
 		console.log('parentFormTemplateId: ', parentFormTemplateId);
 		if (sectionId === null && subsectionId === null) {
-			// To create section in root section
-			// Required data: parentFormTemplateId, parentSectionId that is rootSectionId
 			if (dropData.type === 'section') {
 				const response = await fetch(`/api/server/section`, {
 					method: 'POST',
@@ -180,14 +174,8 @@
 			if (response.HttpCode === 200) {
 				showSheet = false;
 			}
-			// errors = {};
 		}
 	}
-
-	// function handleSubmitForm(event: { preventDefault: () => void }) {
-	// 	event.preventDefault();
-	// 	closeSheet(event);
-	// }
 
 	async function handleDeleteCard(id: string, type: 'Section' | 'Card') {
 		console.log('Inside parent handle delete card');
@@ -290,12 +278,12 @@
 		}
 		invalidateAll();
 	}
+
+	let isOpen = $state(false);
 </script>
 
 {#if sectionForm}
-	<div
-		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
-	>
+	<div class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
 		<SectionEditorForm
 			bind:errors
 			{handleSectionUpdate}
@@ -309,10 +297,13 @@
 {/if}
 
 <!-- Section -->
-<div class="bg-green-5 flex min-h-screen flex-row my-12">
-	<div class="flex flex-1 overflow-hidden">
-		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} />
-		<div class="mx-10 my-1 w-8/12 space-y-2 p-2">
+
+<div class=" my-10 flex min-h-screen flex-row">
+	<div class="bg-[#F6F8FA] dark:bg-[#0a0a0b] md:w-[32%] xl:w-[25%]">
+		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} {isOpen} />
+	</div>
+	<div class="flex overflow-hidden md:w-[74%]">
+		<div class="my-1 w-full space-y-2 p-2 md:mx-10">
 			<div class="flex w-full flex-row items-center">
 				<Breadcrumb.Root>
 					<Breadcrumb.List class="flex">
@@ -327,9 +318,7 @@
 				</Breadcrumb.Root>
 				<div class="ml-auto flex items-center">
 					<Dialog.Root>
-						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">
-						
-						</Dialog.Trigger>
+						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex"></Dialog.Trigger>
 						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
 							<p>assa</p>
 						</Dialog.Content>
@@ -347,7 +336,7 @@
 					ondragover={(event) => {
 						event.preventDefault();
 					}}
-					class="flex h-full w-full flex-col"
+					class="flex h-full flex-col"
 					use:dropzone={{ on_dropzone: handleDragAndDrop }}
 					role="region"
 					aria-label="Drop Area"

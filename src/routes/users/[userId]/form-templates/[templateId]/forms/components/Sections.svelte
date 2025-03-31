@@ -89,13 +89,20 @@
 		cardToDelete = null;
 	}
 	import { writable } from 'svelte/store';
+	import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
 
-	const isOpen = writable(false);
+	const isOpen = writable(new Map());
+	function toggleSection(id) {
+		isOpen.update((map) => {
+			map.set(id, !map.get(id));
+			return new Map(map);
+		});
+	}
 </script>
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] p-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b] {highlightedSection ===
+		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] dark:bg-[#0a0a0b] px-4 py-4 shadow-lg dark:border-gray-800  {highlightedSection ===
 		section.id
 			? ' border-1 border-blue-600'
 			: ''}"
@@ -110,25 +117,21 @@
 	>
 		<Collapsible.Root class=" space-y-2">
 			<div class="flex flex-row">
-				<div class="flex items-center justify-between space-x-4 px-4">
+				<div class="flex items-center justify-between px-2">
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
+						onclick={() => toggleSection(section.id)}
 					>
 						<Tooltip.Provider>
 							<Tooltip.Root>
 								<Tooltip.Trigger>
 									<Tooltip.Trigger>
-										<Button
-											variant="ghost"
-											size="sm"
-											class="w-9 p-0"
-											onclick={() => isOpen.update((v) => !v)}
-										>
+										<Button variant="ghost" size="sm" class="w-9 p-0">
 											<Icon
 												icon="grommet-icons:down"
 												width="16"
 												height="16"
-												class={`transition-transform duration-300 ${$isOpen ? 'rotate-180' : 'rotate-0'}`}
+												class={`transition-transform duration-300 ${$isOpen.get(section.id) ? 'rotate-180' : 'rotate-0'}`}
 											/>
 											<span class="sr-only">Toggle</span>
 										</Button>
@@ -142,31 +145,30 @@
 					</Collapsible.Trigger>
 				</div>
 
-				<div class="flex h-full w-full flex-row">
+				<div class="flex h-full flex-row md:w-full">
 					<Button
 						variant="outline"
-						class="h-full w-full p-2  hover:bg-[#f9fafb] hover:dark:bg-[#262626]"
+						class=" h-full flex-col p-2 hover:bg-[#f9fafb]  hover:dark:bg-[#262626] md:w-full"
 						onclick={() => openSectionForm(section)}
 					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
-						<div class="flex-col">
-							{#if section.Title}
-								<p>{section.Title}</p>
-							{:else}
-								<p>{`Section ${index + 1}`}</p>
-							{/if}
-							<p class="text-sm font-normal text-gray-400 dark:text-gray-500">
-								Drop the Subsection and response type cards here
-							</p>
-						</div>
+						{#if section.Title}
+							<p>{section.Title}</p>
+						{:else}
+							<p>{`Section ${index + 1}`}</p>
+						{/if}
+						<p class="whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
+							Drop the Subsection and response type cards here
+						</p>
 					</Button>
 
 					<AlertDialog.Root>
-						<AlertDialog.Trigger class="{buttonVariants} bg-red400">
+						<AlertDialog.Trigger class="{buttonVariants} ">
 							<Button variant="ghost" class="ml-1 h-full w-full "
 								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 							</Button>
 						</AlertDialog.Trigger>
+
 						<AlertDialog.Content>
 							<AlertDialog.Header>
 								<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
@@ -195,7 +197,7 @@
 
 					{#each section.Questions as card, index (card.id)}
 						<div
-							class="hover-container items-center justify-between"
+							class="hover-container mx-6 items-center justify-between"
 							draggable="true"
 							ondragover={(event) => {
 								event.preventDefault();
@@ -204,14 +206,12 @@
 							aria-label={`Card: ${card.Title}`}
 						>
 							<!-- Subsection -->
-							<div
-								class="relative my-4 mt-1 flex w-[95%] rounded-md border bg-[#fafaf9] dark:bg-black"
-							>
+							<div class="relative my-4 flex rounded-md border bg-[#fafaf9] dark:bg-black">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}
 								<button
-									class="delete-button"
+									class="delete-button px-2"
 									onclick={() => openDeleteModal(card.id)}
 									aria-label="Delete card"
 								>

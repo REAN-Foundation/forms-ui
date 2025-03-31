@@ -15,7 +15,6 @@
 		subsections: [],
 		subsectionCount: 0
 	};
-
 	let SubSectionTemplate = {
 		databaseId: '',
 		localId: number,
@@ -24,15 +23,30 @@
 		cards: []
 	};
 
-	export let cards;
-	export let measurements;
-	export let typeOfQuestion;
-	export let changeTypes;
+	// isOpen controls the sidebar visibility on mobile devices.
+	let { cards, measurements, typeOfQuestion, changeTypes, isOpen } = $props();
+
+	// Toggle function to change sidebar visibility on mobile.
+	const toggleSidebar = () => {
+		isOpen = !isOpen;
+	};
 </script>
-<!-- sidebar add section -->
-<div class="relative w-full overflow-hidden md:ml-5 md:w-3/12">
-	<div class="fixed  space-y-4 px-4 py-6 ">
-		<Card.Root class="rounded-lg border p-4  w-64 2xl:w-full">
+
+<!-- Mobile toggle icon (only visible below md breakpoint) -->
+<button
+	onclick={toggleSidebar}
+	class="fixed left-0 top-0 z-50 rounded   dark:bg-[#0a0a0b] p-2.5 text-black dark:text-[#F6F8FA] md:hidden"
+	aria-label="Toggle Sidebar"
+>
+	<Icon icon="mdi:menu" class="h-5 w-5" />
+</button>
+
+<!-- Sidebar: Always visible on md and larger; toggle on mobile -->
+<div class="relative overflow-hidden {isOpen ? 'block' : 'hidden'} z-30 md:block">
+	<div
+		class="fixed h-screen w-[70%] space-y-4 bg-[#F6F8FA] px-4 py-6 dark:bg-[#0a0a0b] sm:w-[30%] xl:w-[25%]"
+	>
+		<Card.Root class="rounded-lg border-none p-4">
 			<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 			<div
 				class="flex cursor-grab items-center justify-center"
@@ -40,22 +54,25 @@
 				role="button"
 				aria-label="Draggable new section template"
 			>
-				<Button class="w-full space-x-2 rounded-md border bg-[#F6F8FA] dark:bg-[#0a0a0b]" variant="secondary">
+				<Button
+					class="w-full space-x-2 rounded-md bg-[#F6F8FA] dark:bg-[#0a0a0b]"
+					variant="secondary"
+				>
 					<Icon
 						icon="teenyicons:section-add-outline"
 						width="16"
 						height="16"
-						class=" mr-2 text-primary "
+						class="mr-2 text-primary"
 					/>
 					Add Section
 				</Button>
 			</div>
 		</Card.Root>
-<!-- Sidebar question -->
-		<Card.Root class="space-y-3 rounded-lg border p-4  shadow-md w-64 2xl:w-full">
+		<!-- Sidebar question -->
+		<Card.Root class="space-y-3 rounded-lg border-none p-4 2xl:w-full">
 			<Card.Title class="text-md">Question</Card.Title>
-			<div class="mx-auto flex w-fit flex-row space-x-8 rounded-md border px-4 2xl:px-14 py-2  bg-[#F6F8FA] dark:bg-[#0a0a0b]">
-				<label class="flex cursor-pointer items-center ">
+			<div class="flex flex-wrap rounded-md border bg-[#F6F8FA] py-2 dark:bg-[#0a0a0b] xl:px-12">
+				<label class="mx-3 flex cursor-pointer items-center md:mx-4 xl:mx-2">
 					<input
 						type="radio"
 						name="layoutType"
@@ -65,7 +82,7 @@
 						class="sr-only"
 					/>
 					<span
-						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary "
+						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
 					>
 						<span
 							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Basic'
@@ -75,7 +92,7 @@
 					</span>
 					Basic
 				</label>
-				<label class="flex cursor-pointer items-center">
+				<label class="flex cursor-pointer items-center md:mx-4 xl:mx-2">
 					<input
 						type="radio"
 						name="layoutType"
@@ -97,16 +114,16 @@
 				</label>
 			</div>
 		</Card.Root>
-<!-- sidebar question response time -->
-		<Card.Root class="rounded-lg border p-4  shadow-md w-64 2xl:w-full">
-			<Card.Title class="text-md  ">Question Response Types</Card.Title>
-			<div class="scrollbar-hide max-h-80 overflow-y-auto py-4">
+		<!-- Sidebar question response types -->
+		<Card.Root class="rounded-lg border-none p-4">
+			<Card.Title class="text-md">Question Response Types</Card.Title>
+			<div class="scrollbar-hide max-h-96 overflow-y-auto py-6 xl:h-auto">
 				<ul class="space-y-2">
 					{#if typeOfQuestion === 'Advanced'}
 						{#each measurements as card}
 							<li>
 								<div
-									class="w-full cursor-grab "
+									class="w-full cursor-grab"
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}
@@ -122,7 +139,7 @@
 						{#each cards as card}
 							<li>
 								<div
-									class="w-full cursor-grab  "
+									class="w-full cursor-grab"
 									use:draggable={{ ...card, type: 'card' }}
 									role="button"
 									aria-label={`Draggable card: ${card.name}`}
@@ -149,10 +166,8 @@
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
 	}
-
-	/* Hide scrollbar for IE, Edge and Firefox */
 	.scrollbar-hide {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 	}
 </style>
