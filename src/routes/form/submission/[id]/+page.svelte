@@ -7,6 +7,8 @@
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
 
 	import { invalidate } from '$app/navigation';
+	import Temperature from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/healthCare/Temperature.svelte';
+	import Float from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/basic/Float.svelte';
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +26,7 @@
 	let submissionStatus = $derived(data.submissionStatus);
 
 	$inspect('submission status', submissionStatus);
+	$inspect('submission questionResponseData ', questionResponseData);
 
 	let showDialog = $state(false);
 
@@ -41,7 +44,12 @@
 		DateTime: 'DateTimeValue',
 		Rating: 'IntegerValue',
 		Location: 'DateTimeValue',
-		Range: 'IntegerValue'
+		Range: 'IntegerValue',
+		Height:'FloatValue',
+		Weight:'FloatValue',
+		PulseRate:'FloatValue',
+		// BloodPressure:'FloatValue',
+		Temperature:'FloatValue'
 	};
 
 	$effect(() => {

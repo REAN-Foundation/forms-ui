@@ -43,7 +43,7 @@
 	<Label for="title" class="ml-4 text-slate-700">{q.Description || 'No description provided'}</Label
 	>
 
-	<Input type="text" class=" w-full" bind:value={answers[q.id]} hidden />
+	<Input type="text" class="hidden w-full" bind:value={answers[q.id]}  />
 	{#if errors[q.id]}
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
 	{/if}

@@ -3,6 +3,8 @@
 	import { Label } from '$lib/components/ui/label';
 
 	let { q, answers = $bindable(), errors = $bindable() } = $props();
+
+	$inspect('This is answers', answers[q.id]);
 </script>
 
 <div class="flex w-full flex-col gap-1.5 p-4">
