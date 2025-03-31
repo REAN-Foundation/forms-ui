@@ -270,6 +270,7 @@
 	}
 
 	async function handleSectionUpdate(model) {
+		console.log(model,"I am from handleSectionUpdate");
 		const response = await fetch(`/api/server/section`, {
 			method: 'PUT',
 			body: JSON.stringify(model),
