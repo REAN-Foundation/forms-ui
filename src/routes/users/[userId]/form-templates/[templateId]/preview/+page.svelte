@@ -4,14 +4,17 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { page } from '$app/state';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { cleanAssessmentTemplate } from '$lib/utils';
 	//////////////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
 	const userId = page.params.userId;
 	// $inspect(data)
 
-	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
+	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
+	let sections = cleanAssessmentTemplate(section);
+	
 </script>
 
 <div class="card container h-full w-full px-6 md:px-16 pt-4 mt-10 ">

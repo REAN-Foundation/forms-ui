@@ -9,12 +9,13 @@
 	import { invalidate } from '$app/navigation';
 	import Temperature from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/healthCare/Temperature.svelte';
 	import Float from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/basic/Float.svelte';
+	import { cleanAssessmentTemplate } from '$lib/utils';
 
 	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
 	const formSubmissionKey = $page.params.id;
-	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
+	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	let answers = $state({});
 	// let currentIndex = $state(0); // Used for pagination
@@ -27,6 +28,45 @@
 
 	$inspect('submission status', submissionStatus);
 	$inspect('submission questionResponseData ', questionResponseData);
+
+	$inspect('Retrive data==========', section);
+	
+	// interface Question {
+	// 	id: string;
+	// 	Title?: string | null;
+	// }
+
+	// interface Section {
+	// 	id: string;
+	// 	Questions?: Question[];
+	// 	Subsections?: Section[];
+	// }
+
+	// function cleanAssessmentTemplate(template: Section[]): Section[] {
+	// 	function cleanSection(section: Section): Section | null {
+	// 		const filteredQuestions = section.Questions?.filter(q => q.Title && q.Title.trim() !== "") || [];
+	// 		const filteredSubsections = section.Subsections
+	// 			?.map(cleanSection)
+	// 			.filter((sub): sub is Section => sub !== null); 
+
+	// 		if (filteredQuestions.length === 0 && filteredSubsections.length === 0) {
+	// 			return null;
+	// 		}
+
+	// 		return {
+	// 			...section,
+	// 			Questions: filteredQuestions.length > 0 ? filteredQuestions : undefined,
+	// 			Subsections: filteredSubsections.length > 0 ? filteredSubsections : undefined
+	// 		};
+	// 	}
+
+	// 	return template
+	// 		.map(cleanSection)
+	// 		.filter((section): section is Section => section !== null); 
+	// };
+
+    let sections = cleanAssessmentTemplate(section);
+
 
 	let showDialog = $state(false);
 
@@ -48,7 +88,7 @@
 		Height:'FloatValue',
 		Weight:'FloatValue',
 		PulseRate:'FloatValue',
-		// BloodPressure:'FloatValue',
+		BloodPressure:'TextValue',
 		Temperature:'FloatValue'
 	};
 
