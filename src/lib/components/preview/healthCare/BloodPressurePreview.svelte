@@ -12,12 +12,12 @@
 		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
 		<br />
-		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-		<div class="h-fit w-full p-2">
+		
+		<!-- <div class="h-fit w-full p-2">
 			<div
 				class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
 			>
-				<!-- <p>Types </p> -->
+			
 				<div class="flex flex-col items-start justify-start space-y-2">
 					<div class=" flex flex-row">
 						<Label for="Celsius">Systolic</Label>
@@ -29,8 +29,42 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
+
+		<div class="w-full space-y-3 rounded-lg mt-6">
+			<div class="flex flex-col space-y-2">
+			  <div class="flex items-center space-x-2">
+				<Label for="systolic" class=" mr-2">Systolic</Label>
+				<Input
+				  type="text"
+				  name="systolic"
+				  placeholder="Enter the systolic blood pressure here..."
+				  class="w-full"
+				/>
+<!-- 	
+			 <div class="text-slate-400">
+				mmHg
+			 </div> -->
+				
+			  </div>
+			  <div class="flex items-center space-x-2">
+				<Label for="diastolic" class="">Diastolic</Label>
+				<Input
+				  type="text"
+				  name="diastolic"
+				  placeholder="Enter the distolic blood pressure here..."
+				  class="w-full"
+				/>
+				<!-- <div class="text-slate-400">
+					mmHg
+				 </div> -->
+			  </div>
+			 
+			</div>
+		  </div>
 	</div>
+
+	<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
 	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
 		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
 	>
