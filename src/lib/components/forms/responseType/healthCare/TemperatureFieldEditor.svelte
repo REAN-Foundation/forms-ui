@@ -58,13 +58,13 @@
 		</div>
 		<Input bind:value={questionCard.id} class="hidden" />
 
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
+		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Title<span class="text-red-600">*</span></Label>
 		</div>
 		<Input bind:value={questionCard.Title} />
 		<p class="text-destructive">{errors?.Title}</p>
 
-		<div class="relative mt-2 grid grid-cols-12 items-center gap-4">
+		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Description</Label>
 		</div>
 		<Input bind:value={questionCard.Description} />
@@ -72,7 +72,7 @@
 
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 flex items-center space-x-2">
-				<Label for="isRequired">Is Required</Label>
+				<Label for="isRequired">Required</Label>
 				<input
 					id="isRequired"
 					type="checkbox"
