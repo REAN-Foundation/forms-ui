@@ -100,7 +100,7 @@
 								: 'opacity-0'} transition-opacity duration-200 ease-in-out"
 						></span>
 					</span>
-					Advanced
+					Health Care
 				</label>
 			</div>
 		</Card.Root>

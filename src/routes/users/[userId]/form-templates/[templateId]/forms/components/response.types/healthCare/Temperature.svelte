@@ -20,7 +20,7 @@
 		</h1>
 	</div>
 	<Input type="text" disabled placeholder="Enter the temperature here..." class="w-full p-2" />
-	<div class=" h-fit w-full">
+	<!-- <div class=" h-fit w-full">
 		<div
 			class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
 		>
@@ -48,7 +48,7 @@
 			<ol>Rectal: [36.6°C to 37.8°C] [97.9°F to 100.4°F] [309.75 K to 310.95 K]</ol>
 			<ol>Axillary (underarm): [35.5°C to 37.0°C] [95.9°F to 98.6°F] [308.65 K to 310.15 K]</ol>
 		</li>
-	</div>
+	</div> -->
 
 	<div>
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>

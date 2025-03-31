@@ -160,69 +160,69 @@ export const healthCarePlugins: AdvanceTypes[] = [
             Distolic: 'above 80 mmHg'
         }
     },
-    {
-        id: 6,
-        name: 'Sleep',
-        value: 'Sleep',
-        units: ['Hr/night'],
-        icon: 'mdi:sleep',
-        type: {
-            Adults: '7-9 hours',
-            Teenagers: '8-10 hours',
-            Children: ' 9-12 hours'
-        }
-    },
-    {
-        id: 7,
-        name: 'Glucose',
-        value: 'Glucose',
-        units: ['mg/dL', 'mmol/L'],
-        icon: 'material-symbols:glucose',
-        type: {
-            Fasting: '70-99 mg/dL (3.9-5.5 mmol/L)',
-            Non_Fasting: '< 140 mg/dL (7.8 mmol/L)'
-        }
-    },
-    {
-        id: 8,
-        name: 'Cholesterol',
-        value: 'Cholesterol',
-        units: ['mg/dL', 'mmol/L'],
-        icon: 'ph:feather',
-        type: {
-            Normal: 'min 200 mg/dL (5.2 mmol/L)',
-            HDL_Cholesterol: {
-                Men: 'min 40 mg/dL (1.0 mmol/L)',
-                Women: 'min 50 mg/dL (1.3 mmol/L)'
-            },
-            LDL_Cholesterol: {
-                Normal: ' min 100 mg/dL (2.6 mmol/L)'
-            },
-            Triglycerides: {
-                Normal: 'min 150 mg/dL (1.7 mmol/L)'
-            }
-        }
-    },
-    {
-        id: 9,
-        name: 'BloodOxygen',
-        value: 'BloodOxygenSaturation',
-        units: ['%'],
-        icon: 'streamline:image-saturation-solid',
-        type: {
-            Normal: '5.7 %'
-        }
-    },
-    {
-        id: 10,
-        name: 'Lipoprotein',
-        value: 'Lipoprotein',
-        units: ['mg/dL', 'nmol/L'],
-        icon: 'lets-icons:protein',
-        type: {
-            Normal: '< 30 mg/dL or < 75 nmol/L'
-        }
-    },
+    // {
+    //     id: 6,
+    //     name: 'Sleep',
+    //     value: 'Sleep',
+    //     units: ['Hr/night'],
+    //     icon: 'mdi:sleep',
+    //     type: {
+    //         Adults: '7-9 hours',
+    //         Teenagers: '8-10 hours',
+    //         Children: ' 9-12 hours'
+    //     }
+    // },
+    // {
+    //     id: 7,
+    //     name: 'Glucose',
+    //     value: 'Glucose',
+    //     units: ['mg/dL', 'mmol/L'],
+    //     icon: 'material-symbols:glucose',
+    //     type: {
+    //         Fasting: '70-99 mg/dL (3.9-5.5 mmol/L)',
+    //         Non_Fasting: '< 140 mg/dL (7.8 mmol/L)'
+    //     }
+    // },
+    // {
+    //     id: 8,
+    //     name: 'Cholesterol',
+    //     value: 'Cholesterol',
+    //     units: ['mg/dL', 'mmol/L'],
+    //     icon: 'ph:feather',
+    //     type: {
+    //         Normal: 'min 200 mg/dL (5.2 mmol/L)',
+    //         HDL_Cholesterol: {
+    //             Men: 'min 40 mg/dL (1.0 mmol/L)',
+    //             Women: 'min 50 mg/dL (1.3 mmol/L)'
+    //         },
+    //         LDL_Cholesterol: {
+    //             Normal: ' min 100 mg/dL (2.6 mmol/L)'
+    //         },
+    //         Triglycerides: {
+    //             Normal: 'min 150 mg/dL (1.7 mmol/L)'
+    //         }
+    //     }
+    // },
+    // {
+    //     id: 9,
+    //     name: 'BloodOxygen',
+    //     value: 'BloodOxygenSaturation',
+    //     units: ['%'],
+    //     icon: 'streamline:image-saturation-solid',
+    //     type: {
+    //         Normal: '5.7 %'
+    //     }
+    // },
+    // {
+    //     id: 10,
+    //     name: 'Lipoprotein',
+    //     value: 'Lipoprotein',
+    //     units: ['mg/dL', 'nmol/L'],
+    //     icon: 'lets-icons:protein',
+    //     type: {
+    //         Normal: '< 30 mg/dL or < 75 nmol/L'
+    //     }
+    // },
     // Remaining items with updated sequential IDs
     // {
     //     id: 11,

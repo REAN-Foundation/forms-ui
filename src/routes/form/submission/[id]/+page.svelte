@@ -275,25 +275,29 @@
 			<div
 				class="relative mx-auto h-fit rounded-md border border-gray-500 bg-[#F6F8FA] pb-7 pt-5 dark:bg-[#0a0a0b]"
 			>
-				{#if templateInfo}
-					<div>
-						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
-							{templateInfo.Type}
+			{#if templateInfo}
+			<div>
+				<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
+					{templateInfo.Type}
+				</p>
+				<div class="flex h-full flex-col items-center justify-center">
+					<h2
+						class="mt-5 text-center text-3xl font-bold"
+					>
+						{templateInfo.Title}
+					</h2>
+					<div class="mt-2 flex w-full flex-row items-center justify-center">
+						<p class="mx-auto [&:not(:first-child)]:mt-6">
+							{templateInfo.Description}
 						</p>
-						<div class="flex h-full flex-col items-center justify-center">
-							<h2
-								class="scroll-m-20 py-4 pt-8 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-							>
-								<p class="mx-auto [&:not(:first-child)]:mt-6"></p>
-								<p class="ml-auto mr-4 text-sm">
-									Version: {templateInfo.CurrentVersion}
-								</p>
-							</h2>
-
-							<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
-						</div>
+						<p class="ml-auto mr-4 text-sm">
+							Version: {templateInfo.CurrentVersion}
+						</p>
 					</div>
-				{/if}
+					<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
+				</div>
+			</div>
+		{/if}
 			</div>
 
 			<div class="min-h-[390px] rounded-md border border-gray-500 bg-[#f9fafb] dark:bg-[#0a0a0b]">

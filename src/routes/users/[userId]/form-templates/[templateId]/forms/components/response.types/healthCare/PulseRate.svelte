@@ -21,11 +21,11 @@
 	</div>
 	<Input type="text" disabled placeholder="Enter the Heart Rate here..." class="w-full  p-2" />
 
-	<div
+	<!-- <div
 		class="flex w-full flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
 	>
 		<p>Normally : 60-100 bpm</p>
-	</div>
+	</div> -->
 
 	<div>
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>
