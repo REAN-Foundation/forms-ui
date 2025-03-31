@@ -78,11 +78,12 @@
 			<div class="flex items-center space-x-2">
 				<Label for="systolic" class=" mr-2">Systolic</Label>
 				<Input
-					type="text"
+					type="number"
 					name={q.id}
 					bind:value={selectedBPValues.Systolic}
 					placeholder="Enter the systolic blood pressure here..."
 					oninput={updateAnswers}
+					
 				/>
 
 				<Label for="umit" class="">mmHg</Label>
@@ -90,7 +91,7 @@
 			<div class="flex items-center space-x-2">
 				<Label for="diastolic" class="">Diastolic</Label>
 				<Input
-					type="text"
+					type="number"
 					name={q.id}
 					bind:value={selectedBPValues.Diastolic}
 					placeholder="Enter the distolic blood pressure here..."

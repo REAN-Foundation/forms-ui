@@ -130,6 +130,7 @@ export function createSchema(sections) {
                     case 'Text':
                     case 'Object':
                     case 'TextArray':
+                    case 'BloodPressure':
                         schemaObj[q.id] = z
                             .string({
                                 required_error: 'This field is required',
