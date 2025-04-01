@@ -25,13 +25,16 @@
 	let submittedOn = $state(data.submittedOn);
 
 	// Derived value for formatted date
-	const formattedSubmittedOn = $derived(submittedOn ? formatDate(submittedOn) : '');
+	let formattedSubmittedOn = $state('');
+	$effect(() => {
+		formattedSubmittedOn = submittedOn ? formatDate(submittedOn) : '';
+	});
 
 	function formatDate(submittedOn) {
 		const date = new Date(submittedOn);
 		return date.toLocaleString('en-IN', {
-			dateStyle: 'long',
-			timeStyle: 'short'
+			dateStyle: 'long'
+			// timeStyle: 'short'
 		});
 	}
 
@@ -220,12 +223,14 @@
 				<QuestionPaper {sections} bind:answers bind:errors {isSubmitted} />
 			</div>
 			<div class="mx-auto flex flex-col space-x-5 pb-32 pt-6 md:flex-row">
-				<Button type="submit" variant="outline" class="w-full border">Save</Button>
+				<Button type="submit" variant="outline" class="w-full border" disabled={isSubmitted}>Save</Button>
 				<Button
 					onclick={handleSubmit}
 					type="button"
 					variant="secondary"
-					class="btn h-10 w-full border">Submit</Button
+					class="btn h-10 w-full border"
+					disabled={isSubmitted}
+					>Submit</Button
 				>
 			</div>
 		</form>

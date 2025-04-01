@@ -134,7 +134,7 @@ async function handleTemplateUpdate(model) {
 					<div>
 						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
 						<p class="my-2 text-sm text-muted-foreground md:text-base">
-							Here's a Form Template !
+							Here's a Form Templates !
 						</p>
 					</div>
 					<!-- <AssessmentForm {data} /> -->

@@ -318,7 +318,7 @@
 <!-- Section -->
 
 <div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="md:w-[30%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
+	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
