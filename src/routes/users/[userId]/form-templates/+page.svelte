@@ -10,6 +10,7 @@
 	import { enhance } from '$app/forms';
 	import { toastMessage } from '$lib/components/toast/toast.store';
 	import { invalidateAll } from '$app/navigation';
+	import DialogOverlay from '$lib/components/ui/dialog/dialog-overlay.svelte';
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -41,12 +42,12 @@
 			name: 'Forms',
 			icon: 'fluent-mdl2:file-template',
 			subMenuItems: [
-				{
-					name: 'Create New Form',
-					icon: 'mdi:form-textbox',
-					action: () => selectSubmenu('createForm')
-				},
-				{ name: 'View Forms', icon: 'mdi-light:eye', action: () => selectSubmenu('viewForms') }
+				// {
+				// 	name: 'Create New Form',
+				// 	icon: 'mdi:form-textbox',
+				// 	action: () => selectSubmenu('createForm')
+				// },
+				// { name: 'View Forms', icon: 'mdi-light:eye', action: () => selectSubmenu('viewForms') }
 			]
 		}
 	];
@@ -133,7 +134,7 @@ async function handleTemplateUpdate(model) {
 					<div>
 						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
 						<p class="my-2 text-sm text-muted-foreground md:text-base">
-							Here's a Form Template !
+							Here's a Form Templates !
 						</p>
 					</div>
 					<!-- <AssessmentForm {data} /> -->
@@ -141,7 +142,10 @@ async function handleTemplateUpdate(model) {
 						<Dialog.Trigger class="{buttonVariants({ variant: 'default' })} my-2 w-28 md:ml-auto">
 							Add New
 						</Dialog.Trigger>
-						<Dialog.Content class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] ">
+						<Dialog.Overlay class=" bg-black/50 backdrop-blur-sm" />
+						<Dialog.Content
+							class=" scrollbar-hide max-h-[90%] max-w-[95%] overflow-y-auto rounded-md md:max-w-[85%] lg:max-w-[45%] "
+						>
 							<Dialog.Header>
 								<Dialog.Title>Add New</Dialog.Title>
 								<Dialog.Description>
@@ -151,7 +155,7 @@ async function handleTemplateUpdate(model) {
 							<form method="POST" action="?/newAssessment" use:enhance>
 								<TemplateForm {templateData} bind:errors />
 								<Dialog.Footer>
-									<Button class="my-4" type="submit">Create</Button>
+									<Button class="my-2" type="submit">Create</Button>
 								</Dialog.Footer>
 							</form>
 						</Dialog.Content>

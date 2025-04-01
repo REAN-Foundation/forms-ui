@@ -18,11 +18,14 @@
 		<h1 class="text-md font-bold text-slate-400">
 			{card.Title || 'Enter Heart rate'}
 			{#if card.IsRequired}
-			<span class="text-red-600 ml-1">*</span>
+				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</h1>
 	</div>
-	<Input type="text" disabled placeholder="Enter the heart rate here..." class="w-full  p-2" />
+	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+		<p class="text-sm">Heart Pulse Rate (in bits per minute)</p>
+	</div>
+	<!-- <Input type="text" disabled placeholder="Enter the heart rate here..." class="w-full  p-2" /> -->
 
 	<!-- <div
 		class="flex w-full flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"

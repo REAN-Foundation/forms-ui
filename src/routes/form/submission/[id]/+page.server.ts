@@ -34,6 +34,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     console.log('Template id ', submission.FormTemplateId);
 
     const submissionStatus = submission?.Status || 'LinkShared';
+    const submittedOn = submission?.SubmittedAt;
 
     const today = new Date();
     if (!submission.SubmittedAt && new Date(submission.ValidTill) < today) {
@@ -65,7 +66,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
         message: response.Message,
         questionResponses,
         submissionStatus,
+        submittedOn,
         submissionId
     };
-   
 };

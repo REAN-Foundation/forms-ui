@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable() ,isSubmitted} = $props();
 	function handleInput(event, id) {
 		const value = event.target.value;
 		if (value.length > 20) {
@@ -33,6 +33,7 @@
 		class="w-full"
 		bind:value={answers[q.id]}
 		name={q.id}
+		disabled={isSubmitted}
 		/>
 		<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if errors[q.id]}

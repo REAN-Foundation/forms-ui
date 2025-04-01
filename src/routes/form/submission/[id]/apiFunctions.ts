@@ -170,7 +170,7 @@ export function createSchema(sections) {
 
                     case 'MultiChoiceSelection':
                         schemaObj[q.id] = z
-                            .array(z.string({ required_error: 'Please select an option' }))
+                            .string({ required_error: 'Please select an option' })
                             .nonempty('Please select an option');
                         break;
 

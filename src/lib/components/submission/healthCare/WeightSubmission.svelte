@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(),isSubmitted } = $props();
 </script>
 
 <div class="flex w-full flex-col gap-1.5 p-4">
@@ -27,6 +27,7 @@
 			class="w-full"
 			bind:value={answers[q.id]}
 			name={q.id}
+			disabled={isSubmitted}
 		/><Label>kg</Label>
 	</div>
 

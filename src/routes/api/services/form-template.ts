@@ -22,15 +22,11 @@ export const createFormTemplate = async (
 		// CurrentVersion: currentVersion ? currentVersion : null,
 		...(tenantCode && { TenantCode: tenantCode }),
 		// TenantCode: tenantCode ? tenantCode : null,
-		ItemsPerPage: itemsPerPage ? itemsPerPage : null,
-		Type: type,
+		ItemsPerPage: itemsPerPage ? itemsPerPage : 'AllQuestions',
+		Type: type ? type : 'Survey',
 		OwnerUserId: ownerUserId ? ownerUserId : null,
 		DefaultSectionNumbering: defaultSectionNumbering ? defaultSectionNumbering : false
 	};
-	if (id) {
-		const url = BACKEND_API_URL + `/form-templates/${id}`;
-		return await put_(url, body);
-	}
 	const url = BACKEND_API_URL + '/form-templates';
 	return await post_(url, body);
 };

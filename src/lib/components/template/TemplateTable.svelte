@@ -15,7 +15,7 @@
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	let { data, errors = $bindable(),handleTemplateUpdate } = $props();
+	let { data, errors = $bindable(), handleTemplateUpdate } = $props();
 
 	let isLoading = $state(false);
 	let assessmentTemplates = $state(data.assessmentTemplate.Items);
@@ -32,6 +32,8 @@
 
 	let link: string = $state();
 	let open = $state(false);
+
+	let isOpen = $state(false);
 
 	// Format date to readable format
 	function formatDate(dateString: string): string {
@@ -120,68 +122,68 @@
 		}
 	};
 
-async function handleSubmit(event: Event) {
-	event.preventDefault();
-	
-	const form = (event.currentTarget as HTMLElement).closest('form');
-	if (!form) {
-		console.error('Form not found!');
-		return;
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
+
+		const form = (event.currentTarget as HTMLElement).closest('form');
+		if (!form) {
+			console.error('Form not found!');
+			return;
+		}
+
+		const formData = new FormData(form);
+		const model = {
+			id: formData.get('id'),
+			Title: formData.get('Title'),
+			Description: formData.get('Description'),
+			TenantCode: formData.get('TenantCode'),
+			CurrentVersion: formData.get('CurrentVersion'),
+			Type: formData.get('Type'),
+			ItemsPerPage: formData.get('ItemsPerPage')
+		};
+
+		console.log('Form Model:', model);
+
+		const result = await assessmentSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('Client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
+
+		if (Object.keys(errors).length === 0 || result?.success) {
+			handleTemplateUpdate(model);
+			isOpen = false;
+		}
 	}
-
-	const formData = new FormData(form);
-	const model = {
-		id: formData.get('id'),
-		Title: formData.get('Title'),
-		Description: formData.get('Description'),
-		TenantCode: formData.get('TenantCode'),
-		CurrentVersion: formData.get('CurrentVersion'),
-		Type: formData.get('Type'),
-		ItemsPerPage: formData.get('ItemsPerPage'),
-	};
-
-	console.log('Form Model:', model);
-
-	const result = await assessmentSchema.safeParseAsync(model);
-	if (!result.success) {
-		console.log('Client side validation error', result.error.flatten().fieldErrors);
-		errors = Object.fromEntries(
-			Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
-				key,
-				val?.[0] || ''
-			])
-		);
-	}
-
-	if (Object.keys(errors).length === 0 || result?.success) {
-		handleTemplateUpdate(model);
-	}
-}
-
-
 </script>
 
 <div class="mt-4 w-full overflow-x-auto rounded-md border">
 	<table class="w-full table-auto border-collapse border border-slate-200">
-		<thead class="border">
-			<tr class="bg-[#F6F8FA] dark:bg-[#0a0a0b]">
-				<th class="p-2 text-center">Sr No</th>
-				<th class="p-2 text-center">
-					<Button variant="ghost" class="" onclick={() => sortTable('Title')}>
-						Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-					</Button>
-				</th>
-				<th class="p-2 text-center">
-					<Button variant="ghost" onclick={() => sortTable('Type')}>
-						Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-					</Button>
-				</th>
-
-				<th class="p-2 text-center">Created At</th>
-				<th class="p-2 text-center">Version</th>
-				<th class="p-2 text-center">Actions</th>
-			</tr>
-		</thead>
+		 <thead class="border">
+            <tr class="bg-[#F6F8FA] dark:bg-[#0A0A0B]">
+                <th class="w-12 p-3">Sr No</th>
+                <th class="w-52 py-3 text-start">
+                    <Button variant="ghost" class=" font-bold text-md" onclick={() => sortTable('Title')}>
+                        Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+                    </Button>
+                </th>
+                <th class=" w-28 py-3 text-start">
+                    <Button variant="ghost" class="font-bold text-md" onclick={() => sortTable('Type')}>
+                        Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+                    </Button>
+                </th>
+                <!-- <th class="p-4 text-center">Description</th>
+                <th class="p-4 text-center">Tenant Code</th> -->
+                <th class=" w-32 p-3 text-center">Created At</th>
+                <th class=" w-20 p-3 text-center">Version</th>
+                <th class=" w-20 p-3 text-center">Actions</th>
+            </tr>
+        </thead>
 		<tbody>
 			{#if isLoading}
 				<tr><td colspan="8" class="p-4 text-center">Loading...</td></tr>
@@ -191,7 +193,7 @@ async function handleSubmit(event: Event) {
 				{#each assessmentTemplates as row, index}
 					<tr class="border-b border-l border-r p-4">
 						<td class=" text-center">{index + 1}</td>
-						<td class="text-center capitalize">
+						<td class="text-left capitalize px-2">
 							<a
 								href={`/users/${userId}/form-templates/${row.id}/forms`}
 								class="hover:text-blue-500 hover:underline"
@@ -199,21 +201,21 @@ async function handleSubmit(event: Event) {
 								{row.Title || 'Not specified'}
 							</a>
 						</td>
-						<td class=" text-center">{row.Type || 'N/A'}</td>
+						<td class="px-2 text-left">{row.Type || 'N/A'}</td>
 						<td class=" text-center">{formatDate(row.CreatedAt)}</td>
 						<td class="text-center">{row.CurrentVersion || '-'}</td>
 						<td class=" flex justify-center gap-4">
 							<Tooltip.Provider>
 								<Tooltip.Root>
 									<Tooltip.Trigger>
-										<Dialog.Root>
-											<Dialog.Trigger>
-												<Button variant="ghost"
-													><Icon icon="material-symbols:edit" width="24" height="24" />
+										<Dialog.Root bind:open={isOpen}>
+											<Dialog.Trigger onclick={() => (isOpen = true)}>
+												<Button variant="ghost">
+													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
 												</Button>
 											</Dialog.Trigger>
 											<Dialog.Content
-												class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] "
+												class="max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh]"
 											>
 												<Dialog.Header>
 													<Dialog.Title>Add New</Dialog.Title>
@@ -224,7 +226,7 @@ async function handleSubmit(event: Event) {
 												<form method="post" use:enhance>
 													<TemplateForm templateData={row} bind:errors />
 													<Dialog.Footer>
-														<Button onclick={handleSubmit} type="submit">Save changes</Button>
+														<Button class="my-2" onclick={handleSubmit} type="submit">Save changes</Button>
 													</Dialog.Footer>
 												</form>
 											</Dialog.Content>
@@ -256,7 +258,7 @@ async function handleSubmit(event: Event) {
 											<Tooltip.Trigger>
 												<Button variant="ghost" class=""
 													><Icon
-														icon="material-symbols-light:link"
+														icon="material-symbols:link"
 														width="20"
 														height="20"
 													/></Button

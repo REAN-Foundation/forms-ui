@@ -59,13 +59,13 @@
 			<Label class="col-span-11">Title<span class="text-red-600">*</span></Label>
 		</div>
 		<Input bind:value={questionCard.Title} />
-		<p class="error">{errors?.Title}</p>
+		<p class="text-destructive">{errors?.Title}</p>
 
 		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11">Description</Label>
 		</div>
 		<Input bind:value={questionCard.Description} />
-		<p class="error">{errors?.Description}</p>
+		<p class="text-destructive">{errors?.Description}</p>
 
 		<div class="relative my-4 grid grid-cols-12 items-center gap-4">
 			<div class="col-span-11 flex items-center space-x-2">
@@ -79,7 +79,7 @@
 				/>
 			</div>
 		</div>
-		<p class="error">{errors?.IsRequired}</p>
+		<p class="text-destructive">{errors?.IsRequired}</p>
 
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
@@ -87,25 +87,25 @@
 			<Label class="col-span-11">Score</Label>
 		</div>
 		<Input bind:value={questionCard.Score} type="number" />
-		<p class="error">{errors?.Score}</p>
+		<p class="text-destructive">{errors?.Score}</p>
 
 		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11">Hint</Label>
 		</div>
 		<Input bind:value={questionCard.Hint} />
-		<p class="error">{errors?.Hint}</p>
+		<p class="text-destructive">{errors?.Hint}</p>
 
 		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11">CorrectAnswer</Label>
 		</div>
 		<Input bind:value={questionCard.CorrectAnswer} />
-		<p class="error">{errors?.CorrectAnswer}</p>
+		<p class="text-destructive">{errors?.CorrectAnswer}</p>
 
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
+		<!-- <div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11">Question Image Url</Label>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
-		<p class="error">{errors?.QuestionImageUrl}</p>
+		<p class="text-destructive">{errors?.QuestionImageUrl}</p> -->
 
 		<Dialog.Footer class="mt-4">
 			<Button type="submit">Save changes</Button>

@@ -16,7 +16,7 @@ export type AdvanceTypes = {
 };
 
 
-export const cards: BasicTypes[] = [
+export const basicCards: BasicTypes[] = [
     {
         id: 1,
         name: 'Text',
@@ -41,27 +41,27 @@ export const cards: BasicTypes[] = [
         value: 'Boolean',
         icon: 'lucide:binary',
     },
-    {
-        id: 5,
-        name: 'Object',
-        value: 'Object',
-        icon: 'ic:baseline-data-object',
-    },
-    {
-        id: 6,
-        name: 'TextArray',
-        value: 'TextArray',
-        icon: 'material-symbols:data-array',
-    },
+    // {
+    //     id: 5,
+    //     name: 'Object',
+    //     value: 'Object',
+    //     icon: 'ic:baseline-data-object',
+    // },
+    // {
+    //     id: 6,
+    //     name: 'Text-Array',
+    //     value: 'TextArray',
+    //     icon: 'material-symbols:data-array',
+    // },
     {
         id: 7,
-        name: 'MultiChoiceSelection',
+        name: 'Multi-Choice Selection',
         value: 'MultiChoiceSelection',
         icon: 'mdi:checkbox-outline',
     },
     {
         id: 8,
-        name: 'SingleChoiceSelection',
+        name: 'Single-ChoiceS election',
         value: 'SingleChoiceSelection',
         icon: 'ph:radio-button-fill',
     },
@@ -73,7 +73,7 @@ export const cards: BasicTypes[] = [
     },
     {
         id: 10,
-        name: 'DateTime',
+        name: 'Date-Time',
         value: 'DateTime',
         icon: 'formkit:datetime',
     },
@@ -141,7 +141,7 @@ export const healthCarePlugins: AdvanceTypes[] = [
     },
     {
         id: 4,
-        name: 'PulseRate',
+        name: 'Pulse Rate',
         value: 'PulseRate',
         units: ['bpm'],
         icon: 'streamline:heart-rate-pulse-graph',
@@ -151,7 +151,7 @@ export const healthCarePlugins: AdvanceTypes[] = [
     },
     {
         id: 5,
-        name: 'BloodPressure',
+        name: 'Blood Pressure',
         value: 'BloodPressure',
         units: ['mmHg', 'kPa'],
         icon: 'healthicons:blood-pressure-monitor',

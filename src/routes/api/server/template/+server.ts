@@ -28,7 +28,7 @@ export const PUT = async (event: RequestEvent) => {
             data.CurrentVersion,
             data.Type,
             data.ItemsPerPage,
-            data.OwnerUserId
+            // data.OwnerUserId
         );
         // return json({
         //     status: 'success',

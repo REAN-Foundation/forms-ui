@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 
 	let selectedBPValues = $state({
 		Systolic: '',
@@ -37,8 +37,7 @@
 
 	<Label for="score" class="float-right">{q.Score || ''}</Label>
 
-	<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label
-	>
+	<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
 
 	<Input type="text" class="hidden w-full" bind:value={answers[q.id]} />
 
@@ -83,7 +82,7 @@
 					bind:value={selectedBPValues.Systolic}
 					placeholder="Enter the systolic blood pressure here..."
 					oninput={updateAnswers}
-					
+					disabled={isSubmitted}
 				/>
 
 				<Label for="umit" class="">mmHg</Label>
@@ -96,12 +95,13 @@
 					bind:value={selectedBPValues.Diastolic}
 					placeholder="Enter the distolic blood pressure here..."
 					oninput={updateAnswers}
+					disabled={isSubmitted}
 				/>
 				<Label for="umit" class="">mmHg</Label>
 			</div>
 		</div>
 	</div>
-	
+
 	{#if errors[q.id]}
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
 	{/if}

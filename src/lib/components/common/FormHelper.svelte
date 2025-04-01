@@ -39,34 +39,37 @@
 
 <div class="relative">
 	<button
-		class="blur-background fixed inset-0 z-40 bg-black bg-opacity-10 backdrop-blur-sm"
+		class="blur-background fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
 		onclick={() => closeSheet()}
 		onkeydown={(e) => e.key === 'Escape' && closeSheet()}
 		aria-label="Close sheet"
 	></button>
 
 	<div
-		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[46%] overflow-y-auto rounded-sm shadow-lg"
+		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[65%] overflow-y-auto rounded-sm bg-[#fafaf9] shadow-lg md:w-[46%]"
 		in:fly={{ x: 500, duration: 500 }}
 		out:fly={{ x: 500, duration: 500 }}
 		role="dialog"
 		aria-modal="true"
 	>
-		<div
-			class="sticky top-0 z-20 flex items-center justify-between bg-[#fafaf9] px-5 py-4 dark:bg-[#0a0a0b]"
-		>
-			<div class="mt-2 flex flex-col">
-				<h2 class="text-lg font-semibold text-black dark:text-white">Edit Question</h2>
-
-				<p class="text-sm text-black dark:text-white">Make changes to your question here.</p>
+		<div class="sticky top-0 z-20 flex items-center justify-between bg-[#fafaf9] dark:bg-[#0a0a0b]">
+			<div class="bg-secondary w-full flex justify-between p-3">
+				<div class=" flex flex-col">
+					<h2 class="text-lg font-semibold text-black ">Edit Question</h2>
+	
+					<p class="text-sm text-black ">Make changes to your question here.</p>
+				</div>
+				<Button type="button" variant="ghost" size="icon" onclick={() => closeSheet()}>
+					<Icon icon="mdi:close" class="" />
+				</Button>
 			</div>
-			<Button type="button" variant="ghost" size="icon" onclick={() => closeSheet()}>
-				<Icon icon="mdi:close" class="text-gray-600 " />
-			</Button>
+			
 		</div>
 		<!-- {JSON.stringify(questionCard.ResponseType)} -->
 
 		<!-- <FielEditorForm {questionCard} {closeModel} /> -->
+    <div class="h-screen overflow-y-hidden">
+
 		{#if questionCard.ResponseType === 'Text'}
 			<TextForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Float'}
@@ -104,6 +107,11 @@
 		{:else}
 			<AdvanceForm {questionCard} bind:errors {handleQuestionCardUpdate} />
 		{/if}
+	</div>
+
+	<!-- <div class="sticky bottom-0 mt-4 bg-secondary text-right p-2">
+			<Button type="submit">Save changes</Button>
+		</div> -->
 	</div>
 </div>
 

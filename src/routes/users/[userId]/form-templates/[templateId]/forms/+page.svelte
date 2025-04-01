@@ -4,7 +4,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
-	import { healthCarePlugins, cards } from '$lib/components/common/questionTypes';
+	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
@@ -12,6 +12,7 @@
 	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
 	import { error } from '@sveltejs/kit';
+	import Icon from '@iconify/svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +22,7 @@
 	// console.log('form data:');
 	// $inspect(errors);
 
-	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
+	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
@@ -48,7 +49,7 @@
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
-		if (target.value === 'Basic' || target.value === 'Advanced') {
+		if (target.value === 'Basic' || target.value === 'HealthCare') {
 			typeOfQuestion = target.value;
 		}
 	}
@@ -291,11 +292,16 @@
 		}
 		invalidateAll();
 	}
+
+	let isOpen = $state(false);
+	function toggleOpen() {
+		isOpen = !isOpen;
+	}
 </script>
 
 {#if sectionForm}
 	<div
-		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
+		class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 	>
 		<SectionEditorForm
 			bind:errors
@@ -310,66 +316,73 @@
 {/if}
 
 <!-- Section -->
-<div class="bg-green-5 flex min-h-screen flex-row my-12">
-	<div class="flex flex-1 overflow-hidden">
-		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {cards} />
-		<div class="mx-10 my-1 w-8/12 space-y-2 p-2">
-			<div class="flex w-full flex-row items-center">
-				<Breadcrumb.Root>
-					<Breadcrumb.List class="flex">
-						<Breadcrumb.Item>
-							<Breadcrumb.Link href="/users/{userId}/form-templates">Templates</Breadcrumb.Link>
-						</Breadcrumb.Item>
-						<Breadcrumb.Separator />
-						<Breadcrumb.Item>
-							<Breadcrumb.Page>Question</Breadcrumb.Page>
-						</Breadcrumb.Item>
-					</Breadcrumb.List>
-				</Breadcrumb.Root>
-				<div class="ml-auto flex items-center">
-					<Dialog.Root>
-						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">
-						
-						</Dialog.Trigger>
-						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
-							<p>assa</p>
-						</Dialog.Content>
-					</Dialog.Root>
-				</div>
-			</div>
 
-			<div class="h-full w-full overflow-hidden">
-				{#if uiSections.length === 0}
-					<p class="text-center text-sm text-slate-500">
-						Drag and drop sections, subsections, and question response type cards here
-					</p>
-				{/if}
-				<div
-					ondragover={(event) => {
-						event.preventDefault();
-					}}
-					class="flex h-full w-full flex-col"
-					use:dropzone={{ on_dropzone: handleDragAndDrop }}
-					role="region"
-					aria-label="Drop Area"
-				>
-					<Sections
-						bind:uiSections
-						{handleDragAndDrop}
-						{highlightedSection}
-						{highlightedSubSection}
-						{deleteButtonClicked}
-						{deleteSubButtonClicked}
-						{openSectionForm}
-						{subSectionForm}
-						{handleDeleteCard}
-						{closeSheet}
-						{openSheet}
-					/>
-				</div>
-			</div>
-		</div>
+<div class="bg-green-5 my-10 flex min-h-screen flex-row">
+	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
+		<button onclick={toggleOpen} class=" m-2 md:hidden">
+			<Icon
+				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
+				class=" text-2xl dark:text-white"
+			/>
+		</button>
+
+		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
 	</div>
+	<div class="flex md:w-[70%] overflow-hidden">
+        <div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
+            <div class="flex w-full flex-row items-center">
+                <Breadcrumb.Root>
+                    <Breadcrumb.List class="flex">
+                        <Breadcrumb.Item>
+                            <Breadcrumb.Link href="/users/{userId}/form-templates">Templates</Breadcrumb.Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Separator />
+                        <Breadcrumb.Item>
+                            <Breadcrumb.Page>Question</Breadcrumb.Page>
+                        </Breadcrumb.Item>
+                    </Breadcrumb.List>
+                </Breadcrumb.Root>
+                <!-- <div class="ml-auto flex items-center">
+                    <Dialog.Root>
+                        <Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex"></Dialog.Trigger>
+                        <Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
+                            <p>assa</p>
+                        </Dialog.Content>
+                    </Dialog.Root>
+                </div> -->
+            </div>
+            <div class="h-full w-full overflow-hidden">
+                {#if uiSections.length === 0}
+                    <p class="text-center text-sm text-slate-500">
+                        Drag and drop sections, subsections, and question response type cards here
+                    </p>
+                {/if}
+                <div
+                    ondragover={(event) => {
+                        event.preventDefault();
+                    }}
+                    class="flex h-full flex-col"
+                    use:dropzone={{ on_dropzone: handleDragAndDrop }}
+                    role="region"
+                    aria-label="Drop Area"
+                >
+                    <Sections
+                        bind:uiSections
+                        {handleDragAndDrop}
+                        {highlightedSection}
+                        {highlightedSubSection}
+                        {deleteButtonClicked}
+                        {deleteSubButtonClicked}
+                        {openSectionForm}
+                        {subSectionForm}
+                        {handleDeleteCard}
+                        {closeSheet}
+                        {openSheet}
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>

@@ -9,6 +9,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
 	import { writable } from 'svelte/store';
+        import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -104,7 +105,7 @@
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] p-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b] {highlightedSection ===
+		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] px-4 py-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b] {highlightedSection ===
 		section.id
 			? ' border-1 border-blue-600'
 			: ''}"
@@ -119,7 +120,7 @@
 	>
 		<Collapsible.Root class=" space-y-2">
 			<div class="flex flex-row">
-				<div class="flex items-center justify-between space-x-4 px-4">
+				<div class="flex items-center justify-between px-2">
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
 					>
@@ -152,10 +153,10 @@
 					</Collapsible.Trigger>
 				</div>
 
-				<div class="flex h-full w-full flex-row">
+				<div class="flex h-full flex-row md:w-full">
 					<Button
 						variant="outline"
-						class="h-full w-full p-2  hover:bg-[#f9fafb] hover:dark:bg-[#262626]"
+						class=" h-full flex-col p-2 hover:bg-[#f9fafb]  hover:dark:bg-[#262626] md:w-full"
 						onclick={() => openSectionForm(section)}
 					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
@@ -165,7 +166,7 @@
 							{:else}
 								<p>{`Section ${index + 1}`}</p>
 							{/if}
-							<p class="text-sm font-normal text-gray-400 dark:text-gray-500">
+							<p class=" whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
 								Drop the Subsection and response type cards here
 							</p>
 						</div>
@@ -205,7 +206,7 @@
 
 					{#each section.Questions as card, index (card.id)}
 						<div
-							class="hover-container items-center justify-between"
+							class="hover-container mx-6 items-center justify-between"
 							draggable="true"
 							ondragover={(event) => {
 								event.preventDefault();
@@ -214,14 +215,12 @@
 							aria-label={`Card: ${card.Title}`}
 						>
 							<!-- Subsection -->
-							<div
-								class="relative my-4 mt-1 flex w-[95%] rounded-md border bg-[#fafaf9] dark:bg-black"
-							>
+							<div class="relative my-4 flex rounded-md border dark:bg-black">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}
 								<button
-									class="delete-button"
+									class="delete-button px-2"
 									onclick={() => openDeleteModal(card.id)}
 									aria-label="Delete card"
 								>
