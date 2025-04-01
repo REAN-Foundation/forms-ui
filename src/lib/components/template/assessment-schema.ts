@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const assessmentSchema = z.object({
-    id:z.string(),
+    id: z.string(),
     Title: z
         .string()
         .min(8, { message: "Title must be at least 8 characters long." })
@@ -20,7 +20,7 @@ export const assessmentSchema = z.object({
         .optional(),
     Type: z.string(),
     CurrentVersion: zfd
-        .numeric(z.number().min(0, { message: "Score cannot be negative." }).default(1))
+        .numeric(z.number().min(0, { message: "Version cannot be negative." }).default(1))
         .nullable()
         .optional(),
     DefaultSectionNumbering: z.boolean().default(true),

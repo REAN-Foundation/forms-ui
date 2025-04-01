@@ -3,29 +3,19 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { createSchema, questionResponseModels, save, submit } from './apiFunctions';
-	import FloatInteger from '$lib/components/submission/FloatInteger.svelte';
-	import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
-	import Text from '$lib/components/submission/Text.svelte';
-	import File from '$lib/components/submission/File.svelte';
-	import MultipleChoices from '$lib/components/submission/MultipleChoice.svelte';
-	import DateTime from '$lib/components/submission/Datetime.svelte';
-	import Bool from '$lib/components/submission/Boolean.svelte';
-	import Range from '$lib/components/submission/Range.svelte';
-	import Rating from '$lib/components/submission/Rating.svelte';
-	import BloodOxygen from '$lib/components/submission/BloodOxygen.svelte';
 	import QuestionPaper from '$lib/components/submission/QuestionPaper.svelte';
 	import { addToast, toastMessage } from '$lib/components/toast/toast.store';
-	import { z } from 'zod';
+
 	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import { show } from '$lib/components/toast/message.utils';
+	import Temperature from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/healthCare/Temperature.svelte';
+	import Float from '../../../users/[userId]/form-templates/[templateId]/forms/components/response.types/basic/Float.svelte';
+	import { cleanAssessmentTemplate } from '$lib/utils';
+
 	///////////////////////////////////////////////////////////////////////////
 
 	let { data }: { data: PageServerData } = $props();
 	const formSubmissionKey = $page.params.id;
-	let sections = $state(data.assessmentTemplate.FormSections[0].Subsections);
+	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	let answers = $state({});
 	// let currentIndex = $state(0); // Used for pagination
@@ -37,9 +27,48 @@
 	let submissionStatus = $derived(data.submissionStatus);
 
 	$inspect('submission status', submissionStatus);
+	$inspect('submission questionResponseData ', questionResponseData);
+
+	$inspect('Retrive data==========', section);
+	
+	// interface Question {
+	// 	id: string;
+	// 	Title?: string | null;
+	// }
+
+	// interface Section {
+	// 	id: string;
+	// 	Questions?: Question[];
+	// 	Subsections?: Section[];
+	// }
+
+	// function cleanAssessmentTemplate(template: Section[]): Section[] {
+	// 	function cleanSection(section: Section): Section | null {
+	// 		const filteredQuestions = section.Questions?.filter(q => q.Title && q.Title.trim() !== "") || [];
+	// 		const filteredSubsections = section.Subsections
+	// 			?.map(cleanSection)
+	// 			.filter((sub): sub is Section => sub !== null); 
+
+	// 		if (filteredQuestions.length === 0 && filteredSubsections.length === 0) {
+	// 			return null;
+	// 		}
+
+	// 		return {
+	// 			...section,
+	// 			Questions: filteredQuestions.length > 0 ? filteredQuestions : undefined,
+	// 			Subsections: filteredSubsections.length > 0 ? filteredSubsections : undefined
+	// 		};
+	// 	}
+
+	// 	return template
+	// 		.map(cleanSection)
+	// 		.filter((section): section is Section => section !== null); 
+	// };
+
+    let sections = cleanAssessmentTemplate(section);
+
 
 	let showDialog = $state(false);
-
 
 	const responseTypeMap = {
 		Integer: 'IntegerValue',
@@ -55,16 +84,19 @@
 		DateTime: 'DateTimeValue',
 		Rating: 'IntegerValue',
 		Location: 'DateTimeValue',
-		Range: 'IntegerValue'
+		Range: 'IntegerValue',
+		Height:'FloatValue',
+		Weight:'FloatValue',
+		PulseRate:'FloatValue',
+		BloodPressure:'TextValue',
+		Temperature:'FloatValue'
 	};
 
 	$effect(() => {
-
-		
-	if (submissionStatus === 'Submitted') {
-		showDialog = true;
-		$inspect('Ia am dialog', showDialog);
-	}
+		if (submissionStatus === 'Submitted') {
+			showDialog = true;
+			$inspect('Ia am dialog', showDialog);
+		}
 		answers = Object.fromEntries(
 			(questionResponseData ?? []).map((item) => {
 				const responseTypeKey = responseTypeMap[item.Question.ResponseType] || 'TextValue';
@@ -265,7 +297,6 @@
 	}
 </script>
 
-
 <div class="flex flex-row">
 	<!-- Collapsible Sidebar -->
 	<!-- <p>Display Option: {displayOption}</p> -->
@@ -279,33 +310,38 @@
 		{/if}
 	</div> -->
 
-	<div class="mx-auto flex h-screen w-[80%] rounded-sm p-1 mt-20  ">
+	<div class="mx-auto mt-20 flex h-screen w-[80%] rounded-sm p-1">
 		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
-			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5  bg-[#F6F8FA] dark:bg-[#0a0a0b]">
-				{#if templateInfo}
-					<div>
-						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
-							{templateInfo.Type}
+			<div
+				class="relative mx-auto h-fit rounded-md border border-gray-500 bg-[#F6F8FA] pb-7 pt-5 dark:bg-[#0a0a0b]"
+			>
+			{#if templateInfo}
+			<div>
+				<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
+					{templateInfo.Type}
+				</p>
+				<div class="flex h-full flex-col items-center justify-center">
+					<h2
+						class="mt-5 text-center text-3xl font-bold"
+					>
+						{templateInfo.Title}
+					</h2>
+					<div class="mt-2 flex w-full flex-row items-center justify-center">
+						<p class="mx-auto [&:not(:first-child)]:mt-6">
+							{templateInfo.Description}
 						</p>
-						<div class="flex h-full flex-col items-center justify-center">
-							<h2
-								class="scroll-m-20 pt-8  py-4 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
-							>
-								<p class="mx-auto [&:not(:first-child)]:mt-6">
-								</p>
-								<p class="ml-auto mr-4 text-sm">
-									Version: {templateInfo.CurrentVersion}
-								</p>
-							</h2>
-							
-							<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
-						</div>
+						<p class="ml-auto mr-4 text-sm">
+							Version: {templateInfo.CurrentVersion}
+						</p>
 					</div>
-				{/if}
+					<!-- <span class="ml-auto mr-2 text-sm">Total Questions: {questions.length}</span> -->
+				</div>
+			</div>
+		{/if}
 			</div>
 
-			<div class="min-h-[390px] bg-[#f9fafb] dark:bg-[#0a0a0b] border rounded-md border-gray-500">
-				<QuestionPaper {sections} bind:answers={answers} bind:errors={errors}/>
+			<div class="min-h-[390px] rounded-md border border-gray-500 bg-[#f9fafb] dark:bg-[#0a0a0b]">
+				<QuestionPaper {sections} bind:answers bind:errors />
 				<!-- {#each sections ?? [] as s}
 					<div class="mb-4 min-h-[300px] border p-5">
 						<h4 class="text-md font-semibold">
@@ -398,34 +434,37 @@
 					Next
 				</Button>
 			</div> -->
-			<div class="mx-auto pt-6 pb-32 flex flex-col space-x-5 md:flex-row">
+			<div class="mx-auto flex flex-col space-x-5 pb-32 pt-6 md:flex-row">
 				<Button type="submit" variant="outline" class="w-full border">Save</Button>
-				<Button  onclick={handleSubmit} type="button" variant="secondary" class="btn h-10 w-full border"
-					>Submit</Button
+				<Button
+					onclick={handleSubmit}
+					type="button"
+					variant="secondary"
+					class="btn h-10 w-full border">Submit</Button
 				>
 			</div>
 		</form>
 	</div>
 </div>
 {#if showDialog}
-<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+	<div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
 
-<div class="fixed inset-0 z-50 flex items-center justify-center">
-	<div
-		class="relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full h "
-	>
-		<div class="flex flex-col space-y-2 text-center sm:text-left">
-			<h1 class="text-lg font-semibold">This form has been submitted</h1>
-			<!-- <p class="text-sm text-muted-foreground">
+	<div class="fixed inset-0 z-50 flex items-center justify-center">
+		<div
+			class="h relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full"
+		>
+			<div class="flex flex-col space-y-2 text-center sm:text-left">
+				<h1 class="text-lg font-semibold">This form has been submitted</h1>
+				<!-- <p class="text-sm text-muted-foreground">
 				This action cannot be undone. This will permanently delete your question and
 				remove your data from our servers.
 			</p> -->
-		</div>
+			</div>
 
-		<!-- <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+			<!-- <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
 			<Button variant="outline" onclick={()=>{showDialog = false}}>Cancel</Button>
 			
 		</div> -->
+		</div>
 	</div>
-</div>
 {/if}

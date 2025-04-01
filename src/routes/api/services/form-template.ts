@@ -105,31 +105,31 @@ export const getAllFormTemplate = async () => {
 // };
 
 export const updateFormTemplate = async (
-	// sessionId: string,
-	formTemplateId: string,
+	id: string,
 	title: string,
 	description: string,
-	currentVersion: number,
 	tenantCode: string,
+	currentVersion: string,
 	type: string,
-	displayCode: string,
-	ownerUserId: string,
-	rootSectionId: string,
-	defaultSectionNumbering: boolean
+	itemsPerPage: string
 ) => {
 	const body = {
-		Title: title,
-		Description: description ? description : null,
-		Type: type,
-		CurrentVersion: currentVersion ? currentVersion : null,
-		TenantCode: tenantCode ? tenantCode : null,
-		DisplayCode: displayCode ? displayCode : null,
-		OwnerUserId: ownerUserId ? ownerUserId : null,
-		ScoringApplicable: rootSectionId ? rootSectionId : null,
-		DefaultSectionNumbering: defaultSectionNumbering ? defaultSectionNumbering : null
+		...(title && { Title: title }),
+		...(description && { Description: description }),
+		...(tenantCode && { TenantCode: tenantCode }),
+		...(currentVersion && { CurrentVersion: parseInt(currentVersion) }),
+		...(type && { Type: type }),
+		...(itemsPerPage && { ItemsPerPage: itemsPerPage }),
+		// ...(OwnerUserId && { OwnerUserId: OwnerUserId }),
+		// Title: title ?? title,
+		// Description: description ?? description,
+		// TenantCode: tenantCode ?? tenantCode,
+		// CurrentVersion: currentVersion ?? parseInt(currentVersion),
+		// Type: type ?? type,
+		// ItemsPerPage: itemsPerPage ?? itemsPerPage,
 	};
 
-	const url = BACKEND_API_URL + `/form-templates/${formTemplateId}`;
+	const url = BACKEND_API_URL + `/form-templates/${id}`;
 	return await put_(url, body);
 };
 

@@ -49,7 +49,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     }
     const assessmentTemplate = response.Data;
 
-    console.log('Assessment template details ', assessmentTemplate);
+    console.log('Assessment template details ', assessmentTemplate.FormSections[0].Subsections);
     console.log('Submission status ', submissionStatus);
     let submissionId = submission.id;
     let questionResponses = null;

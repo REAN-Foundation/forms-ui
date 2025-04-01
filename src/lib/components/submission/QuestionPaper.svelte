@@ -1,43 +1,54 @@
 <script>
-	import FloatInteger from './FloatInteger.svelte';
-	import SingleChoice from './SingleChoice.svelte';
-	import Text from './Text.svelte';
-	import File from './File.svelte';
-	import MultipleChoices from './MultipleChoice.svelte';
-	import DateTime from './Datetime.svelte';
-	import Bool from './Boolean.svelte';
-	import Range from './Range.svelte';
-	import Rating from './Rating.svelte';
-	import BloodOxygen from './BloodOxygen.svelte';
+	// import FloatInteger from './FloatInteger.svelte';
+	// import SingleChoice from './SingleChoice.svelte';
+	// import Text from './Text.svelte';
+	// import File from './File.svelte';
+	// import MultipleChoices from './MultipleChoice.svelte';
+	// import DateTime from './Datetime.svelte';
+	// import Bool from './basic/Boolean.svelte';
+	// import Range from './Range.svelte';
+	// import Rating from './Rating.svelte';
+	import BloodOxygen from './healthCare/BloodOxygen.svelte';
 	import QuestionPaper from './QuestionPaper.svelte';
-
+	import {
+		BoolSubmission,
+		DateSubmission,
+		FileSubmission,
+		FloatIntegerSubmission,
+		MultipleChoicesSubmission,
+		RangeSubmission,
+		RatingSubmission,
+		SingleChoiceSubmission,
+		TextSubmission
+	} from './basic';
+	import { BloodPressureSubmission, HeightForm, PulseRateForm, TemperatureForm, WeightForm } from './healthCare';
 	/////////////////////////////////////////////////////////////////////////////////
 
-	let { sections, answers = $bindable(), errors= $bindable()} = $props();
+	let { sections, answers = $bindable(), errors = $bindable() } = $props();
 
 	const componentsMap = {
-		Text: Text,
-		Float: FloatInteger,
-		Integer: FloatInteger,
-		Boolean: Bool,
-		Object: Text,
-		TextArray: Text,
-		File: File,
-		SingleChoiceSelection: SingleChoice,
-		MultiChoiceSelection: MultipleChoices,
-		Date: DateTime,
-		DateTime: DateTime,
-		Rating: Rating,
-		Range: Range,
-		Temperature: BloodOxygen,
-		BloodPressure: BloodOxygen,
+		Text: TextSubmission,
+		Float: FloatIntegerSubmission,
+		Integer: FloatIntegerSubmission,
+		Boolean: BoolSubmission,
+		Object: TextSubmission,
+		TextArray: TextSubmission,
+		File: FileSubmission,
+		SingleChoiceSelection: SingleChoiceSubmission,
+		MultiChoiceSelection: MultipleChoicesSubmission,
+		Date: DateSubmission,
+		DateTime: DateSubmission,
+		Rating: RatingSubmission,
+		Range: RangeSubmission,
+		Height: HeightForm,
+		Weight: WeightForm,
+		Temperature: TemperatureForm,
+		PulseRate: PulseRateForm,
+		BloodPressure: BloodPressureSubmission,
 		Glucose: BloodOxygen,
 		BloodOxygenSaturation: BloodOxygen,
-		PulseRate: BloodOxygen,
 		Hematocrit: BloodOxygen,
 		Cholesterol: BloodOxygen,
-		Weight: BloodOxygen,
-		Height: BloodOxygen,
 		RespiratoryRate: BloodOxygen,
 		Electrolytes: BloodOxygen,
 		KidneyFunction: BloodOxygen,
@@ -80,7 +91,7 @@
 									</div>
 								{/each}
 							{/each} -->
-				<QuestionPaper sections={s.Subsections} bind:answers bind:errors/>
+				<QuestionPaper sections={s.Subsections} bind:answers bind:errors />
 				<!-- <p>subsection</p> -->
 			{/if}
 		</div>

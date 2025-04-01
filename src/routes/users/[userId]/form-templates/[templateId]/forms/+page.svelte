@@ -4,7 +4,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
-	import { measurements, cards } from '$lib/components/common/questionTypes';
+	import { healthCarePlugins, cards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
@@ -270,6 +270,7 @@
 	}
 
 	async function handleSectionUpdate(model) {
+		console.log(model,"I am from handleSectionUpdate");
 		const response = await fetch(`/api/server/section`, {
 			method: 'PUT',
 			body: JSON.stringify(model),
@@ -311,7 +312,7 @@
 <!-- Section -->
 <div class="bg-green-5 flex min-h-screen flex-row my-12">
 	<div class="flex flex-1 overflow-hidden">
-		<Sidebar {typeOfQuestion} {changeTypes} {measurements} {cards} />
+		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {cards} />
 		<div class="mx-10 my-1 w-8/12 space-y-2 p-2">
 			<div class="flex w-full flex-row items-center">
 				<Breadcrumb.Root>

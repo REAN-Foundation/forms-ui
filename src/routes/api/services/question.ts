@@ -5,21 +5,11 @@ import { delete_, get_, post_, put_ } from './common';
 ////////////////////////////////////////////////////////////////
 
 export const createQuestion = async (
-	parentTemplateId: string,
-	parentSectionId: string,
-	responseType?: string,
-
+	model: any
 ) => {
-	const body = {
-		ParentTemplateId: parentTemplateId,
-		ParentSectionId: parentSectionId,
-		ResponseType: responseType,
-
-	};
-	console.log(body)
+	console.log(model)
 	const url = BACKEND_API_URL + `/questions`;
-	// }
-	return await post_(url, body);
+	return await post_(url, model);
 };
 
 export const getQuestionById = async (

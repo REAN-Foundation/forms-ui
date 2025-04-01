@@ -64,7 +64,7 @@ export type QuestionResponseCreateModel = {
     QuestionId: string;
     IntegerValue: number | null;
     FloatValue: number | null;
-    BooleanValue: string|null;
+    BooleanValue: string | null;
     DateTimeValue: string | null;
     Url: string | null;
     TextValue: string | null;
@@ -130,6 +130,7 @@ export function createSchema(sections) {
                     case 'Text':
                     case 'Object':
                     case 'TextArray':
+                    case 'BloodPressure':
                         schemaObj[q.id] = z
                             .string({
                                 required_error: 'This field is required',
@@ -140,6 +141,10 @@ export function createSchema(sections) {
 
                     case 'Integer':
                     case 'Float':
+                    case 'Height':
+                    case 'Weight':
+                    case 'PulseRate':
+                    case 'Temperature':
                         schemaObj[q.id] = z
                             .number({
                                 required_error: 'This field is required',
@@ -261,7 +266,7 @@ export async function questionResponseModels(
             IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
                 ? (value !== undefined ? Number(value) : null)
                 : null,
-            FloatValue: ResponseType === "Float"
+            FloatValue: ["Float", "Height", "Weight", "Temperature", "PulseRate"].includes(ResponseType)
                 ? (value !== undefined ? parseFloat(value) : null)
                 : null,
             BooleanValue: ResponseType === "Boolean"
@@ -273,7 +278,7 @@ export async function questionResponseModels(
             Url: ResponseType === "URL"
                 ? (value !== undefined ? value : null)
                 : null,
-            TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object"].includes(ResponseType)
+            TextValue: ["Text", "TextArray", "SingleChoiceSelection", "MultiChoiceSelection", "Object", 'BloodPressure'].includes(ResponseType)
                 ? (value !== undefined ? (Array.isArray(value) ? value.join(", ") : value) : null)
                 : null,
             FileResourceId: ResponseType === "File"
