@@ -63,8 +63,9 @@
 		<h4 class="text-md font-semibold">
 			Section: {s.Title || 'Untitled Section'}
 		</h4>
+		
 		<p class="text-sm text-gray-600">
-			{s.Description || 'No description provided.'}
+			{s.Description}
 		</p>
 
 		{#each s?.Questions ?? [] as sq, index}

@@ -188,7 +188,8 @@
 					<Alert.Root variant="primary">
 						<Icon icon="ooui:success" class="h-4 w-4" color="white" />
 						<Alert.Description>
-							This form has already been submitted on <strong>{formattedSubmittedOn}</strong>.
+							This form has already been submitted!
+							<!-- <strong>{formattedSubmittedOn}</strong>. -->
 						</Alert.Description>
 					</Alert.Root>
 				{/if}
@@ -202,15 +203,15 @@
 						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
 							{templateInfo.Type}
 						</p>
-						<div class="flex h-full flex-col items-center justify-center">
+						<div class="flex h-full flex-col text-center justify-center">
 							<h2 class="mt-5 text-center text-3xl font-bold">
 								{templateInfo.Title}
 							</h2>
-							<div class="mt-2 flex w-full flex-row items-center justify-center">
+							<div class="mt-2 w-full items-center justify-center text-wrap">
 								<p class="mx-auto [&:not(:first-child)]:mt-6">
 									{templateInfo.Description}
 								</p>
-								<p class="ml-auto mr-4 text-sm">
+								<p class="ml-auto text-end mr-4 text-sm">
 									Version: {templateInfo.CurrentVersion}
 								</p>
 							</div>
