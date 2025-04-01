@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(),isSubmitted } = $props();
 
 
 	$inspect('Question:', answers);
@@ -90,6 +90,7 @@
 			class="w-full"
 			name={q.id}
 			bind:value={answers[q.id]}
+			disabled={isSubmitted}
 		/>
 
 		{#if errors[q.id]}

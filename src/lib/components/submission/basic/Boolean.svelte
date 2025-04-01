@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Label } from '$lib/components/ui/label/index.js';
 
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 	let optionsArray = $state([]);
 	$inspect('Selected answers:', answers);
 	// Extract options from `q.Options`
@@ -16,11 +16,11 @@
 	let selected: string = $state(answers[q.id] || '');
 
 	// Handle radio button change
-    function handleRadioChange(event) {
-        const value = event.target.value;
-        selected = value; // Update local state
-        answers[q.id] = value; // Synchronize with answers object
-    }
+	function handleRadioChange(event) {
+		const value = event.target.value;
+		selected = value; // Update local state
+		answers[q.id] = value; // Synchronize with answers object
+	}
 
 	// Debugging logs (optional, for development)
 	$inspect('Selected:', selected);
@@ -49,9 +49,9 @@
 					name={q.id}
 					value={o}
 					id={o}
-					   bind:group={selected} 
-				checked={answers[q.id] === o}
-				
+					bind:group={selected}
+					checked={answers[q.id] === o}
+					disabled={isSubmitted}
 				/>
 				<Label for={o}>{o}</Label><br />
 			</div>

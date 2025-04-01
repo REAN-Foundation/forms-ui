@@ -173,13 +173,13 @@
 			<Label class="col-span-11 ">Correct Answer</Label>
 		</div>
 		<Input bind:value={questionCard.CorrectAnswer} />
-		<p class="error">{errors?.CorrectAnswer}</p>
+		<p class="text-destructive">{errors?.CorrectAnswer}</p>
 
-		<div class="relative my-2 grid grid-cols-12 items-center gap-4">
+		<!-- <div class="relative my-2 grid grid-cols-12 items-center gap-4">
 			<Label class="col-span-11 ">Question Image Url</Label>
 		</div>
 		<Input bind:value={questionCard.QuestionImageUrl} />
-		<p class="error">{errors?.QuestionImageUrl}</p>
+		<p class="error">{errors?.QuestionImageUrl}</p> -->
 
 		<Dialog.Footer class="mt-4">
 			<Button type="submit">Save changes</Button>

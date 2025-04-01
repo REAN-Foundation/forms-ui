@@ -18,13 +18,13 @@ export const assessmentSchema = z.object({
         .max(1024, { message: "Description cannot exceed 1024 characters." })
         .nullable()
         .optional(),
-    Type: z.string(),
+    Type: z.string().default('Survey'),
     CurrentVersion: zfd
         .numeric(z.number().min(0, { message: "Version cannot be negative." }).default(1))
         .nullable()
         .optional(),
     DefaultSectionNumbering: z.boolean().default(true),
-    ItemsPerPage: z.string()
+    ItemsPerPage: z.string().default('AllQuestions')
 });
 export type AssessmentSchema = typeof assessmentSchema;
 

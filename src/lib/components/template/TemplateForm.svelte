@@ -2,10 +2,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '../ui/label';
 	import * as Select from '$lib/components/ui/select/index.js';
-	
+
 	///////////////////////////////////////////////////////////////
 	let { templateData, errors = $bindable() } = $props();
-	
+
 	$inspect(templateData, 'ghcfszdgvbjkn');
 	// async function handleSubmit(event) {
 	// 	event.preventDefault();

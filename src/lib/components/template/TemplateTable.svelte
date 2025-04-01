@@ -15,7 +15,7 @@
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	let { data, errors = $bindable(),handleTemplateUpdate } = $props();
+	let { data, errors = $bindable(), handleTemplateUpdate } = $props();
 
 	let isLoading = $state(false);
 	let assessmentTemplates = $state(data.assessmentTemplate.Items);
@@ -32,6 +32,8 @@
 
 	let link: string = $state();
 	let open = $state(false);
+
+	let isOpen = $state(false);
 
 	// Format date to readable format
 	function formatDate(dateString: string): string {
@@ -120,45 +122,44 @@
 		}
 	};
 
-async function handleSubmit(event: Event) {
-	event.preventDefault();
-	
-	const form = (event.currentTarget as HTMLElement).closest('form');
-	if (!form) {
-		console.error('Form not found!');
-		return;
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
+
+		const form = (event.currentTarget as HTMLElement).closest('form');
+		if (!form) {
+			console.error('Form not found!');
+			return;
+		}
+
+		const formData = new FormData(form);
+		const model = {
+			id: formData.get('id'),
+			Title: formData.get('Title'),
+			Description: formData.get('Description'),
+			TenantCode: formData.get('TenantCode'),
+			CurrentVersion: formData.get('CurrentVersion'),
+			Type: formData.get('Type'),
+			ItemsPerPage: formData.get('ItemsPerPage')
+		};
+
+		console.log('Form Model:', model);
+
+		const result = await assessmentSchema.safeParseAsync(model);
+		if (!result.success) {
+			console.log('Client side validation error', result.error.flatten().fieldErrors);
+			errors = Object.fromEntries(
+				Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
+					key,
+					val?.[0] || ''
+				])
+			);
+		}
+
+		if (Object.keys(errors).length === 0 || result?.success) {
+			handleTemplateUpdate(model);
+			isOpen = false;
+		}
 	}
-
-	const formData = new FormData(form);
-	const model = {
-		id: formData.get('id'),
-		Title: formData.get('Title'),
-		Description: formData.get('Description'),
-		TenantCode: formData.get('TenantCode'),
-		CurrentVersion: formData.get('CurrentVersion'),
-		Type: formData.get('Type'),
-		ItemsPerPage: formData.get('ItemsPerPage'),
-	};
-
-	console.log('Form Model:', model);
-
-	const result = await assessmentSchema.safeParseAsync(model);
-	if (!result.success) {
-		console.log('Client side validation error', result.error.flatten().fieldErrors);
-		errors = Object.fromEntries(
-			Object.entries(result.error.flatten().fieldErrors).map(([key, val]) => [
-				key,
-				val?.[0] || ''
-			])
-		);
-	}
-
-	if (Object.keys(errors).length === 0 || result?.success) {
-		handleTemplateUpdate(model);
-	}
-}
-
-
 </script>
 
 <div class="mt-4 w-full overflow-x-auto rounded-md border">
@@ -206,14 +207,14 @@ async function handleSubmit(event: Event) {
 							<Tooltip.Provider>
 								<Tooltip.Root>
 									<Tooltip.Trigger>
-										<Dialog.Root>
-											<Dialog.Trigger>
-												<Button variant="ghost"
-													><Icon icon="material-symbols:edit" width="24" height="24" />
+										<Dialog.Root bind:open={isOpen}>
+											<Dialog.Trigger onclick={() => (isOpen = true)}>
+												<Button variant="ghost">
+													<Icon icon="material-symbols:edit" width="24" height="24" />
 												</Button>
 											</Dialog.Trigger>
 											<Dialog.Content
-												class=" max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh] "
+												class="max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh]"
 											>
 												<Dialog.Header>
 													<Dialog.Title>Add New</Dialog.Title>

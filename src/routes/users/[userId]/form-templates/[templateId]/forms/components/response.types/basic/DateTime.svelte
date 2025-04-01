@@ -15,15 +15,19 @@
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
-		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Select date-time from here'}
+		<h1 class="text-md font-bold text-slate-400">
+			{card.Title || 'Select date-time from here'}
 			{#if card.IsRequired}
-			<span class="text-red-600 ml-1">*</span>
+				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</h1>
 	</div>
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
-			<Input type="datetime-local" id="option1" name="options" disabled />
+			<!-- <Input type="datetime-local" id="option1" name="options" disabled /> -->
+			<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+				<p class="text-sm">Enter date-time here</p>
+			</div>
 		</div>
 	</div>
 	<div>

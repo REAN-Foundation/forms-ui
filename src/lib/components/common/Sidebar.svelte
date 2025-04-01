@@ -6,7 +6,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 
-	let { cards, healthCarePlugins, typeOfQuestion, changeTypes } = $props();
+	let { basicCards, healthCarePlugins, typeOfQuestion, changeTypes,isOpen } = $props();
 	let SectionTemplate = {
 		id: number,
 		localId: number,
@@ -86,8 +86,8 @@
 					<input
 						type="radio"
 						name="layoutType"
-						value="Advanced"
-						checked={typeOfQuestion === 'Advanced'}
+						value="HealthCare"
+						checked={typeOfQuestion === 'HealthCare'}
 						onchange={changeTypes}
 						class="sr-only"
 					/>
@@ -95,7 +95,7 @@
 						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
 					>
 						<span
-							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Advanced'
+							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'HealthCare'
 								? 'opacity-100'
 								: 'opacity-0'} transition-opacity duration-200 ease-in-out"
 						></span>
@@ -109,7 +109,7 @@
 			<Card.Title class="text-md  ">Question Response Types</Card.Title>
 			<div class="scrollbar-hide max-h-80 overflow-y-auto py-4">
 				<ul class="space-y-2">
-					{#if typeOfQuestion === 'Advanced'}
+					{#if typeOfQuestion === 'HealthCare'}
 						{#each healthCarePlugins as card}
 							<li>
 								<div
@@ -126,7 +126,7 @@
 							</li>
 						{/each}
 					{:else if typeOfQuestion === 'Basic'}
-						{#each cards as card}
+						{#each basicCards as card}
 							<li>
 								<div
 									class="w-full cursor-grab"

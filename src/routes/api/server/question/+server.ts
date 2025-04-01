@@ -22,19 +22,19 @@ export const POST = async (event: RequestEvent) => {
         }
 
         if (data.responseType === 'Height') {
-            model['Title'] = 'What is your body height?';
+            model['Title'] = 'Body Height (Centimeter)?';
         }
         if (data.responseType === 'Weight') {
-            model['Title'] = 'What is your body weight?';
+            model['Title'] = 'Body Weight (Kilograms)?';
         }
         if (data.responseType === 'Temperature') {
-            model['Title'] = 'What is your body temperature?';
+            model['Title'] = 'Body Temperature (Fahrenheit)?';
         }
         if (data.responseType === 'PulseRate') {
-            model['Title'] = 'What is your heart pulse rate?';
+            model['Title'] = 'Heart Pulse Rate (in beats per minute)?';
         }
         if (data.responseType === 'BloodPressure') {
-            model['Title'] = 'What is your blood pressure?';
+            model['Title'] = 'Blood Pressure (in mmHg)?';
         }
         const response = await createQuestion(model);
 

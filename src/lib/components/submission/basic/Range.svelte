@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 </script>
 
 <!-- {#if q.Title} -->
@@ -29,6 +29,7 @@
 		min={q?.RangeMin}
 		max={q?.RangeMax}
 		bind:value={answers[q.id]}
+		disabled={isSubmitted}
 	/>
 	<span>{answers[q.id]}</span>
 	{#if errors[q.id]}

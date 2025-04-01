@@ -22,13 +22,16 @@
 			{/if}
 		</h1>
 	</div>
-	<Input
+	<!-- <Input
 		type="text"
 		disabled
 		placeholder="Enter the height in cm / m /inches here..."
 		class="brder w-full p-2"
-	/>
+	/> -->
 
+	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+		<p class="text-sm">Body Height (in centimeter)</p>
+	</div>
 	<div>
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>
 	</div>

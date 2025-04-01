@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(), errors = $bindable() } = $props();
+	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 </script>
 
 <div class="flex w-full flex-col gap-1.5 p-4">
@@ -21,8 +21,14 @@
 		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
 	{/if}
 	<div class="flex items-center space-x-2">
-		<Input type="number" class="w-full" bind:value={answers[q.id]} name={q.id} /><Label>Celcius</Label>
-    </div>
+		<Input
+			type="number"
+			class="w-full"
+			bind:value={answers[q.id]}
+			name={q.id}
+			disabled={isSubmitted}
+		/><Label>Celcius</Label>
+	</div>
 	<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if errors[q.id]}
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>

@@ -4,7 +4,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
-	import { healthCarePlugins, cards } from '$lib/components/common/questionTypes';
+	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
@@ -22,7 +22,7 @@
 	// console.log('form data:');
 	// $inspect(errors);
 
-	let typeOfQuestion: 'Basic' | 'Advanced' = $state('Basic');
+	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
@@ -49,7 +49,7 @@
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
-		if (target.value === 'Basic' || target.value === 'Advanced') {
+		if (target.value === 'Basic' || target.value === 'HealthCare') {
 			typeOfQuestion = target.value;
 		}
 	}
@@ -326,7 +326,7 @@
 			/>
 		</button>
 
-		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {cards} {isOpen} />
+		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
 	</div>
 	<div class="flex md:w-[74%] overflow-hidden">
 		<div class="my-1 w-full space-y-2 p-2 md:mx-10">

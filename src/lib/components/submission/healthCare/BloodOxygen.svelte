@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(),errors = $bindable()} = $props();
+	let { q, answers = $bindable(),errors = $bindable(),isSubmitted} = $props();
 </script>
 
 <!-- {#if q.Title} -->
@@ -21,7 +21,7 @@
 			>{q.Description || 'No description provided'}</Label
 		>
 
-		<Input type="text" class=" w-full" name={q.id} bind:value={answers[q.id]} />
+		<Input type="text" class=" w-full" name={q.id} bind:value={answers[q.id]} disabled={isSubmitted} />
 		{#if errors[q.id]}
 			<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
 		{/if}
