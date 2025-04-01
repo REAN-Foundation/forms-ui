@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { Label } from '$lib/components/ui/label';
 
-	let { q, answers = $bindable(), errors = $bindable(),isSubmitted } = $props();
+	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 </script>
 
 <div class="flex w-full flex-col gap-1.5 p-4">
@@ -23,7 +23,6 @@
 	<div class="flex items-center space-x-2">
 		<Input
 			type="number"
-			placeholder="Enter your weight in cm"
 			class="w-full"
 			bind:value={answers[q.id]}
 			name={q.id}
