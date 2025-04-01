@@ -61,7 +61,7 @@ export const basicCards: BasicTypes[] = [
     },
     {
         id: 8,
-        name: 'Single-ChoiceS election',
+        name: 'Single-Choice Selection',
         value: 'SingleChoiceSelection',
         icon: 'ph:radio-button-fill',
     },
