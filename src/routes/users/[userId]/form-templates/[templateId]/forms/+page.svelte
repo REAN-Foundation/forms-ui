@@ -12,6 +12,7 @@
 	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
 	import { error } from '@sveltejs/kit';
+	import Icon from '@iconify/svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -291,11 +292,16 @@
 		}
 		invalidateAll();
 	}
+
+	let isOpen = $state(false);
+	function toggleOpen() {
+		isOpen = !isOpen;
+	}
 </script>
 
 {#if sectionForm}
 	<div
-		class="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50 backdrop-blur-md"
+		class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 	>
 		<SectionEditorForm
 			bind:errors
@@ -310,10 +316,20 @@
 {/if}
 
 <!-- Section -->
-<div class="bg-green-5 flex min-h-screen flex-row my-12">
-	<div class="flex flex-1 overflow-hidden">
-		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {cards} />
-		<div class="mx-10 my-1 w-8/12 space-y-2 p-2">
+
+<div class="bg-green-5 my-10 flex min-h-screen flex-row">
+	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
+		<button onclick={toggleOpen} class=" m-2 md:hidden">
+			<Icon
+				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
+				class=" text-2xl dark:text-white"
+			/>
+		</button>
+
+		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {cards} {isOpen} />
+	</div>
+	<div class="flex md:w-[74%] overflow-hidden">
+		<div class="my-1 w-full space-y-2 p-2 md:mx-10">
 			<div class="flex w-full flex-row items-center">
 				<Breadcrumb.Root>
 					<Breadcrumb.List class="flex">
@@ -348,7 +364,7 @@
 					ondragover={(event) => {
 						event.preventDefault();
 					}}
-					class="flex h-full w-full flex-col"
+					class="flex h-full flex-col"
 					use:dropzone={{ on_dropzone: handleDragAndDrop }}
 					role="region"
 					aria-label="Drop Area"
