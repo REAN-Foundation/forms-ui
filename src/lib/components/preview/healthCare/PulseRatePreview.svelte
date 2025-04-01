@@ -17,7 +17,7 @@
 		>
 		<br />
 		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-		<Input placeholder="Enter your Height " />
+		<Input placeholder="Enter value here" disabled/>
 	</div>
 	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
 		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
