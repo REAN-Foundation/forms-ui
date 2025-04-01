@@ -42,12 +42,12 @@
 			name: 'Forms',
 			icon: 'fluent-mdl2:file-template',
 			subMenuItems: [
-				{
-					name: 'Create New Form',
-					icon: 'mdi:form-textbox',
-					action: () => selectSubmenu('createForm')
-				},
-				{ name: 'View Forms', icon: 'mdi-light:eye', action: () => selectSubmenu('viewForms') }
+				// {
+				// 	name: 'Create New Form',
+				// 	icon: 'mdi:form-textbox',
+				// 	action: () => selectSubmenu('createForm')
+				// },
+				// { name: 'View Forms', icon: 'mdi-light:eye', action: () => selectSubmenu('viewForms') }
 			]
 		}
 	];

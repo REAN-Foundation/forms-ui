@@ -22,7 +22,7 @@ export const POST = async (event: RequestEvent) => {
         }
 
         if (data.responseType === 'Height') {
-            model['Title'] = 'Body Height (Centimeter)?';
+            model['Title'] = 'Height (Centimeter)?';
         }
         if (data.responseType === 'Weight') {
             model['Title'] = 'Body Weight (Kilograms)?';

@@ -30,7 +30,7 @@
 	/> -->
 
 	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
-		<p class="text-sm">Body Height (in centimeter)</p>
+		<p class="text-sm">Height (in centimeter)</p>
 	</div>
 	<div>
 		<p class="text-sm text-slate-400">{card.Description || ''}</p>

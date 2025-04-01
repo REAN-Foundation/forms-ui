@@ -164,25 +164,26 @@
 
 <div class="mt-4 w-full overflow-x-auto rounded-md border">
 	<table class="w-full table-auto border-collapse border border-slate-200">
-		<thead class="border">
-			<tr class="bg-[#F6F8FA] dark:bg-[#0a0a0b]">
-				<th class="p-2 text-center">Sr No</th>
-				<th class="p-2 text-center">
-					<Button variant="ghost" class="" onclick={() => sortTable('Title')}>
-						Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-					</Button>
-				</th>
-				<th class="p-2 text-center">
-					<Button variant="ghost" onclick={() => sortTable('Type')}>
-						Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-					</Button>
-				</th>
-
-				<th class="p-2 text-center">Created At</th>
-				<th class="p-2 text-center">Version</th>
-				<th class="p-2 text-center">Actions</th>
-			</tr>
-		</thead>
+		 <thead class="border">
+            <tr class="bg-[#F6F8FA] dark:bg-[#0A0A0B]">
+                <th class="w-12 p-3">Sr No</th>
+                <th class="w-52 py-3 text-start">
+                    <Button variant="ghost" class=" font-bold text-md" onclick={() => sortTable('Title')}>
+                        Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+                    </Button>
+                </th>
+                <th class=" w-28 py-3 text-start">
+                    <Button variant="ghost" class="font-bold text-md" onclick={() => sortTable('Type')}>
+                        Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+                    </Button>
+                </th>
+                <!-- <th class="p-4 text-center">Description</th>
+                <th class="p-4 text-center">Tenant Code</th> -->
+                <th class=" w-32 p-3 text-center">Created At</th>
+                <th class=" w-20 p-3 text-center">Version</th>
+                <th class=" w-20 p-3 text-center">Actions</th>
+            </tr>
+        </thead>
 		<tbody>
 			{#if isLoading}
 				<tr><td colspan="8" class="p-4 text-center">Loading...</td></tr>
@@ -192,7 +193,7 @@
 				{#each assessmentTemplates as row, index}
 					<tr class="border-b border-l border-r p-4">
 						<td class=" text-center">{index + 1}</td>
-						<td class="text-center capitalize">
+						<td class="text-left capitalize px-2">
 							<a
 								href={`/users/${userId}/form-templates/${row.id}/forms`}
 								class="hover:text-blue-500 hover:underline"
@@ -200,7 +201,7 @@
 								{row.Title || 'Not specified'}
 							</a>
 						</td>
-						<td class=" text-center">{row.Type || 'N/A'}</td>
+						<td class="px-2 text-left">{row.Type || 'N/A'}</td>
 						<td class=" text-center">{formatDate(row.CreatedAt)}</td>
 						<td class="text-center">{row.CurrentVersion || '-'}</td>
 						<td class=" flex justify-center gap-4">
@@ -210,7 +211,7 @@
 										<Dialog.Root bind:open={isOpen}>
 											<Dialog.Trigger onclick={() => (isOpen = true)}>
 												<Button variant="ghost">
-													<Icon icon="material-symbols:edit" width="24" height="24" />
+													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
 												</Button>
 											</Dialog.Trigger>
 											<Dialog.Content
@@ -225,7 +226,7 @@
 												<form method="post" use:enhance>
 													<TemplateForm templateData={row} bind:errors />
 													<Dialog.Footer>
-														<Button onclick={handleSubmit} type="submit">Save changes</Button>
+														<Button class="my-2" onclick={handleSubmit} type="submit">Save changes</Button>
 													</Dialog.Footer>
 												</form>
 											</Dialog.Content>
@@ -257,7 +258,7 @@
 											<Tooltip.Trigger>
 												<Button variant="ghost" class=""
 													><Icon
-														icon="material-symbols-light:link"
+														icon="material-symbols:link"
 														width="20"
 														height="20"
 													/></Button

@@ -22,8 +22,8 @@ export const createFormTemplate = async (
 		// CurrentVersion: currentVersion ? currentVersion : null,
 		...(tenantCode && { TenantCode: tenantCode }),
 		// TenantCode: tenantCode ? tenantCode : null,
-		ItemsPerPage: itemsPerPage ? itemsPerPage : null,
-		Type: type,
+		ItemsPerPage: itemsPerPage ? itemsPerPage : 'AllQuestions',
+		Type: type ? type : 'Survey',
 		OwnerUserId: ownerUserId ? ownerUserId : null,
 		DefaultSectionNumbering: defaultSectionNumbering ? defaultSectionNumbering : false
 	};
