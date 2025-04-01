@@ -2,14 +2,14 @@
 	import type { ActionData, PageServerData } from './$types';
 	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { AssessmentForm, DataTable } from '$lib/index';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import { columns } from '$lib/components/template/data.table/column';
-	import { goto } from '$app/navigation';
+	// import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { TemplateTable, TemplateForm } from '$lib/components/template/index';
 	import { enhance } from '$app/forms';
+	import { toastMessage } from '$lib/components/toast/toast.store';
+	import { invalidateAll } from '$app/navigation';
 
 	//////////////////////////////////////////////////////////////////////
 
@@ -59,9 +59,28 @@
 		selectedSubmenu = submenu;
 	}
 
-	function templateEditRoute() {
-		console.log(userId, 'This is template edit router');
-		goto(`/users/${userId}/form-templates/create`);
+async function handleTemplateUpdate(model) {
+		console.log(model,"I am from handleSectionUpdate");
+		const response = await fetch(`/api/server/template`, {
+			method: 'PUT',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const section = await response.json();
+		console.log(section);
+		if (section.HttpCode === 200) {
+			toastMessage(section);
+			// closeModel('Section', section);
+			errors = {};
+			invalidateAll();
+			return;
+		}
+
+		errors = section?.Errors || {};
+		if (Object.keys(errors).length === 0) {
+			toastMessage(section);
+		}
+		invalidateAll();
 	}
 </script>
 
@@ -139,7 +158,7 @@
 					</Dialog.Root>
 				</div>
 				<!-- <DataTable data={assessments.Items} {columns} /> -->
-				<TemplateTable {data} bind:errors />
+				<TemplateTable {data} bind:errors {handleTemplateUpdate}/>
 			</div>
 		{:else if selectedSubmenu === 'viewForms'}
 			<div class="container mx-auto">

@@ -1,18 +1,10 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
-	import Icon from '@iconify/svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import InfoIcon from '../common/InfoIcon.svelte';
 	import { Label } from '../ui/label';
-	import { enhance } from '$app/forms';
-	import { assessmentSchema } from './assessment-schema';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
-	let { templateData, errors = $bindable() } = $props();
-
+	
 	///////////////////////////////////////////////////////////////
+	let { templateData, errors = $bindable() } = $props();
 	
 	$inspect(templateData, 'ghcfszdgvbjkn');
 	// async function handleSubmit(event) {
@@ -64,7 +56,7 @@
 
 	let itemsPerPageValue = $state(templateData.ItemsPerPage);
 	const selectedItemsPerPage = $derived(
-		itemsPerPage.find((f) => f.value === itemsPerPageValue)?.label ?? 'Select a fruit'
+		itemsPerPage.find((f) => f.value === itemsPerPageValue)?.label ?? 'Select a Items Per Page'
 	);
 </script>
 
@@ -94,7 +86,7 @@
 <div class="relative my-2 grid grid-cols-12 items-center gap-4">
 	<Label class="col-span-11 ">CurrentVersion</Label>
 </div>
-<Input name="CurrentVersion" bind:value={templateData.CurrentVersion} />
+<Input name="CurrentVersion" bind:value={templateData.CurrentVersion} type="number" />
 
 <Label class=" text-right" for="ItemsPerPage">Select Type <span class="text-red-600">*</span></Label
 >

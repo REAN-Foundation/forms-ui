@@ -17,3 +17,4 @@ export const DELETE = async (event: RequestEvent) => {
         return new Response(err);
     }
 };
+

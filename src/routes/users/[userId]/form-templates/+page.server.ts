@@ -104,7 +104,6 @@ export const actions = {
 
 		const templateId = response.Data.id;
 
-		console.log(response,"I am response ");
 		if (response.Status === 'failure' || response.HttpCode !== 201) {
 			throw redirect(
 				303,
