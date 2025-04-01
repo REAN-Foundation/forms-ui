@@ -79,13 +79,13 @@
 	</div>
 
 	<div class="relative items-center  space-y-1">
-		<Label class="col-span-11 ">TenantCode</Label>
+		<Label class="col-span-11 ">Tenant Code</Label>
 		<Input name="TenantCode" bind:value={templateData.TenantCode} />
 		<p class="text-destructive">{errors?.TenantCode}</p>
 	</div>
 
 	<div class="relative items-center  space-y-1">
-		<Label class="col-span-11 ">CurrentVersion</Label>
+		<Label class="col-span-11 ">Current Version</Label>
 		<Input name="CurrentVersion" bind:value={templateData.CurrentVersion} type = "number" />
 	</div>
 
