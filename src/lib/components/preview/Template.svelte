@@ -10,8 +10,8 @@
 
 {#each sections ?? [] as s, index}
 	<!-- {#if s?.Sections?.length > 0 || s?.Questions?.length > 0} -->
-	<fieldset class="mt-2 border p-4 border-gray-400 rounded-md  dark:bg-[#0a0a0b]  ">
-		<legend class=" px-4 text-left">{s?.Title ?? 'Section Name'}</legend>
+	<div class="my-2 border py-6 px-4 border-gray-400 rounded-md  dark:bg-[#0a0a0b]  ">
+		<h1 class=" font-semibold text-lg px-4 text-left">{s?.Title ?? 'Section Name'}</h1>
 
 		{#each s?.Questions ?? [] as sq, index}
 			<!-- <fieldset class="mt-2 border-2 p-2"> -->
@@ -40,6 +40,6 @@
 		{/if}
 		<!-- </div> -->
 		<!-- <Template {Subsections} /> -->
-	</fieldset>
+	</div>
 	<!-- {/if} -->
 {/each}

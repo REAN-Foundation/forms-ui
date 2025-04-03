@@ -36,7 +36,7 @@
 
 <ModeWatcher />
 
-<div class="bg-yello flex flex-col">
+<div class="flex flex-col">
 	<!-- <div class="fixed top-0 z-50 w-full bg-emerald-500"> -->
 	<Navbar />
 	<!-- </div> -->

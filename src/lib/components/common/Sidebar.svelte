@@ -31,12 +31,12 @@
 </script>
 
 <!-- sidebar add section -->
-<div class="relative h-screen overflow-hidden {isOpen ? 'block' : 'hidden'} md:block">
+<div class=" md:fixed my-2  h-full overflow-hidden {isOpen ? 'block' : 'hidden'} md:block">
 	<!-- <div class="sticky h-screen space-y-4 bg-[#F6F8FA] px-4 py-6 dark:bg-[#0A0A0B] md:fixed"> -->
 	<Card.Root
 		class="!rounded-none !border-none bg-[#F6F8FA] px-4 py-5 !shadow-none dark:bg-[#0A0A0B] md:w-full "
 	>
-		<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
+		<!-- <Card.Title class="text-md mb-3">Drag Section From Here</Card.Title> -->
 		<div
 			class="flex cursor-grab items-center justify-center"
 			use:draggable={{ ...SectionTemplate, type: 'section' }}
@@ -64,51 +64,51 @@
 		<Card.Title class="text-md px-3">Question</Card.Title>
 		<div class=" h-full rounded-md px-3 dark:border-gray-400">
 			<div
-                class=" flex flex-wrap justify-around dark:bg-[#0A0A0B] bg-[#FDFDFD] py-2 px-4 rounded-tl-md rounded-tr-md border border-b-0"
-            >
-                <label class="  flex cursor-pointer items-center">
-                    <input
-                        type="radio"
-                        name="layoutType"
-                        value="Basic"
-                        bind:group={selectedTab}
-                        checked={typeOfQuestion === 'Basic'}
-                        onchange={changeTypes}
-                        class="sr-only"
-                    />
-                    <span
-                        class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
-                    >
-                        <span
-                            class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Basic'
-                                ? 'opacity-100'
-                                : 'opacity-0'} transition-opacity duration-200 ease-in-out"
-                        ></span>
-                    </span>
-                    Basic
-                </label>
-                <label class="mx-2 flex cursor-pointer items-center">
-                    <input
-                        type="radio"
-                        name="layoutType"
-                        value="HealthCare"
-                        bind:group={selectedTab}
-                        checked={typeOfQuestion === 'HealthCare'}
-                        onchange={changeTypes}
-                        class="sr-only"
-                    />
-                    <span
-                        class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
-                    >
-                        <span
-                            class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'HealthCare'
-                                ? 'opacity-100'
-                                : 'opacity-0'} transition-opacity duration-200 ease-in-out"
-                        ></span>
-                    </span>
-                    Health Care
-                </label>
-            </div>
+				class=" flex flex-wrap justify-around rounded-tl-md rounded-tr-md border border-b-0 bg-[#FDFDFD] px-4 py-2 dark:bg-[#0A0A0B]"
+			>
+				<label class="  flex cursor-pointer items-center">
+					<input
+						type="radio"
+						name="layoutType"
+						value="Basic"
+						bind:group={selectedTab}
+						checked={typeOfQuestion === 'Basic'}
+						onchange={changeTypes}
+						class="sr-only"
+					/>
+					<span
+						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
+					>
+						<span
+							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'Basic'
+								? 'opacity-100'
+								: 'opacity-0'} transition-opacity duration-200 ease-in-out"
+						></span>
+					</span>
+					Basic
+				</label>
+				<label class="mx-2 flex cursor-pointer items-center">
+					<input
+						type="radio"
+						name="layoutType"
+						value="HealthCare"
+						bind:group={selectedTab}
+						checked={typeOfQuestion === 'HealthCare'}
+						onchange={changeTypes}
+						class="sr-only"
+					/>
+					<span
+						class="relative mr-3 flex h-4 w-4 items-center justify-center rounded-full border border-primary"
+					>
+						<span
+							class="absolute h-2 w-2 rounded-full bg-primary {typeOfQuestion === 'HealthCare'
+								? 'opacity-100'
+								: 'opacity-0'} transition-opacity duration-200 ease-in-out"
+						></span>
+					</span>
+					Health Care
+				</label>
+			</div>
 			<div
 				class="scrollbar-hide overflow-y-auto rounded-bl-md rounded-br-md border bg-[#FDFDFD] py-4 dark:border-gray-400 dark:bg-[#0A0A0B] md:h-[50%] lg:h-[60%]"
 			>

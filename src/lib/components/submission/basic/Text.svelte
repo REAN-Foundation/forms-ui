@@ -7,8 +7,8 @@
 	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 </script>
 
-<div class="flex w-full flex-col px-4 py-2">
-	<div class="flex justify-between">
+<div class="w-full space-y-3 rounded-lg px-4 py-4">
+	<div class="flex items-center justify-between">
 		<Label for={q.Title}
 			>{q.Title || 'No title provided'}
 			{#if q.IsRequired}
@@ -16,7 +16,7 @@
 			{/if}
 		</Label>
 		{#if q.Score}
-			<Label for="score">{q.Score}</Label>
+			<Label for="score" class=" text-sm font-medium">{q.Score}</Label>
 		{/if}
 	</div>
 
@@ -30,7 +30,9 @@
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
 	{/if}
 
-	{#if q.Hint}
-		<Label class="self-end text-xs text-gray-400">Hint: {q.Hint}</Label>
-	{/if}
+	<div class="flex justify-end">
+		{#if q.Hint}
+			<Label class="my-1 text-xs text-gray-400">Hint: {q.Hint}</Label>
+		{/if}
+	</div>
 </div>

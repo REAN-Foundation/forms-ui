@@ -6,9 +6,9 @@
 	// console.log(question)
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
+<div class=" my-2 w-full justify-between rounded-md px-4 py-4 ">
 	<div>
-		<Label for="title" class="text-md">{question.Title || 'Question Title'}
+		<Label for="title" class="text-sm">{question.Title || 'Question Title'}
 			{#if question.IsRequired}
 			<span class="text-red-600 ml-1">*</span>
 			{/if}

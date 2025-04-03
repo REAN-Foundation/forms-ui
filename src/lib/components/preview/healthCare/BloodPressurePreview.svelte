@@ -6,7 +6,7 @@
 	// console.log(question)
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
+<div class=" mt-4 w-full justify-between rounded-md  p-4 pb-10">
 	<div>
 		<Label for="title" class="text-md"
 			>{question.Title || 'Question Title'}

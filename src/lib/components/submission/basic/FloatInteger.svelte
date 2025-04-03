@@ -13,19 +13,22 @@
 </script>
 
 <!-- {#if q.Title} -->
-<div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}>{q.Title || 'No title provided'}
-		{#if q.IsRequired}
-				<span class="text-red-600 ml-1">*</span>
-			{/if}
-	</Label>
+<div class="w-full space-y-3 rounded-lg px-4 py-4">
+	<div class="flex items-center justify-between">
+		<Label for={q.Title}>{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+					<span class="text-red-600 ml-1">*</span>
+				{/if}
+		</Label>
+	
+		{#if q.score}
+			<Label for="score" class="float-right">{q.Score}</Label>
+		{/if}
+	</div>
 
-	{#if q.score}
-		<Label for="score" class="float-right">{q.Score}</Label>
-	{/if}
 
 	{#if q.Description}
-		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
+		<Label for="title" class="text-xs text-gray-500">{q.Description}</Label><br />
 	{/if}
 	<Input
 		type="number"
@@ -41,7 +44,7 @@
 	{/if}
 	{#if q.Hint}
 		<div class="flex justify-end">
-			<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">Hint: {q.Hint}</Label>
+			<Label for="hint" class="my-1 text-xs text-gray-400"> {q.Hint}</Label>
 		</div>
 	{/if}
 </div>

@@ -21,19 +21,21 @@
 </script>
 
 <!-- Render the Question with Radio Options -->
-<div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}>
-		{q.Title || 'Select :'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
+<div class="w-full space-y-3 rounded-lg px-4 py-4">
+	<div class="flex items-center justify-between">
+		<Label for={q.Title}>
+			{q.Title || 'Select :'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
-	<Label for="title" class="ml-4 ">{q.Description || ''}</Label>
+		<Label for="score" class="text-sm font-medium">{q.Score || ''}</Label>
+	</div>
+	<Label for="title" class="text-xs text-gray-500">{q.Description || ''}</Label>
 
 	{#each optionsArray as o}
-		<div class="bg-[3a994c]">
+		<div class=" flex items-center space-x-3">
 			<input
 				type="radio"
 				class="input"
@@ -55,7 +57,8 @@
 	{/if}
 
 	<div class="flex justify-end">
-		<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">
+
+		<Label for="hint" class="my-1 text-xs text-gray-400">
 			{q.Hint || ''}
 		</Label>
 	</div>

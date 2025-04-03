@@ -328,9 +328,9 @@
 
 		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
 	</div>
-	<div class="flex md:w-[70%] overflow-hidden">
-        <div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
-            <div class="flex w-full flex-row items-center">
+	<div class="flex md:w-[75%] my-3 overflow-hidden">
+        <div class="my-1 w-full ">
+            <div class="flex w-full px-2 md:pl-20 lg:pl-5 xl:pl-0 flex-row items-center md:ml-5">
                 <Breadcrumb.Root>
                     <Breadcrumb.List class="flex">
                         <Breadcrumb.Item>
@@ -351,7 +351,7 @@
                     </Dialog.Root>
                 </div> -->
             </div>
-            <div class="h-full w-full overflow-hidden">
+            <div class="h-full w-full overflow-hidden md:pl-20 lg:pl-10 xl:pl-0">
                 {#if uiSections.length === 0}
                     <p class="text-center text-sm text-slate-500">
                         Drag and drop sections, subsections, and question response type cards here
@@ -361,7 +361,7 @@
                     ondragover={(event) => {
                         event.preventDefault();
                     }}
-                    class="flex h-full flex-col"
+                    class="flex h-full flex-col mx-5"
                     use:dropzone={{ on_dropzone: handleDragAndDrop }}
                     role="region"
                     aria-label="Drop Area"

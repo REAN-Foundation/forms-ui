@@ -14,10 +14,9 @@
 	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
 	let sections = cleanAssessmentTemplate(section);
-	
 </script>
 
-<div class="card container h-full w-full px-6 md:px-16 pt-4 mt-10 ">
+<div class="card container my-12 h-full w-full px-6 pt-4 md:px-5">
 	<Breadcrumb.Root>
 		<Breadcrumb.List class="flex">
 			<Breadcrumb.Item>
@@ -30,25 +29,31 @@
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 
-	<div class="mx-auto md:w-3/4 w-full rounded-md border-gray-400 border bg-[#F6F8FA] dark:bg-[#0a0a0b]  p-5 my-10  ">
-
+	<div
+		class="mx-auto my-10 w-full rounded-md border border-gray-400 p-5 dark:bg-[#0a0a0b] md:w-3/4"
+	>
 		{#if templateInfo}
 			<Card.Root>
-				<div class=" relative mx-auto h-fit rounded-md border border-gray-400  pb-7 pt-5 bg-[#f9fafb] dark:bg-[#0a0a0b] ">
-					<Card.Title class="absolute right-3 top-2 mr-0 mt-0  text-base sm:text-2xl font-semibold">
-						{templateInfo.Type}
-					</Card.Title>
-					<div class="flex h-full flex-col items-center justify-center  ">
-						<h2 class="mt-5 text-center text-3xl font-bold   ">
+
+				<div
+					class=" relative mx-auto h-fit rounded-md border border-gray-400 py-4 dark:bg-[#0a0a0b]"
+				>
+					<!-- <p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
+								{templateInfo.Type}
+							</p> -->
+					<div class="flex h-full flex-col items-center justify-center">
+						<h2 class="text-center text-2xl font-bold capitalize">
 							{templateInfo.Title}
 						</h2>
-						<div class="mt-2 flex w-full flex-row justify-center">
-							<Card.Description class="ml-auto text-sm">
-								{templateInfo.Description || ''}
-							</Card.Description>
-							<p class="ml-auto mr-3 text-base">
+						<div class="relative w-full p-4">
+							<div class="flex w-full justify-center text-center text-gray-700">
+								<Card.Description>
+									{templateInfo.Description || ''}
+								</Card.Description>
+							</div>
+							<span class="absolute mx-4 right-0 top-1/2 -translate-y-1/2 text-sm text-gray-700">
 								Version: {templateInfo.CurrentVersion}
-							</p>
+							</span>
 						</div>
 					</div>
 				</div>

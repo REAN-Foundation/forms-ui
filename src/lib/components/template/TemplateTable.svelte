@@ -12,6 +12,7 @@
 	import { enhance } from '$app/forms';
 	import TemplateForm from './TemplateForm.svelte';
 	import { assessmentSchema } from './assessment-schema';
+	import * as Popover from '$lib/components/ui/popover/index.js';
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,6 +35,8 @@
 	let open = $state(false);
 
 	let isOpen = $state(false);
+	let copied = $state(false);
+	let activeMenu = $state(null);
 
 	// Format date to readable format
 	function formatDate(dateString: string): string {
@@ -66,6 +69,8 @@
 	async function copyToClipboard() {
 		try {
 			await navigator.clipboard.writeText(link);
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
 			successMessage('Link Copied');
 		} catch (error) {
 			errorMessage('Failed to copy link');
@@ -160,30 +165,34 @@
 			isOpen = false;
 		}
 	}
+
+	function toggleMenu(id) {
+		activeMenu = activeMenu === id ? null : id;
+	}
 </script>
 
 <div class="mt-4 w-full overflow-x-auto rounded-md border">
 	<table class="w-full table-auto border-collapse border border-slate-200">
-		 <thead class="border">
-            <tr class="bg-[#F6F8FA] dark:bg-[#0A0A0B]">
-                <th class="w-12 p-3">Sr No</th>
-                <th class="w-52 py-3 text-start">
-                    <Button variant="ghost" class=" font-bold text-md" onclick={() => sortTable('Title')}>
-                        Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-                    </Button>
-                </th>
-                <th class=" w-28 py-3 text-start">
-                    <Button variant="ghost" class="font-bold text-md" onclick={() => sortTable('Type')}>
-                        Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
-                    </Button>
-                </th>
-                <!-- <th class="p-4 text-center">Description</th>
-                <th class="p-4 text-center">Tenant Code</th> -->
-                <th class=" w-32 p-3 text-center">Created At</th>
-                <th class=" w-20 p-3 text-center">Version</th>
-                <th class=" w-20 p-3 text-center">Actions</th>
-            </tr>
-        </thead>
+		<thead class="border">
+			<tr class="bg-[#F6F8FA] dark:bg-[#0a0a0b]">
+				<th class="w-12 p-3">Sr No</th>
+				<th class="w-44 py-3 text-start">
+					<Button variant="ghost" class=" text-md font-bold" onclick={() => sortTable('Title')}>
+						Title {isSortingTitle ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+					</Button>
+				</th>
+				<th class=" w-32 py-3 text-start">
+					<Button variant="ghost" class="text-md font-bold" onclick={() => sortTable('Type')}>
+						Type {isSortingType ? (sortOrder === 'ascending' ? '▲' : '▼') : ''}
+					</Button>
+				</th>
+				<!-- <th class="p-4 text-center">Description</th>
+				<th class="p-4 text-center">Tenant Code</th> -->
+				<th class=" w-32 p-3 text-center">Created At</th>
+				<th class=" w-20 p-3 text-center">Version</th>
+				<th class=" w-20 p-3 text-center">Actions</th>
+			</tr>
+		</thead>
 		<tbody>
 			{#if isLoading}
 				<tr><td colspan="8" class="p-4 text-center">Loading...</td></tr>
@@ -193,7 +202,7 @@
 				{#each assessmentTemplates as row, index}
 					<tr class="border-b border-l border-r p-4">
 						<td class=" text-center">{index + 1}</td>
-						<td class="text-left capitalize px-2">
+						<td class=" px-3 py-1 text-sm capitalize">
 							<a
 								href={`/users/${userId}/form-templates/${row.id}/forms`}
 								class="hover:text-blue-500 hover:underline"
@@ -201,11 +210,130 @@
 								{row.Title || 'Not specified'}
 							</a>
 						</td>
-						<td class="px-2 text-left">{row.Type || 'N/A'}</td>
-						<td class=" text-center">{formatDate(row.CreatedAt)}</td>
-						<td class="text-center">{row.CurrentVersion || '-'}</td>
-						<td class=" flex justify-center gap-4">
-							<Tooltip.Provider>
+						<td class=" mx-10 px-3 py-1 text-sm">{row.Type || 'N/A'}</td>
+						<td class=" px-3 py-1 text-center text-sm">{formatDate(row.CreatedAt)}</td>
+						<td class=" text-center text-sm">{row.CurrentVersion || '-'}</td>
+						<td class=" text-center text-sm">
+							<Popover.Root>
+								<Popover.Trigger>
+									<button
+										onclick={() => toggleMenu(row.id)}
+										class="rotate-90 items-center rounded-md p-2 hover:bg-gray-200"
+									>
+										⠇
+									</button>
+								</Popover.Trigger>
+
+								<Popover.Content class=" !flex !flex-col !items-start">
+									{#if activeMenu === row.id}
+										<Dialog.Root bind:open={isOpen}>
+											<Dialog.Trigger onclick={() => (isOpen = true)}>
+												<Button variant="ghost">
+													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
+													<span>Edit</span>
+												</Button>
+											</Dialog.Trigger>
+											<Dialog.Content
+												class=" scrollbar-hide max-h-[90%] max-w-[95%] overflow-y-auto rounded-md md:max-w-[85%] lg:max-w-[45%] "
+											>
+												<Dialog.Header>
+													<Dialog.Title>Add New</Dialog.Title>
+													<Dialog.Description>
+														Make changes to your form template here. Click save when you're done.
+													</Dialog.Description>
+												</Dialog.Header>
+												<form method="post" use:enhance>
+													<TemplateForm templateData={row} bind:errors />
+													<Dialog.Footer>
+														<Button class="my-2" onclick={handleSubmit} type="submit"
+															>Save changes</Button
+														>
+													</Dialog.Footer>
+												</form>
+											</Dialog.Content>
+										</Dialog.Root>
+										<div>
+											<Button variant="ghost" onclick={() => reviewAssessment(row.id)}
+												><Icon icon="icon-park-outline:preview-open" width="24" height="24" />
+												<span>Preview</span>
+											</Button>
+										</div>
+
+										<AlertDialog.Root>
+											<AlertDialog.Trigger>
+												<Button variant="ghost" class=""
+													><Icon icon="material-symbols:link" width="20" height="20" />
+													<span>Generate Link</span>
+												</Button>
+											</AlertDialog.Trigger>
+											<AlertDialog.Content>
+												<AlertDialog.Header>
+													<AlertDialog.Title>This is the link for the template</AlertDialog.Title>
+													<AlertDialog.Description>
+														Generate link to copy and share form template for data collection.
+													</AlertDialog.Description>
+												</AlertDialog.Header>
+												<div class=" flex w-full items-center">
+													<div class="relative w-full md:w-auto">
+														<Input
+															bind:value={link}
+															type="text"
+															class="w-76 overflow-x-auto whitespace-nowrap rounded-lg border px-4 py-2 pr-10 md:w-96 xl:w-96"
+															readonly
+														/>
+														<Icon
+															icon={copied
+																? 'material-symbols:check-circle-rounded'
+																: 'ion:copy-outline'}
+															width="24"
+															height="24"
+															class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-white p-1"
+															onclick={copyToClipboard}
+														/>
+													</div>
+													<Button class="mx-1" onclick={() => createLink(row.id)}>Generate</Button>
+												</div>
+
+												<AlertDialog.Footer>
+													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+													<AlertDialog.Action onclick={openLink}>Search</AlertDialog.Action>
+												</AlertDialog.Footer>
+											</AlertDialog.Content>
+										</AlertDialog.Root>
+
+										<AlertDialog.Root bind:open>
+											<AlertDialog.Trigger class="">
+												<Button variant="ghost" class="">
+													<Icon
+														icon="material-symbols:delete-outline"
+														class="text-red-500"
+														width="24"
+														height="24"
+													/>
+													<span>Delete</span>
+												</Button>
+											</AlertDialog.Trigger>
+											<AlertDialog.Content>
+												<AlertDialog.Header>
+													<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+													<AlertDialog.Description>
+														This action cannot be undone. Deleting will remove the template and all
+														associated data.
+													</AlertDialog.Description>
+												</AlertDialog.Header>
+												<AlertDialog.Footer>
+													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+													<AlertDialog.Action
+														class="w-fit"
+														onclick={() => handleDeleteAssessment(row.id)}
+													>
+														Delete
+													</AlertDialog.Action>
+												</AlertDialog.Footer>
+											</AlertDialog.Content>
+										</AlertDialog.Root>
+
+										<!-- <Tooltip.Provider>
 								<Tooltip.Root>
 									<Tooltip.Trigger>
 										<Dialog.Root bind:open={isOpen}>
@@ -330,7 +458,10 @@
 										</AlertDialog.Action>
 									</AlertDialog.Footer>
 								</AlertDialog.Content>
-							</AlertDialog.Root>
+							</AlertDialog.Root> -->
+									{/if}
+								</Popover.Content>
+							</Popover.Root>
 						</td>
 					</tr>
 				{/each}
