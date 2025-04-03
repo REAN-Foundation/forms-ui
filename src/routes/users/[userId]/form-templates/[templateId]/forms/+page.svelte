@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
+	import { SectionEditorForm, Sidebar, FormHelper, Template } from '$lib/index';
 	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
@@ -13,7 +13,7 @@
 	import { addToast } from '$lib/components/toast/toast.store';
 	import { error } from '@sveltejs/kit';
 	import Icon from '@iconify/svelte';
-
+	import * as Card from '$lib/components/ui/card/index.js';
 	////////////////////////////////////////////////////////////////////////////////////
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
@@ -28,6 +28,7 @@
 	const parentFormTemplateId = $derived(page.params.templateId);
 	const rootSectionId = data.templateInfo.FormSections[0].id;
 
+	let templateInfo = $derived(data.templateInfo);
 	let showSheet = $state(false); // false;
 	let questionCard = $state();
 	let highlightedSection: number | null = $state();
@@ -271,7 +272,7 @@
 	}
 
 	async function handleSectionUpdate(model) {
-		console.log(model,"I am from handleSectionUpdate");
+		console.log(model, 'I am from handleSectionUpdate');
 		const response = await fetch(`/api/server/section`, {
 			method: 'PUT',
 			body: JSON.stringify(model),
@@ -300,9 +301,7 @@
 </script>
 
 {#if sectionForm}
-	<div
-		class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-	>
+	<div class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
 		<SectionEditorForm
 			bind:errors
 			{handleSectionUpdate}
@@ -318,7 +317,7 @@
 <!-- Section -->
 
 <div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
+	<div class="border border-white bg-gray-100 dark:bg-[#0a0a0b] md:w-[25%] md:bg-white">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
@@ -328,61 +327,91 @@
 
 		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
 	</div>
-	<div class="flex md:w-[70%] overflow-hidden">
-        <div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
-            <div class="flex w-full flex-row items-center">
-                <Breadcrumb.Root>
-                    <Breadcrumb.List class="flex">
-                        <Breadcrumb.Item>
-                            <Breadcrumb.Link href="/users/{userId}/form-templates">Templates</Breadcrumb.Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Separator />
-                        <Breadcrumb.Item>
-                            <Breadcrumb.Page>Question</Breadcrumb.Page>
-                        </Breadcrumb.Item>
-                    </Breadcrumb.List>
-                </Breadcrumb.Root>
-                <!-- <div class="ml-auto flex items-center">
-                    <Dialog.Root>
-                        <Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex"></Dialog.Trigger>
-                        <Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
-                            <p>assa</p>
-                        </Dialog.Content>
-                    </Dialog.Root>
-                </div> -->
-            </div>
-            <div class="h-full w-full overflow-hidden">
-                {#if uiSections.length === 0}
-                    <p class="text-center text-sm text-slate-500">
-                        Drag and drop sections, subsections, and question response type cards here
-                    </p>
-                {/if}
-                <div
-                    ondragover={(event) => {
-                        event.preventDefault();
-                    }}
-                    class="flex h-full flex-col"
-                    use:dropzone={{ on_dropzone: handleDragAndDrop }}
-                    role="region"
-                    aria-label="Drop Area"
-                >
-                    <Sections
-                        bind:uiSections
-                        {handleDragAndDrop}
-                        {highlightedSection}
-                        {highlightedSubSection}
-                        {deleteButtonClicked}
-                        {deleteSubButtonClicked}
-                        {openSectionForm}
-                        {subSectionForm}
-                        {handleDeleteCard}
-                        {closeSheet}
-                        {openSheet}
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="flex overflow-hidden md:w-[70%]">
+		<div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
+			<div class="flex w-full flex-row items-center">
+				<Breadcrumb.Root>
+					<Breadcrumb.List class="flex">
+						<Breadcrumb.Item>
+							<Breadcrumb.Link href="/users/{userId}/form-templates">Templates</Breadcrumb.Link>
+						</Breadcrumb.Item>
+						<Breadcrumb.Separator />
+						<Breadcrumb.Item>
+							<Breadcrumb.Page>{templateInfo.Title}</Breadcrumb.Page>
+						</Breadcrumb.Item>
+					</Breadcrumb.List>
+				</Breadcrumb.Root>
+				<div class="ml-auto flex items-center">
+					<Dialog.Root>
+						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">	<Icon icon="icon-park-outline:preview-open" width="24" height="24" /></Dialog.Trigger>
+						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
+							<div
+								class="mx-auto my-10 w-full rounded-md border border-gray-400 bg-[#F6F8FA] p-5 dark:bg-[#0a0a0b] md:w-3/4"
+							>
+								{#if templateInfo}
+									<Card.Root>
+										<div
+											class=" relative mx-auto h-fit rounded-md border border-gray-400 bg-[#f9fafb] pb-7 pt-5 dark:bg-[#0a0a0b]"
+										>
+											<Card.Title
+												class="absolute right-3 top-2 mr-0 mt-0  text-base font-semibold sm:text-2xl"
+											>
+												{templateInfo.Type}
+											</Card.Title>
+											<div class="flex h-full flex-col items-center justify-center">
+												<h2 class="mt-5 text-center text-3xl font-bold">
+													{templateInfo.Title}
+												</h2>
+												<div class="mt-2 flex w-full flex-row justify-center">
+													<Card.Description class="ml-auto text-sm">
+														{templateInfo.Description || ''}
+													</Card.Description>
+													<p class="ml-auto mr-3 text-base">
+														Version: {templateInfo.CurrentVersion}
+													</p>
+												</div>
+											</div>
+										</div>
+									</Card.Root>
+								{/if}
+								<Template sections={uiSections} />
+							</div>
+						</Dialog.Content>
+					</Dialog.Root>
+				</div>
+			</div>
+			<div class="h-full w-full overflow-hidden">
+				{#if uiSections.length === 0}
+					<p class="text-center text-sm text-slate-500">
+						Drag and drop sections, subsections, and question response type cards here
+					</p>
+				{/if}
+				<div
+					ondragover={(event) => {
+						event.preventDefault();
+					}}
+					class="flex h-full flex-col"
+					use:dropzone={{ on_dropzone: handleDragAndDrop }}
+					role="region"
+					aria-label="Drop Area"
+				>
+					<Sections
+						bind:uiSections
+						{handleDragAndDrop}
+						{highlightedSection}
+						{highlightedSubSection}
+						{deleteButtonClicked}
+						{deleteSubButtonClicked}
+						{openSectionForm}
+						{subSectionForm}
+						{handleDeleteCard}
+						{closeSheet}
+						{openSheet}
+					/>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>

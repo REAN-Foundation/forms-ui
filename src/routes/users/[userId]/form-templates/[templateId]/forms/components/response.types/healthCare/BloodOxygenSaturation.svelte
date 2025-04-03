@@ -19,7 +19,7 @@
 			{card.Title || 'Enter blood oxygen Saturation'}
 		</h1>
 	</div>
-	<Input
+	<!-- <Input
 		disabled
 		type="text"
 		placeholder="Enter Blood Oxygen Saturation in % here..."
@@ -27,6 +27,9 @@
 	/>
 	<div class="flex w-full items-start justify-start">
 		<p class=" font-serif text-sm text-slate-600">Normally : 5.7 %</p>
+	</div> -->
+	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+		<p class="text-sm">Blood Oxygen Saturation (in %)</p>
 	</div>
 
 	<div>
