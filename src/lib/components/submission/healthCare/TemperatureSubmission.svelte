@@ -18,7 +18,7 @@
 	{/if}
 
 	{#if q.Description}
-		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
+		<Label for="title" class="text-xs text-gray-500">{q.Description}</Label><br />
 	{/if}
 	<div class="flex items-center space-x-2">
 		<Input

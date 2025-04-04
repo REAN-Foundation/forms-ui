@@ -1,5 +1,4 @@
 <script>
-	import BloodOxygen from './healthCare/BloodOxygen.svelte';
 	import QuestionPaper from './QuestionPaper.svelte';
 	import {
 		BoolSubmission,
@@ -13,15 +12,21 @@
 		TextSubmission
 	} from './basic';
 	import {
+		BloodOxygenSubmission,
 		BloodPressureSubmission,
-		HeightForm,
-		PulseRateForm,
-		TemperatureForm,
-		WeightForm
+		CholesterolSubmission,
+		GlucoseSubmission,
+		HeightSubmission,
+		LipoproteinSubmission,
+		PulseRateSubmission,
+		SleepSubmission,
+		TemperatureSubmission,
+		WeightSubmission
 	} from './healthCare';
 
 	/////////////////////////////////////////////////////////////////////////////////
 
+	let { sections, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 	let { sections, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 
 	const componentsMap = {
@@ -38,23 +43,17 @@
 		DateTime: DateSubmission,
 		Rating: RatingSubmission,
 		Range: RangeSubmission,
-		Height: HeightForm,
-		Weight: WeightForm,
-		Temperature: TemperatureForm,
-		PulseRate: PulseRateForm,
+
+		Height: HeightSubmission,
+		Weight: WeightSubmission,
+		Temperature: TemperatureSubmission,
+		PulseRate: PulseRateSubmission,
 		BloodPressure: BloodPressureSubmission,
-		Glucose: BloodOxygen,
-		BloodOxygenSaturation: BloodOxygen,
-		Hematocrit: BloodOxygen,
-		Cholesterol: BloodOxygen,
-		RespiratoryRate: BloodOxygen,
-		Electrolytes: BloodOxygen,
-		KidneyFunction: BloodOxygen,
-		Lipoprotein: BloodOxygen,
-		CReactiveProtein: BloodOxygen,
-		Sleep: BloodOxygen,
-		HemoglobinA1C: BloodOxygen,
-		WaistCircumference: BloodOxygen
+		Sleep: SleepSubmission,
+		Glucose: GlucoseSubmission,
+		Cholesterol: CholesterolSubmission,
+		BloodOxygenSaturation: BloodOxygenSubmission,
+		Lipoprotein: LipoproteinSubmission
 	};
 </script>
 
@@ -83,6 +82,7 @@
 
 		<div class="mx-3 rounded-lg border">
 			{#if s?.Subsections?.length > 0}
+				<QuestionPaper sections={s.Subsections} bind:answers bind:errors {isSubmitted} />
 				<QuestionPaper sections={s.Subsections} bind:answers bind:errors {isSubmitted} />
 			{/if}
 		</div>

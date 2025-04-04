@@ -37,7 +37,7 @@
 
 	<Label for="score" class="float-right">{q.Score || ''}</Label>
 
-	<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
+	<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
 
 	<Input type="text" class="hidden w-full" bind:value={answers[q.id]} />
 

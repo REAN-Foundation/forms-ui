@@ -19,7 +19,7 @@
 			{card.Title || 'Enter Glucose level'}
 		</h1>
 	</div>
-	<Input type="text" disabled placeholder="Enter Glucose level here..." class="w-full p-2" />
+	<!-- <Input type="text" disabled placeholder="Enter Glucose level here..." class="w-full p-2" />
 	<div class="h-fit w-full p-2">
 		<div
 			class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
@@ -34,6 +34,10 @@
 				</div>
 			</div>
 		</div>
+	</div> -->
+
+	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+		<p class="text-sm">Glucose (in mg/dL)</p>
 	</div>
 
 	<div>
