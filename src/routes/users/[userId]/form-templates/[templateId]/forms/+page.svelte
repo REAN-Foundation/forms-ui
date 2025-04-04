@@ -327,64 +327,10 @@
 
 		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
 	</div>
-	<div class="flex md:w-[75%] my-3 overflow-hidden">
-        <div class="my-1 w-full ">
-            <div class="flex w-full px-2 md:pl-20 lg:pl-5 xl:pl-0 flex-row items-center md:ml-5">
-                <Breadcrumb.Root>
-                    <Breadcrumb.List class="flex">
-                        <Breadcrumb.Item>
-                            <Breadcrumb.Link href="/users/{userId}/form-templates">Templates</Breadcrumb.Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Separator />
-                        <Breadcrumb.Item>
-                            <Breadcrumb.Page>{templateInfo.Title}</Breadcrumb.Page>
-                        </Breadcrumb.Item>
-                    </Breadcrumb.List>
-                </Breadcrumb.Root>
-                <!-- <div class="ml-auto flex items-center">
-                    <Dialog.Root>
-                        <Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex"></Dialog.Trigger>
-                        <Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
-                            <p>assa</p>
-                        </Dialog.Content>
-                    </Dialog.Root>
-                </div> -->
-            </div>
-            <div class="h-full w-full overflow-hidden md:pl-20 lg:pl-10 xl:pl-0">
-                {#if uiSections.length === 0}
-                    <p class="text-center text-sm text-slate-500">
-                        Drag and drop sections, subsections, and question response type cards here
-                    </p>
-                {/if}
-                <div
-                    ondragover={(event) => {
-                        event.preventDefault();
-                    }}
-                    class="flex h-full flex-col mx-5"
-                    use:dropzone={{ on_dropzone: handleDragAndDrop }}
-                    role="region"
-                    aria-label="Drop Area"
-                >
-                    <Sections
-                        bind:uiSections
-                        {handleDragAndDrop}
-                        {highlightedSection}
-                        {highlightedSubSection}
-                        {deleteButtonClicked}
-                        {deleteSubButtonClicked}
-                        {openSectionForm}
-                        {subSectionForm}
-                        {handleDeleteCard}
-                        {closeSheet}
-                        {openSheet}
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
-	<div class="flex overflow-hidden md:w-[75%] my-3">
+
+	<div class="my-3 flex overflow-hidden md:w-[75%]">
 		<div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
-			<div class="flex w-full flex-row items-center  px-2 md:pl-20 lg:pl-5 xl:pl-0 md:ml-5">
+			<div class="flex w-full flex-row items-center px-2 md:ml-5 md:pl-20 lg:pl-5 xl:pl-0">
 				<Breadcrumb.Root>
 					<Breadcrumb.List class="flex">
 						<Breadcrumb.Item>
@@ -398,36 +344,43 @@
 				</Breadcrumb.Root>
 				<div class="ml-auto flex items-center">
 					<Dialog.Root>
-						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">	<Icon icon="icon-park-outline:preview-open" width="24" height="24" /></Dialog.Trigger>
+						<Dialog.Trigger class="{buttonVariants({ variant: 'outline' })} flex">
+							<Icon icon="icon-park-outline:preview-open" width="24" height="24" /></Dialog.Trigger
+						>
 						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
 							<div
-								class="mx-auto my-10 w-full rounded-md border border-gray-400 bg-[#F6F8FA] p-5 dark:bg-[#0a0a0b] md:w-3/4"
+								class="mx-auto  w-full rounded-md border border-gray-400 p-2 dark:bg-[#0a0a0b] md:w-3/4"
 							>
 								{#if templateInfo}
 									<Card.Root>
 										<div
-											class=" relative mx-auto h-fit rounded-md border border-gray-400 bg-[#f9fafb] pb-7 pt-5 dark:bg-[#0a0a0b]"
+											class=" relative mx-auto h-fit rounded-md border border-gray-400 py-4 dark:bg-[#0a0a0b]"
 										>
-											<Card.Title
+											<!-- <Card.Title
 												class="absolute right-3 top-2 mr-0 mt-0  text-base font-semibold sm:text-2xl"
 											>
 												{templateInfo.Type}
-											</Card.Title>
+											</Card.Title> -->
 											<div class="flex h-full flex-col items-center justify-center">
-												<h2 class="mt-5 text-center text-3xl font-bold">
+												<h2 class="text-center text-2xl font-bold capitalize">
 													{templateInfo.Title}
 												</h2>
-												<div class="mt-2 flex w-full flex-row justify-center">
-													<Card.Description class="ml-auto text-sm">
-														{templateInfo.Description || ''}
-													</Card.Description>
-													<p class="ml-auto mr-3 text-base">
+												<div class="relative w-full p-4">
+													<div class="flex w-full justify-center text-center text-gray-700">
+														<Card.Description>
+															{templateInfo.Description || ''}
+														</Card.Description>
+													</div>
+
+													<span
+														class="absolute right-0 top-1/2 mx-4 -translate-y-1/2 text-sm text-gray-700"
+													>
 														Version: {templateInfo.CurrentVersion}
-													</p>
+													</span>
 												</div>
 											</div>
-										</div>
-									</Card.Root>
+										</div></Card.Root
+									>
 								{/if}
 								<Template sections={uiSections} />
 							</div>
@@ -437,7 +390,7 @@
 			</div>
 			<div class="h-full w-full overflow-hidden md:pl-20 lg:pl-10 xl:pl-0">
 				{#if uiSections.length === 0}
-					<p class="text-center text-sm text-slate-500 ">
+					<p class="text-center text-sm text-slate-500">
 						Drag and drop sections, subsections, and question response type cards here
 					</p>
 				{/if}
@@ -445,7 +398,7 @@
 					ondragover={(event) => {
 						event.preventDefault();
 					}}
-					class="flex h-full flex-col mx-5"
+					class="mx-5 flex h-full flex-col"
 					use:dropzone={{ on_dropzone: handleDragAndDrop }}
 					role="region"
 					aria-label="Drop Area"

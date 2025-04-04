@@ -6,19 +6,19 @@
 	// console.log(question)
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md  p-4 pb-10">
-	<div>
-		<Label for="title" class="text-md"
+<div class=" space-y-2 rounded-lg px-4 pt-4">
+	<div class="flex items-center justify-between">
+		<Label for="title" class="text-sm"
 			>{question.Title || 'Question Title'}
 			{#if question.IsRequired}
 				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</Label>
-		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
+		<Label for="score" class="text-sm font-medium"
+			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-		<br />
-
-		<!-- <div class="h-fit w-full p-2">
+	</div>
+	<!-- <div class="h-fit w-full p-2">
 			<div
 				class="flex flex-col items-start justify-start space-y-2 py-1 font-serif text-sm text-slate-500"
 			>
@@ -36,41 +36,40 @@
 			</div>
 		</div> -->
 
-		<div class="mt-6 w-full space-y-3 rounded-lg">
-			<div class="flex flex-col space-y-2">
-				<div class="flex items-center space-x-2">
-					<Label for="systolic" class=" mr-2">Systolic</Label>
-					<Input
-						type="text"
-						name="systolic"
-						disabled
-						placeholder="Enter the systolic blood pressure here..."
-						class="w-full"
-					/>
-					<!-- 	
+	<div class=" w-full space-y-2 rounded-lg">
+		<div class="flex flex-col space-y-2">
+			<div class="flex items-center space-x-3">
+				<Label for="systolic" class="text-sm">Systolic</Label>
+				<Input
+					type="text"
+					name="systolic"
+					disabled
+					placeholder="Enter the systolic blood pressure here..."
+					class=""
+				/>
+				<!-- 	
 			 <div class="text-slate-400">
 				mmHg
 			 </div> -->
-				</div>
-				<div class="flex items-center space-x-2">
-					<Label for="diastolic" class="">Diastolic</Label>
-					<Input
-						type="text"
-						disabled
-						name="diastolic"
-						placeholder="Enter the distolic blood pressure here..."
-						class="w-full"
-					/>
-					<!-- <div class="text-slate-400">
+			</div>
+			<div class="flex items-center space-x-2">
+				<Label for="diastolic" class=" text-sm">Diastolic</Label>
+				<Input
+					type="text"
+					disabled
+					name="diastolic"
+					placeholder="Enter the distolic blood pressure here..."
+					class="w-full"
+				/>
+				<!-- <div class="text-slate-400">
 					mmHg
 				 </div> -->
-				</div>
 			</div>
 		</div>
 	</div>
 
 	<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
-		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
+	<p class=" text-end text-xs text-slate-500"
+		>{question.Hint ? `Hint: ${question.Hint}` : ''}</p
 	>
 </div>

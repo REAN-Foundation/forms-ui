@@ -13,22 +13,20 @@
 </script>
 
 <div class=" w-full rounded-lg border-gray-300 bg-white px-4 py-4">
-	<div class="flex items-center justify-between">
-		<div>
-			<Label for="title" class="text-sm "
-				>{question.Title || 'Question Title'}
-				{#if question.IsRequired}
-					<span class="ml-1 text-red-600">*</span>
-				{/if}
-			</Label>
-
-			<p class="my-0.5 text-sm text-gray-500">{question.Description || ''}</p>
-		</div>
+	<div class="flex justify-between">
+		<Label for="title" class="text-sm "
+			>{question.Title || 'Question Title'}
+			{#if question.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
 		<Label for="score" class=" text-sm font-medium"
 			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
 	</div>
+	<Label class="my-0.5 text-sm text-gray-500">{question.Description || ''}</Label>
+
 	<div class=" mt-2 space-y-1">
 		{#each optionsArray as option, index}
 			<div class="flex items-center space-x-3">
@@ -37,7 +35,5 @@
 			</div>
 		{/each}
 	</div>
-	<Label for="hint" class="mt-4 text-right text-xs text-gray-500"
-		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
-	>
+	<p class="text-right text-xs text-gray-500">{question.Hint ? `Hint: ${question.Hint}` : ''}</p>
 </div>

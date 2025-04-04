@@ -222,7 +222,7 @@
 					</div>
 				{/if}
 
-				<div class=" mt-3 rounded-md border border-gray-400  dark:bg-[#0a0a0b]">
+				<div class=" mt-3 rounded-md  border-gray-400  dark:bg-[#0a0a0b]">
 					<QuestionPaper {sections} bind:answers bind:errors {isSubmitted} />
 				</div>
 				<div class="flex flex-col my-2 gap-3 sm:flex-row sm:space-x-4">

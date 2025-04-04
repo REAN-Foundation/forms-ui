@@ -188,7 +188,7 @@
 				</th>
 				<!-- <th class="p-4 text-center">Description</th>
 				<th class="p-4 text-center">Tenant Code</th> -->
-				<th class=" w-32 p-3 text-center">Created At</th>
+				<th class=" w-32 p-3 text-start">Created At</th>
 				<th class=" w-20 p-3 text-center">Version</th>
 				<th class=" w-20 p-3 text-center">Actions</th>
 			</tr>
@@ -211,7 +211,7 @@
 							</a>
 						</td>
 						<td class=" mx-10 px-3 py-1 text-sm">{row.Type || 'N/A'}</td>
-						<td class=" px-3 py-1 text-center text-sm">{formatDate(row.CreatedAt)}</td>
+						<td class=" px-3 py-1 text-start text-sm">{formatDate(row.CreatedAt)}</td>
 						<td class=" text-center text-sm">{row.CurrentVersion || '-'}</td>
 						<td class=" text-center text-sm">
 							<Popover.Root>

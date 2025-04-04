@@ -27,7 +27,6 @@
 	/////////////////////////////////////////////////////////////////////////////////
 
 	let { sections, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
-	let { sections, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 
 	const componentsMap = {
 		Text: TextSubmission,
@@ -58,10 +57,10 @@
 </script>
 
 {#each sections ?? [] as s}
-	<div class="my-2 rounded-md border-gray-400 pt-4 dark:bg-[#0a0a0b]">
-		<h1 class=" mt-3 px-4 text-center text-lg font-semibold">
+	<fieldset class="my-2 rounded-md border border-gray-400 pt-4 dark:bg-[#0a0a0b]">
+		<legend class=" mt-3 px-4 text-center text-lg font-semibold">
 			Section: {s.Title || 'Untitled Section'}
-		</h1>
+		</legend>
 		<p class="mb-3 px-4 text-center text-xs font-semibold text-gray-600">
 			{s.Description}
 		</p>
@@ -80,11 +79,10 @@
 			{/each}
 		</div>
 
-		<div class="mx-3 rounded-lg border">
+		<div class="mx-3 rounded-lg ">
 			{#if s?.Subsections?.length > 0}
-				<QuestionPaper sections={s.Subsections} bind:answers bind:errors {isSubmitted} />
 				<QuestionPaper sections={s.Subsections} bind:answers bind:errors {isSubmitted} />
 			{/if}
 		</div>
-	</div>
+	</fieldset>
 {/each}
