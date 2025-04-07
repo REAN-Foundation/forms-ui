@@ -6,20 +6,20 @@
 	// console.log(question)
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
-	<div>
-		<Label for="title" class="text-md">{question.Title || 'Question Title'}
+<div class=" space-y-2 rounded-lg px-4 pt-4">
+	<div class="flex items-center justify-between">
+		<Label for="title" class="mr-1 text-sm"
+			>{question.Title || 'Question Title'}
 			{#if question.IsRequired}
-			<span class="text-red-600 ml-1">*</span>
+				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</Label>
-		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
+		<Label for="score" class=" text-sm font-medium"
+			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-		<br />
-		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-		<Input placeholder="Enter value here " disabled/>
 	</div>
-	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
-		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
-	>
+
+	<Label for="title" class="text-xs text-gray-500">{question.Description || ''}</Label>
+	<Input placeholder="Enter value here " disabled />
+	<p class=" text-end text-xs text-gray-400">{question.Hint ? `Hint: ${question.Hint}` : ''}</p>
 </div>

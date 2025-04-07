@@ -8,8 +8,9 @@
 </script>
 
 {#each sections ?? [] as s, index}
-	<fieldset class="mt-2 rounded-md border border-gray-400 p-4 dark:bg-[#0a0a0b]">
-		<legend class=" px-4 text-left">{s?.Title ?? 'Section Name'}</legend>
+	<!-- {#if s?.Sections?.length > 0 || s?.Questions?.length > 0} -->
+	<fieldset class="my-2 rounded-md border  border-gray-400 px-2 pt-2  dark:bg-[#0a0a0b]">
+		<legend class=" px-4 py-4 text-center text-lg font-semibold">{s?.Title ?? 'Section Name'}</legend>
 
 		{#each s?.Questions ?? [] as sq, index}
 			<Block q={sq} />
@@ -18,5 +19,8 @@
 		{#if s?.Subsections?.length > 0}
 			<Template sections={s?.Subsections} />
 		{/if}
+		<!-- </div> -->
+		<!-- <Template {Subsections} /> -->
 	</fieldset>
+	<!-- {/if} -->
 {/each}

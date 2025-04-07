@@ -12,31 +12,28 @@
 	}
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
-	<div>
-		<Label for="title" class="text-md"
+<div class=" w-full rounded-lg border-gray-300 bg-white px-4 py-4">
+	<div class="flex justify-between">
+		<Label for="title" class="text-sm "
 			>{question.Title || 'Question Title'}
 			{#if question.IsRequired}
 				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</Label>
-		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
+
+		<Label for="score" class=" text-sm font-medium"
+			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-
-		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-
-		<div class="pl-2 pt-2">
-			{#each optionsArray as option, index}
-				<div class="flex items-start justify-start">
-					<input type="radio" class="input mt-1" disabled />
-					<label for={`option${index}`} class="ml-2 font-serif text-sm text-slate-500"
-						>{option}</label
-					>
-				</div>
-			{/each}
-		</div>
 	</div>
-	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
-		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
-	>
+	<Label class="my-0.5 text-sm text-gray-500">{question.Description || ''}</Label>
+
+	<div class=" mt-2 space-y-1">
+		{#each optionsArray as option, index}
+			<div class="flex items-center space-x-3">
+				<input type="radio" class="h-3 w-3 border-gray-300" disabled />
+				<label for={`option${index}`} class=" font-serif text-sm text-slate-500">{option}</label>
+			</div>
+		{/each}
+	</div>
+	<p class="text-right text-xs text-gray-500">{question.Hint ? `Hint: ${question.Hint}` : ''}</p>
 </div>

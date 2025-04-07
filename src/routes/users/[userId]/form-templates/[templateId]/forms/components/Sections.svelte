@@ -9,7 +9,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
 	import { writable } from 'svelte/store';
-        import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
+	import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -91,7 +91,7 @@
 		cardToDelete = null;
 	}
 
-	const isOpen = writable<Record<number, boolean>>({}); 
+	const isOpen = writable<Record<number, boolean>>({});
 
 	function toggleSection(sectionId: number) {
 		isOpen.update((map) => ({
@@ -99,8 +99,6 @@
 			[sectionId]: !map[sectionId]
 		}));
 	}
-
-
 </script>
 
 {#each uiSections as section, index (section.id)}
@@ -123,26 +121,23 @@
 				<div class="flex items-center justify-between px-2">
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
+						onclick={() => toggleSection(section.id)}
 					>
 						<Tooltip.Provider>
 							<Tooltip.Root>
 								<Tooltip.Trigger>
 									<Tooltip.Trigger>
-										<Button
-											variant="ghost"
-											size="sm"
-											class="w-9 p-0"
-											onclick={() => toggleSection(section.id)}
-										>
-											<Icon
-												icon="grommet-icons:down"
-												style="width: 12px; height: 12px;"
-												class={`transition-transform duration-300 ${
-													$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
-												}`}
-											/>
-											<span class="sr-only">Toggle</span>
-										</Button>
+										<!-- <Button variant="ghost" size="sm" class="w-9 p-0"> -->
+										<Icon
+											icon="mdi:chevron-down"
+											width="5"
+											height="5"
+											class={`transition-transform duration-300 ${
+												$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
+											}`}
+										/>
+										<span class="sr-only">Toggle</span>
+										<!-- </Button> -->
 									</Tooltip.Trigger>
 								</Tooltip.Trigger>
 								<Tooltip.Content>
@@ -160,24 +155,23 @@
 						onclick={() => openSectionForm(section)}
 					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
-						<div class="flex-col">
-							{#if section.Title}
-								<p>{section.Title}</p>
-							{:else}
-								<p>{`Section ${index + 1}`}</p>
-							{/if}
-							<p class=" whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
-								Drop the Subsection and response type cards here
-							</p>
-						</div>
+						{#if section.Title}
+							<p>{section.Title}</p>
+						{:else}
+							<p>{`Section ${index + 1}`}</p>
+						{/if}
+						<p class="whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
+							Drop the Subsection and response type cards here
+						</p>
 					</Button>
 
 					<AlertDialog.Root>
-						<AlertDialog.Trigger class="{buttonVariants} bg-red400">
+						<AlertDialog.Trigger class="{buttonVariants} ">
 							<Button variant="ghost" class="ml-1 h-full w-full "
 								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 							</Button>
 						</AlertDialog.Trigger>
+
 						<AlertDialog.Content>
 							<AlertDialog.Header>
 								<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
@@ -198,6 +192,7 @@
 					</AlertDialog.Root>
 				</div>
 			</div>
+
 			<Collapsible.Content class="space-y-2">
 				<div class="h-fit w-full p-1" role="list" aria-label={`Cards in section: ${section.Title}`}>
 					{#if section.Questions.length === 0}
