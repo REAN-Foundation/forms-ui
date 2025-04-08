@@ -98,7 +98,7 @@
 	});
 </script>
 
-<nav class="fixed w-full z-10 flex items-center justify-between border border-t-0 bg-[#F6F8FA] p-1">
+<nav class="fixed w-full z-10 flex items-center justify-between border border-t-0 bg-secondary p-1">
 	<!-- <div class="fixed flex space-x-4 lg:space-x-6"> -->
 	<div class="left-0">
 		<!-- <Menubar.Menu>

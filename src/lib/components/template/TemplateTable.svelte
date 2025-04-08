@@ -1,18 +1,19 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { goto, invalidate } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Button } from '../ui/button';
 	import { errorMessage, successMessage } from '../toast/message.utils';
 	import { toastMessage } from '../toast/toast.store';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Input } from '$lib/components/ui/input';
-	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { enhance } from '$app/forms';
 	import TemplateForm from './TemplateForm.svelte';
 	import { assessmentSchema } from './assessment-schema';
 	import * as Popover from '$lib/components/ui/popover/index.js';
+	import Label from '../ui/label/label.svelte';
+	import * as Select from '$lib/components/ui/select/index.js';
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,6 +49,80 @@
 			month: 'long',
 			day: '2-digit'
 		}).format(date);
+	}
+
+	let searchQuery = $state('');
+	let currentPage = $state(1);
+	let itemsPerPage: number = $state(5);
+
+	// Derived list based on search, sort and pagination
+	$effect(() => {
+		let filtered = assessmentTemplates;
+
+		// Search filter
+		if (searchQuery) {
+			const lowerQuery = searchQuery.toLowerCase();
+			filtered = assessmentTemplates.filter(
+				(row) =>
+					row.Title?.toLowerCase().includes(lowerQuery) ||
+					row.Type?.toLowerCase().includes(lowerQuery)
+			);
+		}
+
+		// Sort
+		filtered.sort((a, b) => {
+			const field = isSortingTitle ? 'Title' : isSortingType ? 'Type' : null;
+			if (!field) return 0;
+
+			const valueA = a[field]?.toLowerCase() || '';
+			const valueB = b[field]?.toLowerCase() || '';
+			return sortOrder === 'ascending'
+				? valueA.localeCompare(valueB)
+				: valueB.localeCompare(valueA);
+		});
+
+		filteredTemplates = filtered;
+		currentPage = 1; // reset to first page when filters change
+	});
+
+	let filteredTemplates = $state([]);
+	$effect(() => {
+		const start = (currentPage - 1) * itemsPerPage;
+		paginatedTemplates = filteredTemplates.slice(start, start + itemsPerPage);
+		filteredTemplates.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+	});
+
+	let paginatedTemplates = $state([]);
+	$inspect('these are paginated templates', paginatedTemplates);
+	$inspect('these are filterd templates', filteredTemplates);
+
+	// let itemsPerPage = 5;
+	// let currentPage = 1;
+	// let filteredTemplates = new Array(23); // just an example
+	function updatePageSize(event) {
+		itemsPerPage = parseInt(event.target.value);
+		currentPage = 1;
+	}
+	// function changePage(offset) {
+	// 	const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage);
+	// 	currentPage = Math.max(1, Math.min(currentPage + offset, totalPages));
+	// }
+
+	// let itemsPerPageValue = $state(5);
+	const itemsPerPageOptions = [
+		{ value: 5, label: '5 records per page' },
+		{ value: 10, label: '10 records per page' },
+		{ value: 15, label: '15 records per page' },
+		{ value: 20, label: '20 records per page' }
+	];
+
+	const selectedLabel = $derived(
+		itemsPerPageOptions.find((f) => f.value === itemsPerPage)?.label ?? 'Select per page'
+	);
+
+	function changePage(offset) {
+		const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage);
+		currentPage = Math.max(1, Math.min(currentPage + offset, totalPages));
 	}
 
 	// Sorting function
@@ -100,10 +175,10 @@
 		}
 	}
 
-	function reviewAssessment(templateId: string) {
-		console.log('this is template id', templateId);
-		goto(`/users/${userId}/form-templates/${templateId}/preview`);
-	}
+	// function reviewAssessment(templateId: string) {
+	// 	console.log('this is template id', templateId);
+	// 	goto(`/users/${userId}/form-templates/${templateId}/preview`);
+	// }
 
 	const createLink = async (templateId: string) => {
 		try {
@@ -171,10 +246,18 @@
 	}
 </script>
 
-<div class="mt-4 w-full overflow-x-auto rounded-md border">
+<div class="my-4 flex items-center justify-between">
+	<Input
+		type="text"
+		placeholder="Search by title or type"
+		class="w-full max-w-sm"
+		bind:value={searchQuery}
+	/>
+</div>
+<div class="my-4 w-full overflow-x-auto rounded-md border">
 	<table class="w-full table-auto border-collapse border border-slate-200">
 		<thead class="border">
-			<tr class="bg-[#F6F8FA] dark:bg-[#0a0a0b]">
+			<tr class="bg-secondary">
 				<th class="w-12 p-3">Sr No</th>
 				<th class="w-44 py-3 text-start">
 					<Button variant="ghost" class=" text-md font-bold" onclick={() => sortTable('Title')}>
@@ -199,10 +282,10 @@
 			{:else if assessmentTemplates.length === 0}
 				<tr><td colspan="8" class="p-4 text-center">No records found</td></tr>
 			{:else}
-				{#each assessmentTemplates as row, index}
-					<tr class="border-b border-l border-r p-4">
-						<td class=" text-center">{index + 1}</td>
-						<td class=" px-3 py-1 text-sm capitalize">
+				{#each paginatedTemplates as row, index}
+					<tr class="border-b border-l border-r p-4 hover:bg-slate-50 dark:hover:bg-[#262728]">
+						<td class="text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+						<td class="px-3 py-1 text-sm capitalize">
 							<a
 								href={`/users/${userId}/form-templates/${row.id}/forms`}
 								class="hover:text-blue-500 hover:underline"
@@ -210,25 +293,26 @@
 								{row.Title || 'Not specified'}
 							</a>
 						</td>
-						<td class=" mx-10 px-3 py-1 text-sm">{row.Type || 'N/A'}</td>
-						<td class=" px-3 py-1 text-start text-sm">{formatDate(row.CreatedAt)}</td>
-						<td class=" text-center text-sm">{row.CurrentVersion || '-'}</td>
+						<td class="mx-10 px-3 py-1 text-sm">{row.Type || 'N/A'}</td>
+						<td class="px-3 py-1 text-start text-sm">{formatDate(row.CreatedAt)}</td>
+						<td class="text-center text-sm">{row.CurrentVersion || '-'}</td>
 						<td class=" text-center text-sm">
 							<Popover.Root>
 								<Popover.Trigger>
-									<button
+									<Button
+										variant="ghost"
 										onclick={() => toggleMenu(row.id)}
-										class="rotate-90 items-center rounded-md p-2 hover:bg-gray-200"
+										class="rotate-90 items-center rounded-md p-2 "
 									>
 										⠇
-									</button>
+									</Button>
 								</Popover.Trigger>
 
-								<Popover.Content class=" !flex !flex-col !items-start">
+								<Popover.Content class=" !flex !flex-col !items-start" sideOffset={-10}>
 									{#if activeMenu === row.id}
 										<Dialog.Root bind:open={isOpen}>
 											<Dialog.Trigger onclick={() => (isOpen = true)}>
-												<Button variant="ghost">
+												<Button variant="ghost" class="w-36 justify-start ">
 													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
 													<span>Edit</span>
 												</Button>
@@ -253,7 +337,10 @@
 											</Dialog.Content>
 										</Dialog.Root>
 										<div>
-											<Button variant="ghost" onclick={() => reviewAssessment(row.id)}
+											<Button
+												href="/users/{userId}/form-templates/{row.id}/preview"
+												variant="ghost"
+												class="w-36 justify-start"
 												><Icon icon="icon-park-outline:preview-open" width="24" height="24" />
 												<span>Preview</span>
 											</Button>
@@ -261,7 +348,7 @@
 
 										<AlertDialog.Root>
 											<AlertDialog.Trigger>
-												<Button variant="ghost" class=""
+												<Button variant="ghost" class="w-36 justify-start"
 													><Icon icon="material-symbols:link" width="20" height="20" />
 													<span>Generate Link</span>
 												</Button>
@@ -296,14 +383,14 @@
 
 												<AlertDialog.Footer>
 													<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-													<AlertDialog.Action onclick={openLink}>Search</AlertDialog.Action>
+													<AlertDialog.Action onclick={openLink}>Open</AlertDialog.Action>
 												</AlertDialog.Footer>
 											</AlertDialog.Content>
 										</AlertDialog.Root>
 
 										<AlertDialog.Root bind:open>
 											<AlertDialog.Trigger class="">
-												<Button variant="ghost" class="">
+												<Button variant="ghost" class="w-36 justify-start ">
 													<Icon
 														icon="material-symbols:delete-outline"
 														class="text-red-500"
@@ -332,133 +419,6 @@
 												</AlertDialog.Footer>
 											</AlertDialog.Content>
 										</AlertDialog.Root>
-
-										<!-- <Tooltip.Provider>
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-										<Dialog.Root bind:open={isOpen}>
-											<Dialog.Trigger onclick={() => (isOpen = true)}>
-												<Button variant="ghost">
-													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
-												</Button>
-											</Dialog.Trigger>
-											<Dialog.Content
-												class="max-w-[50vh] sm:max-w-[50vh] md:max-w-[70vh] xl:max-w-[100vh]"
-											>
-												<Dialog.Header>
-													<Dialog.Title>Add New</Dialog.Title>
-													<Dialog.Description>
-														Make changes to your form template here. Click save when you're done.
-													</Dialog.Description>
-												</Dialog.Header>
-												<form method="post" use:enhance>
-													<TemplateForm templateData={row} bind:errors />
-													<Dialog.Footer>
-														<Button class="my-2" onclick={handleSubmit} type="submit">Save changes</Button>
-													</Dialog.Footer>
-												</form>
-											</Dialog.Content>
-										</Dialog.Root>
-									</Tooltip.Trigger>
-									<Tooltip.Content>
-										<p>Edit Template</p>
-									</Tooltip.Content>
-								</Tooltip.Root>
-							</Tooltip.Provider>
-
-							<Tooltip.Provider>
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-										<Button variant="ghost" onclick={() => reviewAssessment(row.id)}
-											><Icon icon="icon-park-outline:preview-open" width="24" height="24" /></Button
-										></Tooltip.Trigger
-									>
-									<Tooltip.Content>
-										<p>Preview Template</p>
-									</Tooltip.Content>
-								</Tooltip.Root>
-							</Tooltip.Provider>
-
-							<AlertDialog.Root>
-								<AlertDialog.Trigger>
-									<Tooltip.Provider>
-										<Tooltip.Root>
-											<Tooltip.Trigger>
-												<Button variant="ghost" class=""
-													><Icon
-														icon="material-symbols:link"
-														width="20"
-														height="20"
-													/></Button
-												></Tooltip.Trigger
-											>
-											<Tooltip.Content>
-												<p>Generate Link for Template</p>
-											</Tooltip.Content>
-										</Tooltip.Root>
-									</Tooltip.Provider>
-								</AlertDialog.Trigger>
-								<AlertDialog.Content>
-									<AlertDialog.Header>
-										<AlertDialog.Title>This is the link for the template</AlertDialog.Title>
-										<AlertDialog.Description>
-											Generate link to copy and share form template for data collection.
-											<div class="mt-5 flex w-full items-center space-x-2">
-												<Input placeholder={link} />
-												<Button onclick={() => createLink(row.id)}>Generate</Button>
-											</div>
-										</AlertDialog.Description>
-									</AlertDialog.Header>
-									<AlertDialog.Footer>
-										<AlertDialog.Cancel onclick={copyToClipboard}>
-											<Icon icon="ion:copy-outline" width="20" height="20" class="mr-2" />
-											Copy to clipboard
-										</AlertDialog.Cancel>
-										<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-										<AlertDialog.Action onclick={openLink}>Search</AlertDialog.Action>
-									</AlertDialog.Footer>
-								</AlertDialog.Content>
-							</AlertDialog.Root>
-
-							<AlertDialog.Root bind:open>
-								<AlertDialog.Trigger class="">
-									<Tooltip.Provider>
-										<Tooltip.Root>
-											<Tooltip.Trigger>
-												<Button variant="ghost" class="">
-													<Icon
-														icon="material-symbols:delete-outline"
-														class="text-red-500"
-														width="24"
-														height="24"
-													/>
-												</Button>
-											</Tooltip.Trigger>
-											<Tooltip.Content>
-												<p>Delete Template</p>
-											</Tooltip.Content>
-										</Tooltip.Root>
-									</Tooltip.Provider>
-								</AlertDialog.Trigger>
-								<AlertDialog.Content>
-									<AlertDialog.Header>
-										<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-										<AlertDialog.Description>
-											This action cannot be undone. Deleting will remove the template and all
-											associated data.
-										</AlertDialog.Description>
-									</AlertDialog.Header>
-									<AlertDialog.Footer>
-										<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-										<AlertDialog.Action
-											class="w-fit"
-											onclick={() => handleDeleteAssessment(row.id)}
-										>
-											Delete
-										</AlertDialog.Action>
-									</AlertDialog.Footer>
-								</AlertDialog.Content>
-							</AlertDialog.Root> -->
 									{/if}
 								</Popover.Content>
 							</Popover.Root>
@@ -468,4 +428,124 @@
 			{/if}
 		</tbody>
 	</table>
+</div>
+<!-- <div class="my-4 flex items-center justify-between">
+	<div class="text-sm text-gray-500">
+		<select
+			class="appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-8 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
+			onchange={updatePageSize}
+			bind:value={itemsPerPage}
+		>
+			<option value="5">5 records per page</option>
+			<option value="10">10 records per page</option>
+			<option value="15">15 records per page</option>
+			<option value="20">20 records per page</option>
+		</select>
+
+
+		<div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500">
+			<Icon icon="mdi:chevron-down" class="h-4 w-4" />
+		</div>
+		Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
+	</div>
+	<div class="space-x-2">
+		<Button onclick={() => changePage(-1)} disabled={currentPage === 1}>
+			<Icon icon="material-symbols:chevron-left-rounded" width="24" height="24" />
+		</Button>
+		<Button
+			onclick={() => changePage(1)}
+			disabled={currentPage === Math.ceil(filteredTemplates.length / itemsPerPage)}
+		>
+			<Icon icon="material-symbols:chevron-right-rounded" width="24" height="24" />
+		</Button>
+	</div>
+</div> -->
+
+<div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
+	<!-- Items Per Page Dropdown -->
+	<div class="flex flex-col items-start text-sm text-gray-700 dark:text-gray-300">
+		<Label for="itemsPerPage">Items per page</Label>
+		<div class="relative">
+			<select
+				id="itemsPerPage"
+				class="appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
+				onchange={updatePageSize}
+				bind:value={itemsPerPage}
+			>
+				<option value={5}>5 records per page</option>
+				<option value={10}>10 records per page</option>
+				<option value={15}>15 records per page</option>
+				<option value={20}>20 records per page</option>
+			</select>
+			<!-- Chevron Icon -->
+			<div
+				class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 dark:text-gray-400"
+			>
+				<Icon icon="mdi:chevron-down" class="h-4 w-4" />
+			</div>
+		</div>
+		<!-- Page Info -->
+		<span class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+			Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
+		</span>
+	</div>
+
+	<!-- Pagination Buttons -->
+	<div class="flex items-center space-x-2">
+		<Button onclick={() => changePage(-1)} disabled={currentPage === 1}>
+			<Icon icon="material-symbols:chevron-left-rounded" width="20" height="20" />
+		</Button>
+		<Button
+			onclick={() => changePage(1)}
+			disabled={currentPage === Math.ceil(filteredTemplates.length / itemsPerPage)}
+		>
+			<Icon icon="material-symbols:chevron-right-rounded" width="20" height="20" />
+		</Button>
+	</div>
+</div>
+
+<div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
+	<!-- Label + Select -->
+	<div class="flex w-full max-w-xs flex-col items-start text-sm text-gray-700 dark:text-gray-300">
+		<Label for="ItemsPerPage">Select items per page <span class="text-red-600">*</span></Label>
+
+		<Select.Root type="single" name="itemsPerPage" bind:value={itemsPerPage}>
+			<Select.Trigger
+				class="mt-1 w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
+			>
+				{selectedLabel}
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Group>
+					<Select.GroupHeading>Items per Page</Select.GroupHeading>
+					{#each itemsPerPageOptions as option (option.value)}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Group>
+			</Select.Content>
+		</Select.Root>
+
+		<!-- Page info below -->
+		<span class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+			Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
+		</span>
+	</div>
+
+	<!-- Pagination Buttons -->
+	<div class="flex items-center space-x-2">
+		<Button
+			onclick={() => changePage(-1)}
+			disabled={currentPage === 1}
+			class="rounded-md bg-gray-100 px-3 py-2 text-sm hover:bg-gray-200 disabled:opacity-50 dark:bg-gray-700 dark:hover:bg-gray-600"
+		>
+			<Icon icon="material-symbols:chevron-left-rounded" width="20" height="20" />
+		</Button>
+		<Button
+			onclick={() => changePage(1)}
+			disabled={currentPage === Math.ceil(filteredTemplates.length / itemsPerPage)}
+			class="rounded-md bg-gray-100 px-3 py-2 text-sm hover:bg-gray-200 disabled:opacity-50 dark:bg-gray-700 dark:hover:bg-gray-600"
+		>
+			<Icon icon="material-symbols:chevron-right-rounded" width="20" height="20" />
+		</Button>
+	</div>
 </div>

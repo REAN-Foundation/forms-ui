@@ -87,7 +87,7 @@ async function handleTemplateUpdate(model) {
 
 <div class="relative my-12 flex h-screen w-full flex-col md:flex-row">
 	<!-- Sidebar -->
-	<div class="flex fixed  flex-col justify-between border-r bg-[#F6F8FA] p-4 dark:bg-[#0a0a0b] h-full md:w-[20%]">
+	<div class="flex fixed  flex-col justify-between border-r bg-secondary p-4 dark:bg-[#0a0a0b] h-full md:w-[20%]">
 		<div class="flex flex-col space-y-2">
 			{#each menuItems as item}
 				<div>
@@ -129,7 +129,7 @@ async function handleTemplateUpdate(model) {
 	<!-- Main Content -->
 	<div class="h-full w-[80%] py-6 md:px-10 ml-32 md:ml-56 ">
 		{#if selectedSubmenu === 'createForm'}
-			<div class="container mx-auto">
+			<div class="container ml-12 mx-auto">
 				<div class=" flex flex-col md:flex-row md:items-center">
 					<div>
 						<h2 class="my-2 text-lg font-bold tracking-tight md:text-2xl">Welcome...!</h2>
