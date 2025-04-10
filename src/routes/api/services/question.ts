@@ -80,6 +80,21 @@ export const updateQuestion = async (
 	return await put_(url, body);
 };
 
+export const updateQuestionsSequence = async (
+	qestionId: string,
+	parentSectionId: string,
+	sequence: number,
+	
+) => {
+	const body = {
+		ParentSectionId: parentSectionId,
+		Sequence: sequence	
+	};
+
+	const url = BACKEND_API_URL + `/questions/sequence/${qestionId}`;
+	return await put_(url, body);
+};
+
 export const deleteQuestion = async (
 	questionId: string,
 ) => {

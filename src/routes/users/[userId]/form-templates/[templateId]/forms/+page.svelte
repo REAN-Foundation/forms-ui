@@ -31,8 +31,7 @@
 	let templateInfo = $derived(data.templateInfo);
 	let showSheet = $state(false); // false;
 	let questionCard = $state();
-	let highlightedSection: number | null = $state();
-	let highlightedSubSection: number | null = $state();
+
 	let deleteButtonClicked = $state(false);
 	let deleteSubButtonClicked = $state(false);
 	let sectionForm = $state(false);
@@ -64,10 +63,10 @@
 		event.preventDefault();
 		event.stopPropagation();
 
-		console.log('dropData: ', dropData);
-		console.log('sectionId: ', sectionId);
-		console.log('subsectionId: ', subsectionId);
-		console.log('parentFormTemplateId: ', parentFormTemplateId);
+		// console.log('dropData: ', dropData);
+		// console.log('sectionId: ', sectionId);
+		// console.log('subsectionId: ', subsectionId);
+		// console.log('parentFormTemplateId: ', parentFormTemplateId);
 		if (sectionId === null && subsectionId === null) {
 			// To create section in root section
 			// Required data: parentFormTemplateId, parentSectionId that is rootSectionId
@@ -317,7 +316,7 @@
 <!-- Section -->
 
 <div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="border border-white bg-gray-100 dark:bg-[#0a0a0b] md:w-[25%] md:bg-white">
+	<div class="border border-white md:w-[25%]">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
@@ -349,7 +348,7 @@
 						>
 						<Dialog.Content class="dialog-content h-[90vh] overflow-y-auto sm:max-w-[150vh]">
 							<div
-								class="mx-auto  w-full rounded-md border border-gray-400 p-2 dark:bg-[#0a0a0b] md:w-3/4"
+								class="mx-auto w-full rounded-md border border-gray-400 p-2 dark:bg-[#0a0a0b] md:w-3/4"
 							>
 								{#if templateInfo}
 									<Card.Root>
@@ -406,8 +405,6 @@
 					<Sections
 						bind:uiSections
 						{handleDragAndDrop}
-						{highlightedSection}
-						{highlightedSubSection}
 						{deleteButtonClicked}
 						{deleteSubButtonClicked}
 						{openSectionForm}
