@@ -4,14 +4,11 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { SectionEditorForm, Sidebar, FormHelper, Template } from '$lib/index';
-	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
 	import { invalidate, invalidateAll } from '$app/navigation';
-	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
-	import { error } from '@sveltejs/kit';
 	import Icon from '@iconify/svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +19,7 @@
 	// console.log('form data:');
 	// $inspect(errors);
 
-	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
+	// let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
@@ -30,7 +27,7 @@
 
 	let templateInfo = $derived(data.templateInfo);
 	let showSheet = $state(false); // false;
-	let questionCard = $state();
+	// let questionCard = $state();
 
 	let deleteButtonClicked = $state(false);
 	let deleteSubButtonClicked = $state(false);
@@ -47,12 +44,12 @@
 	// console.log('uiSections:');
 	// $inspect(uiSections);
 
-	function changeTypes(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (target.value === 'Basic' || target.value === 'HealthCare') {
-			typeOfQuestion = target.value;
-		}
-	}
+	// function changeTypes(event: Event) {
+	// 	const target = event.target as HTMLInputElement;
+	// 	if (target.value === 'Basic' || target.value === 'HealthCare') {
+	// 		typeOfQuestion = target.value;
+	// 	}
+	// }
 
 	function openSheet(card) {
 		showSheet = true;
@@ -316,7 +313,7 @@
 <!-- Section -->
 
 <div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="border border-white md:w-[25%]">
+	<div class="w-[25%] border border-white bg-purple-700">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
@@ -324,10 +321,10 @@
 			/>
 		</button>
 
-		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
+		<Sidebar {isOpen} />
 	</div>
 
-	<div class="my-3 flex overflow-hidden md:w-[75%]">
+	<div class="my-3 w-[75%] overflow-hidden">
 		<div class="my-1 w-full space-y-2 p-2 md:mx-24 lg:mx-10">
 			<div class="flex w-full flex-row items-center px-2 md:ml-5 md:pl-20 lg:pl-5 xl:pl-0">
 				<Breadcrumb.Root>

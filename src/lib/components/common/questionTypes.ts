@@ -16,7 +16,7 @@ export type AdvanceTypes = {
 };
 
 
-export const basicCards: BasicTypes[] = [
+export const BasicCards: BasicTypes[] = [
     {
         id: 1,
         name: 'Text',
@@ -110,7 +110,146 @@ export const basicCards: BasicTypes[] = [
     // }
 ];
 
-export const healthCarePlugins: AdvanceTypes[] = [
+export const Common: BasicTypes[] = [
+    {
+        id: 1,
+        name: 'Phone Number',
+        value: 'PhoneNumber',
+        icon: 'fluent:text-12-regular',
+    },
+    {
+        id: 2,
+        name: 'Age',
+        value: 'Age',
+        icon: 'mdi:decimal',
+    },
+    {
+        id: 3,
+        name: 'Email',
+        value: 'Email',
+        icon: 'carbon:string-integer',
+    },
+    {
+        id: 4,
+        name: 'Name',
+        value: 'Name',
+        icon: 'lucide:binary',
+    },
+    {
+        id: 7,
+        name: 'Address',
+        value: 'Address',
+        icon: 'mdi:checkbox-outline',
+    },
+    {
+        id: 8,
+        name: 'Gender',
+        value: 'Gender',
+        icon: 'ph:radio-button-fill',
+    },
+    {
+        id: 9,
+        name: 'Birth Date',
+        value: 'BirthDate',
+        icon: 'uiw:date',
+    }
+];
+
+export const Financial: BasicTypes[] = [
+    {
+        id: 1,
+        name: 'Text',
+        value: 'Text',
+        icon: 'fluent:text-12-regular',
+    },
+    {
+        id: 2,
+        name: 'Float',
+        value: 'Float',
+        icon: 'mdi:decimal',
+    },
+    {
+        id: 3,
+        name: 'Integer',
+        value: 'Integer',
+        icon: 'carbon:string-integer',
+    },
+    {
+        id: 4,
+        name: 'Boolean',
+        value: 'Boolean',
+        icon: 'lucide:binary',
+    },
+    // {
+    //     id: 5,
+    //     name: 'Object',
+    //     value: 'Object',
+    //     icon: 'ic:baseline-data-object',
+    // },
+    // {
+    //     id: 6,
+    //     name: 'Text-Array',
+    //     value: 'TextArray',
+    //     icon: 'material-symbols:data-array',
+    // },
+    {
+        id: 7,
+        name: 'Multi-Choice Selection',
+        value: 'MultiChoiceSelection',
+        icon: 'mdi:checkbox-outline',
+    },
+    {
+        id: 8,
+        name: 'Single-Choice Selection',
+        value: 'SingleChoiceSelection',
+        icon: 'ph:radio-button-fill',
+    },
+    {
+        id: 9,
+        name: 'Date',
+        value: 'Date',
+        icon: 'uiw:date',
+    },
+    {
+        id: 10,
+        name: 'Date-Time',
+        value: 'DateTime',
+        icon: 'formkit:datetime',
+    },
+    {
+        id: 11,
+        name: 'Rating',
+        value: 'Rating',
+        icon: 'ri:star-line',
+    },
+    {
+        id: 12,
+        name: 'Range',
+        value: 'Range',
+        icon: 'formkit:range',
+    },
+    // {
+    //     id: 13,
+    //     name: 'Location',
+    //     value: 'Location',
+    //     icon: 'pajamas:location',
+    // },
+    // {
+    //     id: 14,
+    //     name: 'File',
+    //     value: 'File',
+    //     icon: 'ph:file-duotone',
+    // },
+    // {
+    //     id: 15,
+    //     name: 'None',
+    //     value: 'None',
+    //     icon: '',
+
+    // }
+];
+
+export const HealthCarePlugins: AdvanceTypes[] = [
     {
         id: 1,
         name: 'Height',
