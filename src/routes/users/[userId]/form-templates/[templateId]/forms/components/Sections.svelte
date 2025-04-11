@@ -9,13 +9,14 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
 	import { writable } from 'svelte/store';
-        import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
+	import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
+	import { toastMessage } from '$lib/components/toast/toast.store';
+	import { invalidate } from '$app/navigation';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
 		uiSections = $bindable(),
-		highlightedSection,
-		highlightedSubSection,
+
 		deleteButtonClicked,
 		deleteSubButtonClicked,
 		openSheet,
@@ -27,14 +28,19 @@
 	} = $props();
 
 	let cardToDelete = $state('');
+	let highlightedSection: string = $state();
+	let highlightedSubSection: string = $state();
+	const isOpen = writable<Record<number, boolean>>({});
+	let cardToSwap = $state();
 
 	//1 For handleing drag enter
-	function handleDragEnter(sectionId: number) {
+
+	function handleDragEnter(sectionId: string) {
 		highlightedSection = sectionId;
 	}
 
 	//2 For handleing drag leave
-	function handleDragLeave(sectionId: number) {
+	function handleDragLeave(sectionId: string) {
 		if (highlightedSection === sectionId) {
 			highlightedSection = null;
 			highlightedSubSection = null;
@@ -42,18 +48,18 @@
 	}
 
 	//3 For handleing drag over
-	function handleDragOver(sectionId: number, event: DragEvent) {
+	function handleDragOver(sectionId: string, event: DragEvent) {
 		event.preventDefault();
 		highlightedSection = sectionId;
 	}
 
 	// For handleing drag enter of subsection
-	function handleDragEnterSubsection(subSectionId: number) {
+	function handleDragEnterSubsection(subSectionId: string) {
 		highlightedSubSection = subSectionId;
 	}
 
 	// For handleing drag leave of subsection
-	function handleDragLeaveSubsection(subSectionId: number) {
+	function handleDragLeaveSubsection(subSectionId: string) {
 		if (highlightedSubSection === subSectionId) {
 			highlightedSubSection = null;
 			highlightedSection = null;
@@ -61,7 +67,7 @@
 	}
 
 	// For handleing drag over of subsection
-	function handleDragOverSubsection(subSectionId: number, event: DragEvent) {
+	function handleDragOverSubsection(subSectionId: string, event: DragEvent) {
 		event.preventDefault();
 		highlightedSubSection = subSectionId;
 	}
@@ -86,12 +92,10 @@
 	}
 
 	// For closing subsection card delete model
-	function closeDeleteSubModal() {
-		deleteSubButtonClicked = false;
-		cardToDelete = null;
-	}
-
-	const isOpen = writable<Record<number, boolean>>({}); 
+	// function closeDeleteSubModal() {
+	// 	deleteSubButtonClicked = false;
+	// 	cardToDelete = null;
+	// }
 
 	function toggleSection(sectionId: number) {
 		isOpen.update((map) => ({
@@ -100,21 +104,59 @@
 		}));
 	}
 
+	// let cardToSwap = $state({
+	// 	id: '',
+	// 	parentSectionId: '',
+	// 	sequence: 0
+	// });
 
+	function handleCardDragStart(sectionId: string, card, event: DragEvent) {
+		// console.log('Hi i am from handleCardDragStart ', sectionId);
+		// console.log('Hi i am from handleCardDragStart ', card);
+		cardToSwap = card;
+		event.dataTransfer.setData('text/plain', JSON.stringify({ sectionId, card }));
+	}
+
+	// $inspect("This is card to swap",cardToSwap);
+	async function handleCardDrop(sectionId: string, cardIndex: number, event: DragEvent, card) {
+		event.preventDefault();
+		console.log('This is card index', cardIndex);
+		console.log('This is section id', sectionId);
+		console.log('This is card', card);
+		const data = JSON.parse(event.dataTransfer.getData('text/plain'));
+		try {
+			const model = {
+				id: cardToSwap.id,
+				parentSectionId: sectionId,
+				sequence: cardIndex + 1
+			};
+			const response = await fetch(`/api/server/question/${card.id}`, {
+				method: 'PUT',
+				body: JSON.stringify(model),
+				headers: { 'content-type': 'application/json' }
+			});
+			const questionData = await response.json();
+			invalidate('app:allNodes');
+			toastMessage(questionData);
+			// console.log('questionData: ***', questionData);
+		} catch (error) {
+			console.error('Error Updating:', error);
+			toastMessage();
+			invalidate('app:allNodes');
+		}
+	}
 </script>
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] px-4 py-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b] {highlightedSection ===
-		section.id
-			? ' border-1 border-blue-600'
-			: ''}"
+		class="my-4 rounded-md border bg-[#F6F8FA] px-4 py-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b]
+		{highlightedSection === section.id && !highlightedSubSection
+			? ' border-blue-600 ring-2 ring-blue-400'
+			: 'border-gray-300'}"
 		ondragenter={() => handleDragEnter(section.id)}
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
-		use:dropzone={{
-			on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id)
-		}}
+		use:dropzone={{ on_dropzone: (data, e) => handleDragAndDrop(data, e, section.id) }}
 		role="region"
 		aria-label={`Section ${section.Title}`}
 	>
@@ -123,26 +165,23 @@
 				<div class="flex items-center justify-between px-2">
 					<Collapsible.Trigger
 						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
+						onclick={() => toggleSection(section.id)}
 					>
 						<Tooltip.Provider>
 							<Tooltip.Root>
 								<Tooltip.Trigger>
 									<Tooltip.Trigger>
-										<Button
-											variant="ghost"
-											size="sm"
-											class="w-9 p-0"
-											onclick={() => toggleSection(section.id)}
-										>
-											<Icon
-												icon="grommet-icons:down"
-												style="width: 12px; height: 12px;"
-												class={`transition-transform duration-300 ${
-													$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
-												}`}
-											/>
-											<span class="sr-only">Toggle</span>
-										</Button>
+										<!-- <Button variant="ghost" size="sm" class="w-9 p-0"> -->
+										<Icon
+											icon="mdi:chevron-down"
+											width="5"
+											height="5"
+											class={`transition-transform duration-300 ${
+												$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
+											}`}
+										/>
+										<span class="sr-only">Toggle</span>
+										<!-- </Button> -->
 									</Tooltip.Trigger>
 								</Tooltip.Trigger>
 								<Tooltip.Content>
@@ -160,24 +199,23 @@
 						onclick={() => openSectionForm(section)}
 					>
 						<!-- onclick={() => sectionEditRoute(section.id)} -->
-						<div class="flex-col">
-							{#if section.Title}
-								<p>{section.Title}</p>
-							{:else}
-								<p>{`Section ${index + 1}`}</p>
-							{/if}
-							<p class=" whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
-								Drop the Subsection and response type cards here
-							</p>
-						</div>
+						{#if section.Title}
+							<p>{section.Title}</p>
+						{:else}
+							<p>{`Section ${index + 1}`}</p>
+						{/if}
+						<p class="whitespace-normal text-sm font-normal text-gray-400 dark:text-gray-500">
+							Drop the Subsection and response type cards here
+						</p>
 					</Button>
 
 					<AlertDialog.Root>
-						<AlertDialog.Trigger class="{buttonVariants} bg-red400">
+						<AlertDialog.Trigger class="{buttonVariants} ">
 							<Button variant="ghost" class="ml-1 h-full w-full "
 								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 							</Button>
 						</AlertDialog.Trigger>
+
 						<AlertDialog.Content>
 							<AlertDialog.Header>
 								<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
@@ -198,6 +236,7 @@
 					</AlertDialog.Root>
 				</div>
 			</div>
+
 			<Collapsible.Content class="space-y-2">
 				<div class="h-fit w-full p-1" role="list" aria-label={`Cards in section: ${section.Title}`}>
 					{#if section.Questions.length === 0}
@@ -211,6 +250,8 @@
 							ondragover={(event) => {
 								event.preventDefault();
 							}}
+							ondragstart={(event) => handleCardDragStart(section.id, card, event)}
+							ondrop={(event) => handleCardDrop(section.id, index, event, card)}
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
@@ -263,8 +304,6 @@
 					<Sections
 						bind:uiSections={section.Subsections}
 						{handleDragAndDrop}
-						{highlightedSection}
-						{highlightedSubSection}
 						{deleteButtonClicked}
 						{deleteSubButtonClicked}
 						{openSheet}
@@ -298,5 +337,9 @@
 		width: 0;
 		height: 0;
 		display: none;
+	}
+
+	:global(.ring-2) {
+		transition: box-shadow 0.2s ease-in-out;
 	}
 </style>

@@ -3,6 +3,8 @@
 	import { Label } from '$lib/components/ui/label';
 
 	let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
+
+	$inspect('This is answers', answers[q.id]);
 </script>
 
 <div class=" space-y-2 rounded-lg px-4 pt-4">
@@ -19,7 +21,7 @@
 		{/if}
 	</div>
 	{#if q.Description}
-		<Label for="title" class="text-xs text-gray-500">{q.Description}</Label><br />
+		<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
 	{/if}
 	<div class="flex items-center space-x-2">
 		<Input
@@ -28,7 +30,7 @@
 			bind:value={answers[q.id]}
 			name={q.id}
 			disabled={isSubmitted}
-		/><Label>bpm</Label>
+		/><Label>hours</Label>
 	</div>
 
 	<!-- oninput={(e) => handleInput(e, q.id)} -->

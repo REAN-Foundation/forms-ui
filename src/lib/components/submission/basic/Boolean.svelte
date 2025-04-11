@@ -28,20 +28,23 @@
 </script>
 
 <!-- Render the Question with Radio Button Options -->
-<div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}
-		>{q.Title || 'Select:'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
+<div class=" space-y-2 rounded-lg px-4 pt-4">
+	<div class="flex justify-between">
+		<Label for={q.Title} class="text-sm"
+			>{q.Title || 'Select:'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
+		<Label for="score" class="text-sm font-medium">{q.Score || ''}</Label>
+	</div>
+
 	<Label for="description" class="text-xs text-gray-500">{q.Description || ''}</Label>
 
 	{#if optionsArray.length > 0}
 		{#each optionsArray as o}
-			<div class="bg-slate">
+			<div class="flex items-center space-x-3">
 				<input
 					type="radio"
 					onchange={handleRadioChange}
@@ -53,7 +56,7 @@
 					checked={answers[q.id] === o}
 					disabled={isSubmitted}
 				/>
-				<Label for={o}>{o}</Label><br />
+				<Label for={o}>{o}</Label>
 			</div>
 		{/each}
 	{:else}
@@ -64,9 +67,7 @@
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
 	{/if}
 
-	<div class="flex justify-end">
-		<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">
-			{q.Hint || ''}
-		</Label>
-	</div>
+	<p class=" text-end text-xs text-gray-400">
+		{q.Hint || ''}
+	</p>
 </div>

@@ -19,12 +19,15 @@
 			{card.Title || 'Enter Lipoprotein'}
 		</h1>
 	</div>
-	<Input disabled type="text" placeholder="Enter Lipoprotein here..." class="w-full p-2" />
+	<!-- <Input disabled type="text" placeholder="Enter Lipoprotein here..." class="w-full p-2" />
 
 	<div
 		class="flex w-full flex-col items-start justify-start py-1 font-serif text-sm text-slate-500"
 	>
 		<div class="flex flex-col items-start justify-start">Normally : min 30mg/dL or 75 nmol/L</div>
+	</div> -->
+	<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+		<p class="text-sm">Lipoprotein (in mg/dL)</p>
 	</div>
 
 	<div>

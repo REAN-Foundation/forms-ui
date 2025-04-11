@@ -6,21 +6,21 @@
 	// console.log(question)
 </script>
 
-<div class=" mt-4 w-full justify-between rounded-md border p-4 pb-10">
-	<div>
-		<Label for="title" class="text-md"
+<div class=" w-full rounded-lg bg-white px-4 py-4">
+	<div class="flex justify-between">
+		<Label for="title" class=" text-sm"
 			>{question.Title || 'Question Title'}
 			{#if question.IsRequired}
 				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</Label>
-		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
+		<Label for="score" class="text-sm font-medium"
+			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-		<br />
-		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
-		<Input disabled type={question.ResponseType} class="mt-2" />
 	</div>
-	<Label for="hint" class="float-right ml-auto mt-4 text-xs text-slate-500"
-		>{question.Hint ? `Hint: ${question.Hint}` : ''}</Label
+	<Label class="mt-1 text-sm text-gray-500">{question.Description || ''}</Label>
+	<Input disabled type={question.ResponseType} class="mt-2 " />
+	<p class="text-right text-xs text-gray-500"
+		>{question.Hint ? `Hint: ${question.Hint}` : ''}</p
 	>
 </div>

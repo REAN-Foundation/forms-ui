@@ -29,20 +29,22 @@
 </script>
 
 <!-- Render Question with Checkbox Options -->
-<div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for="title">
-		{q.Title || 'Select:'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
+<div class=" space-y-2 rounded-lg px-4 pt-4">
+	<div class="flex  justify-between">
+		<Label for="title" class="text-sm">
+			{q.Title || 'Select:'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
+		<Label for="score" class="text-sm font-medium">{q.Score || ''}</Label>
+	</div>
 	<Label for="description" class="text-xs text-gray-500">{q.Description || ''}</Label>
 	<Input type="text" class="hidden w-full" bind:value={answers[q.id]} />
 	{#if optionsArray.length > 0}
 		{#each optionsArray as o}
-			<div class="flex items-center gap-2">
+			<div class="flex items-center space-x-3">
 				<!-- Ensure checked state based on answers -->
 				<input
 					type="checkbox"
@@ -65,7 +67,5 @@
 		<p class="mt-1 text-xs text-red-600">{errors[q.id]}</p>
 	{/if}
 
-	<div class="flex justify-end">
-		<Label for="hint" class="float-right ml-auto mt-4 justify-end p-2">{q.Hint || ''}</Label>
-	</div>
+	<p class=" text-end text-xs text-gray-400">{q.Hint || ''}</p>
 </div>

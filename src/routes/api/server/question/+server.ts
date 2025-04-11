@@ -15,33 +15,36 @@ export const POST = async (event: RequestEvent) => {
 
         console.log('Data from api/server/question POST:', data);
 
-        const model = {
+        // Lookup object for supported responseTypes
+        const SUPPORTED_RESPONSE_TYPES: Record<string, string> = {
+            Height: 'Height (Centimeter)?',
+            Weight: 'Body Weight (Kilograms)?',
+            Temperature: 'Body Temperature (Fahrenheit)?',
+            PulseRate: 'Heart Pulse Rate (in beats per minute)?',
+            BloodPressure: 'Blood Pressure (in mmHg)?',
+            Sleep: 'Sleep Duration (in hours)?',
+            Glucose: 'Blood Glucose Level (mg/dL)?',
+            Cholesterol: 'Cholesterol Level (mg/dL)?',
+            BloodOxygenSaturation: 'Blood Oxygen Saturation (%)?',
+            Lipoprotein: 'Lipoprotein Level (mg/dL)?'
+        };
+
+        // Base model (always includes these fields)
+        const model: any = {
             ParentTemplateId: data.parentFormTemplateId,
             ParentSectionId: data.parentSectionId,
             ResponseType: data.responseType
+        };
+
+        // Only add Title if responseType is supported
+        if (SUPPORTED_RESPONSE_TYPES[data.responseType]) {
+            model.Title = SUPPORTED_RESPONSE_TYPES[data.responseType];
         }
 
-        if (data.responseType === 'Height') {
-            model['Title'] = 'Height (Centimeter)?';
-        }
-        if (data.responseType === 'Weight') {
-            model['Title'] = 'Body Weight (Kilograms)?';
-        }
-        if (data.responseType === 'Temperature') {
-            model['Title'] = 'Body Temperature (Fahrenheit)?';
-        }
-        if (data.responseType === 'PulseRate') {
-            model['Title'] = 'Heart Pulse Rate (in beats per minute)?';
-        }
-        if (data.responseType === 'BloodPressure') {
-            model['Title'] = 'Blood Pressure (in mmHg)?';
-        }
         const response = await createQuestion(model);
-
-        console.log('Response from createQuestion:', response);
         return new Response(JSON.stringify(response));
     } catch (err) {
-        const error = err as Error; // Ensures type safety for error
+        const error = err as Error;
         console.error(`Error creating question: ${error.message}`);
         return new Response(JSON.stringify({
             Status: 'failure',

@@ -14,12 +14,12 @@
 				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</Label>
-		<Label for="score" class="text-sm font-medium"
+		<Label for="score" class="text-xs text-gray-500"
 			>{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
 	</div>
-	<Label for="title" class="text-xs text-gray-500">{question.Description || ''}</Label>
-	<Input placeholder="Enter value here" disabled />
+	<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label>
+	<Input placeholder="Enter value here " disabled />
 
 	<p class="text-end text-xs text-gray-400">
 		{question.Hint ? `Hint: ${question.Hint}` : ''}

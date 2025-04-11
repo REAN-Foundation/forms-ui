@@ -1,5 +1,5 @@
-import { type RequestEvent } from '@sveltejs/kit';
-import { deleteQuestion, getQuestionById } from '../../../services/question';
+import { json, type RequestEvent } from '@sveltejs/kit';
+import { deleteQuestion, getQuestionById, updateQuestionsSequence } from '../../../services/question';
 
 /////////////////////////////////////////////////////////////////////
 export const GET = async (event: RequestEvent) => {
@@ -41,5 +41,45 @@ export const DELETE = async (event: RequestEvent) => {
         //     },
         //     { status: 500 }
         // );
+    }
+};
+
+
+
+// Custom error type for extended error properties
+interface CustomError extends Error {
+    statusCode?: number;
+    details?: string;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+export const PUT = async (event: RequestEvent) => {
+    try {
+        const request = event.request;
+        const data = await request.json();
+
+        console.log('data from api/server/template:', data);
+
+        const response = await updateQuestionsSequence(
+            data.id,
+            data.parentSectionId,
+            data.sequence,
+
+        );
+        console.log(response);
+
+        return new Response(JSON.stringify(response))
+    } catch (err) {
+        const error = err as CustomError;
+        console.error(`Error updating the section: ${error.message}`);
+        return json(
+            {
+                status: 'error',
+                message: error.message || 'An error occurred while updating the section.',
+                details: error.details || null,
+            },
+            { status: 500 }
+        );
     }
 };

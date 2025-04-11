@@ -25,19 +25,20 @@
 </script>
 
 <!-- {#if q.Title} -->
-<div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for="title"
-		>{q.Title || 'No title provided'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
+<div class=" space-y-2 rounded-lg px-4 pt-4">
+	<div class="flex items-center justify-between">
+		<Label for="title" class="text-sm"
+			>{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
 
-	<!-- <Label>Drop file here{q.ResponseType}</Label> -->
+		<!-- <Label>Drop file here{q.ResponseType}</Label> -->
 
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
-
-	<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
+		<Label for="score" class="float-right">{q.Score || ''}</Label>
+	</div>
+	<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
 
 	<Input type="text" class="hidden w-full" bind:value={answers[q.id]} />
 

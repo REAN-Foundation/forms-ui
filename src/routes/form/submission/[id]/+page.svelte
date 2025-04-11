@@ -23,6 +23,9 @@
 
 	let submissionStatus = $derived(data.submissionStatus);
 	let submittedOn = $state(data.submittedOn);
+	let sections = cleanAssessmentTemplate(section);
+
+	let isSubmitted = $state(false);
 
 	// Derived value for formatted date
 	let formattedSubmittedOn = $state('');
@@ -37,10 +40,6 @@
 			// timeStyle: 'short'
 		});
 	}
-
-	let sections = cleanAssessmentTemplate(section);
-
-	let isSubmitted = $state(false);
 
 	const responseTypeMap = {
 		Integer: 'IntegerValue',
@@ -179,8 +178,8 @@
 		{/if}
 	</div> -->
 
-	<div class="mx-auto mt-20 flex h-screen w-[80%] rounded-sm p-1">
-		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
+	<div class="mx-auto my-10 flex h-screen w-full rounded-sm p-1">
+		<form onsubmit={handleSave} class="mx-auto w-full">
 			<div class="">
 				<!-- this is the completed filled form -->
 
@@ -196,43 +195,48 @@
 			</div>
 
 			<div
-				class="relative mx-auto h-fit rounded-md border border-gray-500 bg-[#F6F8FA] pb-7 pt-5 dark:bg-[#0a0a0b]"
+				class="mx-auto my-10 w-full rounded-md border border-gray-400 p-5 dark:bg-[#0a0a0b] md:w-3/4"
 			>
 				{#if templateInfo}
-					<div>
-						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
-							{templateInfo.Type}
-						</p>
-						<div class="flex h-full flex-col text-center justify-center">
-							<h2 class="mt-5 text-center text-3xl font-bold">
-								{templateInfo.Title}
-							</h2>
-							<div class="mt-2 w-full items-center justify-center text-wrap">
-								<p class="mx-auto [&:not(:first-child)]:mt-6">
-									{templateInfo.Description}
-								</p>
-								<p class="ml-auto text-end mr-4 text-sm">
-									Version: {templateInfo.CurrentVersion}
-								</p>
+					<div
+						class=" relative mx-auto h-fit rounded-md border border-gray-400 py-4 dark:bg-[#0a0a0b]"
+					>
+						<div>
+							<!-- <p class="absolute right-4 top-2 mr-0 mt-0 leading-7 [&:not(:first-child)]:mt-6">
+								{templateInfo.Type}
+							</p> -->
+							<div class="flex h-full flex-col items-center justify-center">
+								<h2 class="text-center text-2xl font-bold capitalize">
+									{templateInfo.Title}
+								</h2>
+								<div class="relative w-full p-4">
+									<p class="flex w-full justify-center text-center text-gray-700">
+										{templateInfo.Description}
+									</p>
+									<span class="absolute mx-4 right-0 top-1/2 -translate-y-1/2 text-sm text-gray-700">
+										Version: {templateInfo.CurrentVersion}
+									</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				{/if}
-			</div>
 
-			<div class="min-h-[390px] rounded-md border border-gray-500 bg-[#f9fafb] dark:bg-[#0a0a0b]">
-				<QuestionPaper {sections} bind:answers bind:errors {isSubmitted} />
-			</div>
-			<div class="mx-auto flex flex-col space-x-5 pb-32 pt-6 md:flex-row">
-				<Button type="submit" variant="outline" class="w-full border" disabled={isSubmitted}>Save</Button>
-				<Button
-					onclick={handleSubmit}
-					type="button"
-					variant="secondary"
-					class="btn h-10 w-full border"
-					disabled={isSubmitted}
-					>Submit</Button
-				>
+				<div class=" mt-3 rounded-md  border-gray-400  dark:bg-[#0a0a0b]">
+					<QuestionPaper {sections} bind:answers bind:errors {isSubmitted} />
+				</div>
+				<div class="flex flex-col my-2 gap-3 sm:flex-row sm:space-x-4">
+					<Button type="submit" variant="outline" class="w-full rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300" disabled={isSubmitted}
+						>Save</Button
+					>
+					<Button
+						onclick={handleSubmit}
+						type="button"
+						variant="ghost"
+						class="w-full rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm focus:outline-none"
+						disabled={isSubmitted}>Submit</Button
+					>
+				</div>
 			</div>
 		</form>
 	</div>

@@ -6,7 +6,7 @@
 	// console.log(question)
 </script>
 
-<div class="space-y-2 rounded-lg px-4 pt-4">
+<div class=" space-y-2 rounded-lg px-4 pt-4">
 	<div class="flex items-center justify-between">
 		<Label for="title" class="text-sm"
 			>{question.Title || 'Question Title'}
@@ -19,9 +19,9 @@
 		>
 	</div>
 	<Label for="title" class="text-xs text-gray-500">{question.Description || ''}</Label>
-	<Input placeholder="Enter value here" disabled />
+	<Input placeholder="Enter value here " disabled />
 
-	<p class="text-end text-xs text-gray-400">
+	<p class=" text-end text-xs text-gray-400">
 		{question.Hint ? `Hint: ${question.Hint}` : ''}
 	</p>
 </div>

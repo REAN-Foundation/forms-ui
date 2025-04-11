@@ -98,12 +98,10 @@
 	});
 </script>
 
-<Menubar.Root
-	class=" fixed z-50 flex   w-full items-center justify-between bg-[#F6F8FA] dark:bg-[#0a0a0b]"
->
-	<div class="fixed flex space-x-4 lg:space-x-6">
-		<div class="left-0 flex">
-			<!-- <Menubar.Menu>
+<nav class="fixed w-full z-10 flex items-center justify-between border border-t-0 bg-secondary p-1">
+	<!-- <div class="fixed flex space-x-4 lg:space-x-6"> -->
+	<div class="left-0">
+		<!-- <Menubar.Menu>
 				<Menubar.Trigger>File</Menubar.Trigger>
 				<Menubar.Content>
 					<Menubar.Item>
@@ -188,10 +186,10 @@
 					<Menubar.Item inset>Add Profile...</Menubar.Item>
 				</Menubar.Content>
 			</Menubar.Menu> -->
-		</div>
 	</div>
+	<!-- </div> -->
 
-	<div class="fixed right-0 flex space-x-2">
+	<div class="mr-3">
 		<div class="relative inline-block">
 			<Button onclick={toggleDropdown} variant="outline" size="icon">
 				<Icon
@@ -228,7 +226,7 @@
 
 			{#if dropdownOpen}
 				<div
-					class="dropdown absolute right-0 z-50 mt-2 w-72 rounded-lg bg-white p-4 mr-2 shadow-lg dark:bg-gray-800 dark:text-white"
+					class="dropdown absolute right-0 z-50 mr-2 mt-2 w-72 rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800 dark:text-white"
 				>
 					<div class="mb-2 text-lg font-semibold">Themes</div>
 					<p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
@@ -278,7 +276,7 @@
 			{/if}
 		</div>
 	</div>
-</Menubar.Root>
+</nav>
 
 <!-- 
 <script>
