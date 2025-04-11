@@ -504,8 +504,8 @@
 	</div>
 </div>
 
-<div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
-	<!-- Label + Select -->
+<!-- <div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
+
 	<div class="flex w-full max-w-xs flex-col items-start text-sm text-gray-700 dark:text-gray-300">
 		<Label for="ItemsPerPage">Select items per page <span class="text-red-600">*</span></Label>
 
@@ -525,13 +525,13 @@
 			</Select.Content>
 		</Select.Root>
 
-		<!-- Page info below -->
+	
 		<span class="mt-2 text-xs text-gray-500 dark:text-gray-400">
 			Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
 		</span>
 	</div>
 
-	<!-- Pagination Buttons -->
+
 	<div class="flex items-center space-x-2">
 		<Button
 			onclick={() => changePage(-1)}
@@ -548,4 +548,4 @@
 			<Icon icon="material-symbols:chevron-right-rounded" width="20" height="20" />
 		</Button>
 	</div>
-</div>
+</div> -->
