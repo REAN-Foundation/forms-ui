@@ -115,7 +115,7 @@
 	// 	sequence: 0
 	// });
 
-	$inspect(uiSections[1].Questions);
+	// $inspect(uiSections[1].Questions);
 	const cards = uiSections[1].Questions;
 
 	function handleCardDragStart(sectionId: string, card, event: DragEvent) {
@@ -164,9 +164,7 @@
 {#each uiSections as section, index (section.id)}
 	<div
 		class="my-4 rounded-md border bg-[#F6F8FA] px-4 py-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b]
-		{highlightedSection === section.id && !highlightedSubSection
-			? ' border-blue-600 ring-2 ring-blue-400'
-			: 'border-gray-300'}"
+		{highlightedSection === section.id ? ' border-blue-600 ring-2 ring-blue-400' : ''}"
 		ondragenter={() => handleDragEnter(section.id)}
 		ondragleave={() => handleDragLeave(section.id)}
 		ondragover={(event) => handleDragOver(section.id, event)}
@@ -260,7 +258,7 @@
 					{#each section.Questions as card, index (card.id)}
 						<div
 							class="hover-container mx-6 items-center justify-between {hoverIndex === index
-								? 'highlight'
+								? ' border-blue-600 ring-2 ring-blue-400 rounded-md'
 								: ''}"
 							draggable="true"
 							ondragover={(event) => {
@@ -360,7 +358,6 @@
 	:global(.ring-2) {
 		transition: box-shadow 0.2s ease-in-out;
 	}
-
 
 	.highlight {
 		border: 2px dashed blue;
