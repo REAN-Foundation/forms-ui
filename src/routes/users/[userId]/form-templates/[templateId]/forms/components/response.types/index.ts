@@ -31,6 +31,10 @@ import RangeForm from "./basic/Range.svelte";
 import TextArrayForm from "./basic/TextArray.svelte";
 import TextForm from "./basic/Text.svelte";
 
+import PhoneNumberForm from "./common/PhoneNumber.svelte";
+import AgeForm from "./common/Age.svelte";
+import EmailForm from "./common/Age.svelte";
+
 export const formComponents = {
     Text: TextForm,
     Integer: IntegerForm,
@@ -64,4 +68,8 @@ export const formComponents = {
     CReactiveProtein: CReactiveProteinForm,
     Lipoprotein: LipoproteinForm,
     // None: ''
+
+    PhoneNumber:PhoneNumberForm,
+    Age:AgeForm,
+    Email:EmailForm,
 };

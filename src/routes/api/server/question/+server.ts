@@ -26,7 +26,11 @@ export const POST = async (event: RequestEvent) => {
             Glucose: 'Blood Glucose Level (mg/dL)?',
             Cholesterol: 'Cholesterol Level (mg/dL)?',
             BloodOxygenSaturation: 'Blood Oxygen Saturation (%)?',
-            Lipoprotein: 'Lipoprotein Level (mg/dL)?'
+            Lipoprotein: 'Lipoprotein Level (mg/dL)?',
+
+            PhoneNumber: 'Enter your Phone number',
+            Age: 'Enter your Age number',
+            Email: 'Enter your Email number',
         };
 
         // Base model (always includes these fields)

@@ -165,6 +165,7 @@
 	} from '../forms/responseType/healthCare/index';
 
 	import AdvanceForm from '../forms/responseType/healthCare/AdvanceFieldEditor.svelte';
+	import { AgeForm, EmailForm, PhoneNumberForm } from '../forms/responseType/common';
 
 	let {
 		questionCard = $bindable(),
@@ -196,7 +197,12 @@
 		{ responseType: 'Glucose', component: GlucoseForm },
 		{ responseType: 'Cholesterol', component: CholesterolForm },
 		{ responseType: 'BloodOxygenSaturation', component: BloodOxygenForm },
-		{ responseType: 'Lipoprotein', component: LipoproteinForm }
+		{ responseType: 'Lipoprotein', component: LipoproteinForm },
+
+		{ responseType: 'PhoneNumber', component: PhoneNumberForm },
+		{ responseType: 'Age', component: AgeForm },
+		{ responseType: 'Email', component: EmailForm }
+
 	];
 
 	// Initialize selected form based on questionCard.ResponseType
