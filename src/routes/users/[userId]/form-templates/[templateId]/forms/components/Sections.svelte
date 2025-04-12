@@ -35,10 +35,15 @@
 
 	//1 For handleing drag enter
 
+	let draggingCard = null;
+	let hoverIndex = $state();
 	function handleDragEnter(sectionId: string) {
 		highlightedSection = sectionId;
 	}
 
+	function handleDragLeaveCard() {
+		hoverIndex = null;
+	}
 	//2 For handleing drag leave
 	function handleDragLeave(sectionId: string) {
 		if (highlightedSection === sectionId) {
@@ -110,15 +115,24 @@
 	// 	sequence: 0
 	// });
 
+	$inspect(uiSections[1].Questions);
+	const cards = uiSections[1].Questions;
+
 	function handleCardDragStart(sectionId: string, card, event: DragEvent) {
 		// console.log('Hi i am from handleCardDragStart ', sectionId);
 		// console.log('Hi i am from handleCardDragStart ', card);
 		cardToSwap = card;
+		draggingCard = card;
 		event.dataTransfer.setData('text/plain', JSON.stringify({ sectionId, card }));
 	}
 
 	// $inspect("This is card to swap",cardToSwap);
 	async function handleCardDrop(sectionId: string, cardIndex: number, event: DragEvent, card) {
+		const fromIndex = cards.indexOf(draggingCard);
+		cards.splice(fromIndex, 1);
+		cards.splice(cardIndex, 0, draggingCard);
+		draggingCard = null;
+		hoverIndex = null;
 		event.preventDefault();
 		console.log('This is card index', cardIndex);
 		console.log('This is section id', sectionId);
@@ -245,13 +259,17 @@
 
 					{#each section.Questions as card, index (card.id)}
 						<div
-							class="hover-container mx-6 items-center justify-between"
+							class="hover-container mx-6 items-center justify-between {hoverIndex === index
+								? 'highlight'
+								: ''}"
 							draggable="true"
 							ondragover={(event) => {
 								event.preventDefault();
+								hoverIndex = index;
 							}}
 							ondragstart={(event) => handleCardDragStart(section.id, card, event)}
 							ondrop={(event) => handleCardDrop(section.id, index, event, card)}
+							ondragleave={handleDragLeaveCard}
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
@@ -341,5 +359,11 @@
 
 	:global(.ring-2) {
 		transition: box-shadow 0.2s ease-in-out;
+	}
+
+
+	.highlight {
+		border: 2px dashed blue;
+		background: #d0ebff;
 	}
 </style>
