@@ -6,7 +6,7 @@
 	///////////////////////////////////////////////////////////////
 	let { templateData, errors = $bindable() } = $props();
 
-	$inspect(templateData, 'ghcfszdgvbjkn');
+	// $inspect(templateData, 'ghcfszdgvbjkn');
 	// async function handleSubmit(event) {
 	// 	event.preventDefault();
 
@@ -79,9 +79,9 @@
 	</div>
 
 	<div class="relative items-center  space-y-1">
-		<Label class="col-span-11 ">Tenant Code</Label>
-		<Input name="TenantCode" bind:value={templateData.TenantCode} />
-		<p class="text-destructive">{errors?.TenantCode}</p>
+		<Label class="col-span-11 ">Tenant Id</Label>
+		<Input name="TenantId" bind:value={templateData.TenantId} />
+		<p class="text-destructive">{errors?.TenantId}</p>
 	</div>
 
 	<div class="relative items-center  space-y-1">
