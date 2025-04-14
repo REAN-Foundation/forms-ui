@@ -23,8 +23,8 @@
 	</div>
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
-			<Icon icon="carbon:string-integer" width="20" height="20" />
-			<p class="ml-1">Full Name</p>
+			<Icon icon="icon-park-outline:edit-name" width="20" height="20" />
+			<p class="ml-1">John Doe</p>
 		</div>
 	</div>
 

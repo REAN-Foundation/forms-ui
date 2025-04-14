@@ -33,7 +33,7 @@ import TextForm from "./basic/Text.svelte";
 
 import PhoneNumberForm from "./common/PhoneNumber.svelte";
 import AgeForm from "./common/Age.svelte";
-import EmailForm from "./common/Age.svelte";
+import EmailForm from "./common/Email.svelte";
 import AddressForm from "./common/Address.svelte";
 import BirthDateFOrm from "./common/BirthDate.svelte";
 import GenderForm from "./common/Gender.svelte";

@@ -24,8 +24,8 @@
 	</div>
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
-			<Icon icon="fluent:text-12-regular" width="15" height="15" />
-			<p class="ml-1">Email</p>
+			<Icon icon="ic:outline-email" width="15" height="15" />
+			<p class="ml-1">abc@example.com</p>
 		</div>
 	</div>
 

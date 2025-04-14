@@ -23,8 +23,11 @@
 	</div>
 	<div class="h-fit w-full rounded">
 		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
-			<Icon icon="carbon:string-integer" width="20" height="20" />
+			<Icon icon="entypo:address" width="20" height="20" />
 			<p class="ml-1">Address</p>
+			<p>House No / Flat No</p>
+			<p>House No / Flat No</p>
+
 		</div>
 	</div>
 

@@ -25,7 +25,7 @@
 	<div class="h-fit w-full rounded p-2">
 		<div class="flex items-start justify-start py-2 font-serif text-sm text-slate-500">
 			<!-- <Input type="date" id="option1" name="options" disabled /> -->
-			<div class="w-full rounded-md border bg-slate-50 py-2 pl-2 pr-10 text-left text-slate-400">
+			<div class="w-full rounded-md border border-slate-200 dark:border-slate-800  py-2 pl-2 pr-10 text-left text-slate-400">
 				<p class="text-sm">Enter date here</p>
 			</div>
 		</div>
