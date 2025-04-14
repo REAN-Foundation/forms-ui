@@ -296,9 +296,9 @@ export const HealthCarePlugins: AdvanceTypes[] = [
 export const CommonPlugins: BasicTypes[] = [
     {
         id: 1,
-        name: 'Phone Number',
-        value: 'PhoneNumber',
-        icon: 'carbon:string-integer',
+        name: 'Name',
+        value: 'Name',
+        icon: 'lucide:binary',
     },
     {
         id: 2,
@@ -308,15 +308,27 @@ export const CommonPlugins: BasicTypes[] = [
     },
     {
         id: 3,
-        name: 'Email',
-        value: 'Email',
-        icon: 'carbon:string-integer',
+        name: 'Birth Date',
+        value: 'BirthDate',
+        icon: 'uiw:date',
     },
     {
         id: 4,
-        name: 'Name',
-        value: 'Name',
-        icon: 'lucide:binary',
+        name: 'Phone Number',
+        value: 'PhoneNumber',
+        icon: 'carbon:string-integer',
+    },
+    {
+        id: 5,
+        name: 'Gender',
+        value: 'Gender',
+        icon: 'ph:radio-button-fill',
+    },
+    {
+        id: 6,
+        name: 'Email',
+        value: 'Email',
+        icon: 'carbon:string-integer',
     },
     {
         id: 7,
@@ -324,18 +336,7 @@ export const CommonPlugins: BasicTypes[] = [
         value: 'Address',
         icon: 'mdi:checkbox-outline',
     },
-    {
-        id: 8,
-        name: 'Gender',
-        value: 'Gender',
-        icon: 'ph:radio-button-fill',
-    },
-    {
-        id: 9,
-        name: 'Birth Date',
-        value: 'BirthDate',
-        icon: 'uiw:date',
-    }
+
 ];
 
 export const FinancialPlugins: BasicTypes[] = [

@@ -76,9 +76,7 @@
 		</div>
 	</Card.Root>
 	<!-- Sidebar question -->
-	<Card.Root
-		class=" h-full !rounded-none !border-none   !shadow-none  md:w-full  2xl:w-full"
-	>
+	<Card.Root class=" h-full !rounded-none !border-none   !shadow-none  md:w-full  2xl:w-full">
 		<Card.Title class="text-md px-3">Select Types</Card.Title>
 		<!-- <div class=" h-full rounded-md px-3 dark:border-gray-400">
 			<div
@@ -246,18 +244,16 @@
 			</div>
 		</div> -->
 
-		<div class="h-full rounded-md px- bg-gren-100">
+		<div class="px- bg-gren-100 h-full rounded-md">
 			<!-- Button Grid: 2x2 -->
 			<Card.Header class="bg-yellow-30 py-1">
-				<div class="rounded-t-md border p-2 bg-re0">
+				<div class="bg-re0 rounded-t-md border p-2">
 					<div class="grid grid-cols-2 gap-2">
 						{#each ['Basic', 'Common', 'HealthCare', 'Financial'] as type}
 							<Button
 								type="button"
 								class="w-full  
-						{selectedTab === type
-									? 'bg-primary'
-									: 'bg-secondary'}"
+						{selectedTab === type ? 'bg-primary' : 'bg-secondary'}"
 								onclick={() => (selectedTab = type)}
 							>
 								{type === 'HealthCare' ? 'Health Care' : type}
@@ -268,7 +264,7 @@
 			</Card.Header>
 			<!-- Card List -->
 			<Card.Content class="py-2">
-				<div class="scrollbar-hide overflow-y-auto border rounded-b-md md:h-[50%] lg:h-[60%]">
+				<div class="scrollbar-hide overflow-y-auto rounded-b-md border md:h-[50%] lg:h-[60%]">
 					<ul class="space-y-2 px-2">
 						{#each pluginMap[selectedTab] as card}
 							<li>
@@ -290,48 +286,6 @@
 			</Card.Content>
 		</div>
 	</Card.Root>
-	<!-- sidebar question response time -->
-	<!-- <Card.Root class="h-1/2 rounded-lg !border-none bg-[#F6F8FA] px-4 !shadow-none ">
-            <Card.Title class="text-md  ">Question Response Types</Card.Title>
-            <div class="scrollbar-hide border bg-[#F6F8FA] my-3 dark:bg-[#0A0A0B] h-full overflow-y-auto py-4">
-                <ul class="space-y-2">
-                    {#if typeOfQuestion === 'Advanced' && selectedTab==='Advanced'}
-                        {#each measurements as card}
-                            <li>
-                                <div
-                                    class="w-full cursor-grab"
-                                    use:draggable={{ ...card, type: 'card' }}
-                                    role="button"
-                                    aria-label={`Draggable card: ${card.name}`}
-                                >
-                                    <Button class="w-full justify-start space-x-2" variant="ghost">
-                                        <Icon icon={card.icon} width="20" height="20" class="text-primary" />
-                                        <span>{card.name}</span>
-                                    </Button>
-                                </div>
-                            </li>
-                        {/each}
-                    {:else if typeOfQuestion === 'Basic' && selectedTab==='Basic'}
-                        {#each cards as card}
-                            <li>
-                                <div
-                                    class="w-full cursor-grab"
-                                    use:draggable={{ ...card, type: 'card' }}
-                                    role="button"
-                                    aria-label={`Draggable card: ${card.name}`}
-                                >
-                                    <Button class="w-full justify-start space-x-2" variant="ghost">
-                                        <Icon icon={card.icon} width="20" height="20" class="text-primary" />
-                                        <span>{card.name}</span>
-                                    </Button>
-                                </div>
-                            </li>
-                        {/each}
-                    {/if}
-                </ul>
-            </div>
-        </Card.Root> -->
-	<!-- </div> -->
 </div>
 
 <style>
