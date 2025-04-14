@@ -1,95 +1,156 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { enhance } from '$app/forms';
-	import Icon from '@iconify/svelte';
-	import { toast } from 'svelte-sonner';
+	import { browser } from '$app/environment';
+	import type { PersonRole } from '$lib/components/domain.models/login.models';
 
-	let password = '';
-	let showPassword = false;
+	import type { PageServerData } from './$types';
 
-	function togglePasswordVisibility() {
-		showPassword = !showPassword;
-	}
+	let loginType = $state('username');
 
-	async function handleSubmit(
-		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
-	) {
-		event.preventDefault();
-		// toast.success('Logged in successful');
+	let { data }: { data: PageServerData } = $props();
+	// console.log(data.roles);
+
+	// let roles: PersonRole[] = data.roles;
+	// const logoImageSource = getPublicLogoImageSource();
+	// const footerText = `© ${new Date().getFullYear()} ${getPublicFooterText()}`;
+	// const footerLink = getPublicFooterLink();
+	// const systemName = getSystemName();
+
+	// personRolesStore.set(roles);
+	// LocalStorageUtils.setItem('personRoles', JSON.stringify(roles));
+	// let personRoles = [];
+
+	// if (browser) {
+	// 	const tmp: any = LocalStorageUtils.getItem('personRoles');
+
+	// 	personRoles = JSON.parse(tmp);
+
+	// 	LocalStorageUtils.removeItem('prevUrl');
+	// }
+
+	let maxHeight = '80vh';
+	if (browser) {
+		const handleResize = () => {
+			const screenWidth = window.innerWidth;
+			if (screenWidth <= 600) {
+				maxHeight = '40vh';
+			} else if (screenWidth <= 1024) {
+				maxHeight = '50vh';
+			} else if (screenWidth <= 1440) {
+				maxHeight = '60vh';
+			} else if (screenWidth <= 1600) {
+				maxHeight = '70vh';
+			} else {
+				maxHeight = '80vh';
+			}
+		};
+
+		window.addEventListener('resize', handleResize);
+		handleResize();
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center">
-	<div class="rounded shadow dark:border dark:bg-transparent ">
-		<div>
-			<Card.Root class="w-[350px]  rounded-xl bg-[#fafaf9] dark:bg-[#0a0a0b]">
-				<Card.Header>
-					<Card.Title>Sign In</Card.Title>
-				</Card.Header>
-				<Card.Content>
-					<form
-						method="post"
-						action="?/login"
-						class="rounded-lg"
-						use:enhance
-						onsubmit={handleSubmit}
-					>
-						<div class="grid w-full items-center gap-4">
-							<div class="flex w-full max-w-sm flex-col">
-								<Label for="username" class="mb-2 text-base">Username</Label>
-								<Input
-									type="text"
-									placeholder="username"
-									class="max-w-xs "
-									name="username"
-									required
-								/>
-								<div class=" relative my-4 flex w-full flex-col">
-									<Label for="username" class="mb-2 text-base ">Password</Label>
+<svelte:head>
+	<title>Forms UI</title>
+	<meta name="description" content="REAN careplans" />
+</svelte:head>
 
-									{#if showPassword}
-										<Input
-											type="text"
-											name="password"
-											bind:value={password}
-											placeholder="password"
-											required
-											class="input max-w-xs"
-										/>
-									{:else}
-										<Input
-											type="password"
-											name="password"
-											bind:value={password}
-											placeholder="password"
-											required
-											class="input max-w-xs"
-										/>
-									{/if}
-									{#if password !== ''}
-										<button
-											type="button"
-											class="absolute right-4 top-11 cursor-pointer border-none bg-none"
-											onclick={togglePasswordVisibility}
-										>
-											<Icon
-												icon={showPassword
-													? 'material-symbols:visibility-outline'
-													: 'material-symbols:visibility-off-outline'}
-												class="text-lg"
-											/>
-										</button>
-									{/if}
-								</div>
-							</div>
-						</div>
-						<Button class="w-full" type="submit" >Login</Button>
-					</form>
-				</Card.Content>
-			</Card.Root>
+<div class="form-container flex flex-col items-center justify-center">
+	<!-- <img class="ct-image mt-7 mb-7 w-36" alt="logo" src={logoImageSource} /> -->
+	<form method="post" action="?/login" class="card mb-10 p-8">
+		<h2 class="mb-4 text-center text-xl">Sign In</h2>
+
+		<div class="mb-4 flex items-center gap-6">
+			<label class="text-md flex items-center">
+				<input
+					type="radio"
+					name="loginType"
+					value="username"
+					bind:group={loginType}
+					class="radio-input "
+				/>
+				<span class="">Username</span>
+			</label>
+
+			<label class="text-md flex items-center">
+				<input
+					type="radio"
+					name="loginType"
+					value="email"
+					bind:group={loginType}
+					class="radio-input "
+				/>
+				<span>Email</span>
+			</label>
+
+			<label class="text-md flex items-center">
+				<input
+					type="radio"
+					name="loginType"
+					value="phone"
+					bind:group={loginType}
+					class="radio-input "
+				/>
+				<span>Phone</span>
+			</label>
 		</div>
-	</div>
+
+		{#if loginType === 'username'}
+			<label for="username" class="label">Username</label>
+			<input
+				type="text"
+				id="username"
+				name="username"
+				class="input"
+				placeholder="Enter your username"
+				required
+			/>
+		{/if}
+
+		{#if loginType === 'email'}
+			<label for="email" class="label">Email</label>
+			<input
+				type="email"
+				id="email"
+				name="email"
+				class="input"
+				placeholder="Enter your email"
+				required
+			/>
+		{/if}
+
+		{#if loginType === 'phone'}
+			<label for="phone" class="label">Phone</label>
+			<div class="flex gap-2">
+				<select name="countryCode" class="input !w-1/3" required>
+					<option value="+1">+1</option>
+					<option value="+91">+91</option>
+				</select>
+				<input
+					type="tel"
+					id="phone"
+					name="phone"
+					class="input"
+					placeholder="Enter your mobile number"
+					required
+				/>
+			</div>
+		{/if}
+
+		<label for="password" class="label">Password</label>
+		<input
+			type="password"
+			id="password"
+			name="password"
+			class="input"
+			placeholder="Enter your password"
+			required
+		/>
+
+		<div class="mt-4 flex justify-between">
+			<a href="/forgot-password" class="link">Forgot Password?</a>
+		</div>
+
+		<button type="submit" class="btn mt-4">Login</button>
+	</form>
 </div>
+

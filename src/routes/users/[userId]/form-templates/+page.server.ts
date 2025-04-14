@@ -16,12 +16,15 @@ import type { z } from "zod";
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	const { userId } = event.params;
 	console.log('Form template load called.............');
-	event.depends('app:template');
-
+	console.log('Event.............',event);
+	// event.depends('app:template');
+	const tenantId = event.locals.sessionUser.tenantId;
+	console.log('tenantId--------------------', tenantId);
 	try {
 		const ownerUserId = userId;
 		const response = await getFormTemplateById({
-			ownerUserId:ownerUserId,
+			// ownerUserId:ownerUserId,
+			tenantId : tenantId,
 			orderBy: "Title",
 			order: "ascending"
 		});
@@ -89,13 +92,13 @@ export const actions = {
 		// }
 		// const request = event.request;
 		const userId = event.params.userId
-
+		const tenantId = event.locals.sessionUser.tenantId;
 		const response = await createFormTemplate(
 			result.id,
 			result.Title,
 			result.Description,
 			result.CurrentVersion,
-			result.TenantCode,
+			tenantId,
 			result.ItemsPerPage,
 			result.Type,
 			userId,

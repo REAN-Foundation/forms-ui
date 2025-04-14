@@ -1,10 +1,12 @@
 import { error } from '@sveltejs/kit';
 import chalk from 'chalk';
+import { API_CLIENT_INTERNAL_KEY } from '$env/static/private';
 
 /////////////////////////////////////////////////////////////////////////
 
 const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'x-api-key': API_CLIENT_INTERNAL_KEY
 };
 
 interface ApiResponse {
