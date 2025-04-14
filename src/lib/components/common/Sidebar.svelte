@@ -36,7 +36,7 @@
 		cards: []
 	};
 
-	const types = ['Basic', 'Common', 'HealthCare', 'Financial'];
+	// const types = ['Basic', 'Common', 'HealthCare', 'Financial'];
 	let selectedTab = $state('Basic');
 	// let typeOfQuestion = 'Basic';
 
@@ -244,16 +244,16 @@
 			</div>
 		</div> -->
 
-		<div class="px- bg-gren-100 h-full rounded-md">
+		<div class=" h-full rounded-md">
 			<!-- Button Grid: 2x2 -->
 			<Card.Header class="bg-yellow-30 py-1">
-				<div class="bg-re0 rounded-t-md border p-2">
+				<div class=" rounded-t-md border p-2">
 					<div class="grid grid-cols-2 gap-2">
 						{#each ['Basic', 'Common', 'HealthCare', 'Financial'] as type}
 							<Button
 								type="button"
 								class="w-full  
-						{selectedTab === type ? 'bg-primary' : 'bg-secondary'}"
+									{selectedTab === type ? 'bg-primary' : 'border-input bg-background hover:bg-accent hover:text-accent-foreground border text-black dark:text-white'}"
 								onclick={() => (selectedTab = type)}
 							>
 								{type === 'HealthCare' ? 'Health Care' : type}
