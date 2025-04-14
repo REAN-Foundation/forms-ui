@@ -41,7 +41,7 @@
 	let sectionToOpen = $state();
 
 	$effect(() => {
-		uiSections = data.templateInfo.FormSections[0].Subsections;
+		uiSections = data.templateInfo.FormSections[0]?.Subsections??[];
 	});
 
 	// console.log('uiSections:');

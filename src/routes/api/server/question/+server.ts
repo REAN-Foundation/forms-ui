@@ -31,6 +31,11 @@ export const POST = async (event: RequestEvent) => {
             PhoneNumber: 'Enter your Phone number',
             Age: 'Enter your Age number',
             Email: 'Enter your Email number',
+            Address: 'Enter your Address',
+            BirthDate: 'Enter your Birth Date',
+            Gender: 'Enter your Gmail',
+            Name: 'Enter your Name',
+            
         };
 
         // Base model (always includes these fields)
