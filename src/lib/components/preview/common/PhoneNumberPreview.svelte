@@ -20,6 +20,6 @@
 	</div>
 
 	<Label for="title" class="text-xs text-gray-500">{question.Description || ''}</Label>
-	<Input placeholder="Enter value here " disabled />
+	<Input placeholder="Enter phone number" disabled />
 	<p class=" text-end text-xs text-gray-400">{question.Hint ? `Hint: ${question.Hint}` : ''}</p>
 </div>
