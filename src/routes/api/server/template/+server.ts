@@ -24,7 +24,7 @@ export const PUT = async (event: RequestEvent) => {
             data.id,
             data.Title,
             data.Description,
-            data.TenantCode,
+            data.TenantId,
             data.CurrentVersion,
             data.Type,
             data.ItemsPerPage,

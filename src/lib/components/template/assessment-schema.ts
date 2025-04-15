@@ -13,7 +13,7 @@ export const assessmentSchema = z.object({
         .nullable()
         .optional(),
 
-    TenantCode: z
+    TenantId: z
         .string()
         .max(1024, { message: "Description cannot exceed 1024 characters." })
         .nullable()

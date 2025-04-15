@@ -31,7 +31,16 @@ import RangeForm from "./basic/Range.svelte";
 import TextArrayForm from "./basic/TextArray.svelte";
 import TextForm from "./basic/Text.svelte";
 
+import PhoneNumberForm from "./common/PhoneNumber.svelte";
+import AgeForm from "./common/Age.svelte";
+import EmailForm from "./common/Email.svelte";
+import AddressForm from "./common/Address.svelte";
+import BirthDateFOrm from "./common/BirthDate.svelte";
+import GenderForm from "./common/Gender.svelte";
+import NameForm from "./common/Name.svelte";
+
 export const formComponents = {
+    //Basic cards
     Text: TextForm,
     Integer: IntegerForm,
     Float: FloatForm,
@@ -46,6 +55,7 @@ export const formComponents = {
     Rating: RatingForm,
     Range: RangeForm,
 
+    //Health Care plugins
     Temperature: TemperatureForm,
     BloodPressure: BloodPressureForm,
     Glucose: GlucoseForm,
@@ -64,4 +74,13 @@ export const formComponents = {
     CReactiveProtein: CReactiveProteinForm,
     Lipoprotein: LipoproteinForm,
     // None: ''
+
+    //Common plugins
+    PhoneNumber:PhoneNumberForm,
+    Age:AgeForm,
+    Email:EmailForm,
+    Address:AddressForm,
+    BirthDate: BirthDateFOrm,
+    Gender:GenderForm,
+    Name:NameForm
 };

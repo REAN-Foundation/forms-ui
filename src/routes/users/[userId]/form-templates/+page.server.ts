@@ -95,7 +95,7 @@ export const actions = {
 			result.Title,
 			result.Description,
 			result.CurrentVersion,
-			result.TenantCode,
+			result.TenantId,
 			result.ItemsPerPage,
 			result.Type,
 			userId,

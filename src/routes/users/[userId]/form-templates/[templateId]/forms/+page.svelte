@@ -4,7 +4,7 @@
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { SectionEditorForm, Sidebar, FormHelper, Template } from '$lib/index';
-	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
+	import { HealthCarePlugins, BasicPlugins, CommonPlugins, FinancialPlugins } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
@@ -22,7 +22,7 @@
 	// console.log('form data:');
 	// $inspect(errors);
 
-	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
+	let typeOfQuestion: 'Basic' | 'HealthCare' | 'Common' | 'Financial' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
 	const userId = $derived(page.params.userId);
 	const parentFormTemplateId = $derived(page.params.templateId);
@@ -41,15 +41,15 @@
 	let sectionToOpen = $state();
 
 	$effect(() => {
-		uiSections = data.templateInfo.FormSections[0].Subsections;
+		uiSections = data.templateInfo.FormSections[0]?.Subsections??[];
 	});
 
 	// console.log('uiSections:');
-	// $inspect(uiSections);
+	$inspect(typeOfQuestion);
 
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
-		if (target.value === 'Basic' || target.value === 'HealthCare') {
+		if (target.value === 'Basic' || target.value === 'HealthCare' || target.value === 'Common' || target.value === 'Financial') {
 			typeOfQuestion = target.value;
 		}
 	}
@@ -315,8 +315,8 @@
 
 <!-- Section -->
 
-<div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="border border-white md:w-[25%]">
+<div class="bg-green-5 my-10 flex min-h-screen flex-row w-full">
+	<div class=" w-[25%]">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
@@ -324,7 +324,7 @@
 			/>
 		</button>
 
-		<Sidebar {typeOfQuestion} {changeTypes} {healthCarePlugins} {basicCards} {isOpen} />
+		<Sidebar {typeOfQuestion} {changeTypes} {BasicPlugins} {HealthCarePlugins} {CommonPlugins} {FinancialPlugins} {isOpen} />
 	</div>
 
 	<div class="my-3 flex overflow-hidden md:w-[75%]">
