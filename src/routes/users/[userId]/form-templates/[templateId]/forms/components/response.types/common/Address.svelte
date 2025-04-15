@@ -15,19 +15,35 @@
 	variant="ghost"
 >
 	<div class="flex w-full items-center justify-between">
-		<h1 class="text-md font-bold text-slate-400">{card.Title || 'Enter Phone number here'}
+		<h1 class="text-md font-bold text-slate-400">
+			{card.Title || 'Enter Phone number here'}
 			{#if card.IsRequired}
-			<span class="text-red-600 ml-1">*</span>
+				<span class="ml-1 text-red-600">*</span>
 			{/if}
 		</h1>
 	</div>
 	<div class="h-fit w-full rounded">
-		<div class="flex items-start justify-start py-2 pl-2 font-serif text-sm text-slate-500">
-			<Icon icon="entypo:address" width="20" height="20" />
-			<p class="ml-1">Address</p>
-			<p>House No / Flat No</p>
-			<p>House No / Flat No</p>
-
+		<div
+			class="flex flex-col items-start justify-start p-2 gap-2 font-serif text-sm text-slate-500"
+		>
+			<div
+				class="w-full rounded-md border border-slate-200 p-2 flex-row flex  text-left text-slate-400 dark:border-slate-800"
+			>
+				<Icon icon="ic:outline-home" width="20" height="20" />
+				<p class="text-sm pl-2">House No / Flat No</p>
+			</div>
+			<div
+				class="w-full rounded-md border border-slate-200 p-2 flex-row flex text-left text-slate-400 dark:border-slate-800"
+			>
+				<Icon icon="arcticons:streetcomplete" width="20" height="20" />
+				<p class="text-sm pl-2">Street</p>
+			</div>
+			<div
+				class="w-full rounded-md border border-slate-200 p-2 flex-row flex text-left text-slate-400 dark:border-slate-800"
+			>
+				<Icon icon="entypo:address" width="20" height="20" />
+				<p class="text-sm pl-2">Town</p>
+			</div>
 		</div>
 	</div>
 
