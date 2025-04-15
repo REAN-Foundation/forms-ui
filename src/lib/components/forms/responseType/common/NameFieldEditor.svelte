@@ -45,7 +45,7 @@
 	}
 </script>
 
-<Card.Root class=" rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
+<Card.Root class=" rounded-none border-none bg-secondary p-4 ">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
