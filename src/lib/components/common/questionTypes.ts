@@ -488,3 +488,22 @@ export interface QuestionUpdateModel {
     RangeMax?: number;
     IsRequired?: boolean;
 }
+
+export type NameFieldConfig = {
+    visible: boolean;
+    mandatory: boolean;
+    label: string;
+};
+
+export interface NameUpdateModel {
+    id?: string;
+    Title?: string;
+    Description?: string;
+    ResponseType?: QueryResponseType;
+    InputType?: string;
+    IsRequired?: boolean;
+
+    FirstName: NameFieldConfig;
+    MiddleName: NameFieldConfig;
+    LastName: NameFieldConfig;
+}

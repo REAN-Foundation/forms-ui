@@ -429,38 +429,6 @@
 		</tbody>
 	</table>
 </div>
-<!-- <div class="my-4 flex items-center justify-between">
-	<div class="text-sm text-gray-500">
-		<select
-			class="appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-8 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
-			onchange={updatePageSize}
-			bind:value={itemsPerPage}
-		>
-			<option value="5">5 records per page</option>
-			<option value="10">10 records per page</option>
-			<option value="15">15 records per page</option>
-			<option value="20">20 records per page</option>
-		</select>
-
-
-		<div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500">
-			<Icon icon="mdi:chevron-down" class="h-4 w-4" />
-		</div>
-		Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
-	</div>
-	<div class="space-x-2">
-		<Button onclick={() => changePage(-1)} disabled={currentPage === 1}>
-			<Icon icon="material-symbols:chevron-left-rounded" width="24" height="24" />
-		</Button>
-		<Button
-			onclick={() => changePage(1)}
-			disabled={currentPage === Math.ceil(filteredTemplates.length / itemsPerPage)}
-		>
-			<Icon icon="material-symbols:chevron-right-rounded" width="24" height="24" />
-		</Button>
-	</div>
-</div> -->
-
 <div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
 	<!-- Items Per Page Dropdown -->
 	<div class="flex flex-col items-start text-sm text-gray-700 dark:text-gray-300">
@@ -503,6 +471,38 @@
 		</Button>
 	</div>
 </div>
+<!-- <div class="my-4 flex items-center justify-between">
+	<div class="text-sm text-gray-500">
+		<select
+			class="appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-8 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
+			onchange={updatePageSize}
+			bind:value={itemsPerPage}
+		>
+			<option value="5">5 records per page</option>
+			<option value="10">10 records per page</option>
+			<option value="15">15 records per page</option>
+			<option value="20">20 records per page</option>
+		</select>
+
+
+		<div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500">
+			<Icon icon="mdi:chevron-down" class="h-4 w-4" />
+		</div>
+		Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
+	</div>
+	<div class="space-x-2">
+		<Button onclick={() => changePage(-1)} disabled={currentPage === 1}>
+			<Icon icon="material-symbols:chevron-left-rounded" width="24" height="24" />
+		</Button>
+		<Button
+			onclick={() => changePage(1)}
+			disabled={currentPage === Math.ceil(filteredTemplates.length / itemsPerPage)}
+		>
+			<Icon icon="material-symbols:chevron-right-rounded" width="24" height="24" />
+		</Button>
+	</div>
+</div> -->
+
 
 <!-- <div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
 
