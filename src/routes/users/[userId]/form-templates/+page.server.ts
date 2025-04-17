@@ -10,6 +10,7 @@ import { assessmentSchema } from '$lib/components/template/assessment-schema';
 import { redirect } from 'sveltekit-flash-message/server';
 import { successMessage } from "$lib/components/toast/message.utils.js";
 import type { z } from "zod";
+import { IndexedDB } from "$lib/utils/indexedDB";
 
 ////////////////////////////////////////////////////////
 
@@ -18,6 +19,10 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	console.log('Form template load called.............');
 	event.depends('app:template');
 
+	
+	const FAVOURITE_TEMPLATES = `Templates`;
+	const db = new IndexedDB<{ id: string; payload: any }>('form-submissions', 'unsaved_answers');
+	
 	try {
 		const ownerUserId = userId;
 		const response = await getFormTemplateById({
@@ -37,6 +42,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 			}
 		// const assessmentTemplate = response?.Data?.Items ?? [];
 		const assessmentTemplate = response.Data ?? [];
+		
 			// console.log(assessmentTemplate)
 		// const assessmentTemplate = response.Data.AssessmentTemplateRecords;
 		return {

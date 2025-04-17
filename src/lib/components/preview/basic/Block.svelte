@@ -11,8 +11,6 @@
 		TemperaturePreview,
 		WeightPreview
 	} from '../healthCare';
-	// import SingleChoice from '$lib/components/submission/SingleChoice.svelte';
-	// import {SingleChoice} from './SingleChoice.svelte';
 
 	let { q } = $props();
 	// console.log(q)
