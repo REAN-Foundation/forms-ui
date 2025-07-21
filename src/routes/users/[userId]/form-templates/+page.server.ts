@@ -2,9 +2,6 @@ import { error, type Actions, type RequestEvent, type ServerLoadEvent } from "@s
 import type { PageServerLoad } from "./$types";
 import { createFormTemplate, getFormTemplateById } from '../../../api/services/form-template';
 import { superValidate } from "sveltekit-superforms";
-
-// import { superValidate } from "sveltekit-superforms";
-import { fail } from "@sveltejs/kit";
 import { zod } from "sveltekit-superforms/adapters";
 import { assessmentSchema } from '$lib/components/template/assessment-schema';
 import { redirect } from 'sveltekit-flash-message/server';

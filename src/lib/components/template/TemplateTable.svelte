@@ -177,22 +177,20 @@
 		}
 	}
 
-
 	const createLink = async (templateId: string) => {
 		try {
 			if (!navigator.onLine) {
-				
 				console.warn('You are offline. Generating offline link...');
 				const generalStorage = new IndexedDbStorageManager('general', 'environment_variables');
 				const code = Math.random().toString(36).substring(2, 8);
 				const encryptedId = btoa(templateId);
 				const offlineLink = `offline-${code}-${encryptedId}`;
 				const baseUrlObj = await generalStorage.get('this_base_url');
-				if(baseUrlObj === null) {
+				if (baseUrlObj === null) {
 					console.error('Base URL not found in IndexedDB');
 					return null;
 				}
-				const baseUrl = baseUrlObj['this_base_url'] || 'http://localhost:5173'; 
+				const baseUrl = baseUrlObj['this_base_url'] || 'http://localhost:5173';
 				console.log(JSON.stringify(baseUrlObj));
 				link = `${baseUrl}/offline-form/submissions/${offlineLink}`;
 				toastMessage({
@@ -450,12 +448,12 @@
 </div>
 <div class="my-6 flex flex-col items-center justify-between gap-6 sm:flex-row">
 	<!-- Items Per Page Dropdown -->
-	<div class="flex flex-col items-start text-sm text-gray-700 dark:text-gray-300">
-		<Label for="itemsPerPage">Items per page</Label>
+	<div class="flex flex-col items-start text-sm text-gray-500 dark:text-gray-400">
+		<Label for="itemsPerPage" class="mb-2">Items per page</Label>
 		<div class="relative">
 			<select
 				id="itemsPerPage"
-				class="appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-[#1e1f20] dark:text-white"
+				class="appearance-none rounded-md border border-gray-300 px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:text-white"
 				onchange={updatePageSize}
 				bind:value={itemsPerPage}
 			>
@@ -472,7 +470,7 @@
 			</div>
 		</div>
 		<!-- Page Info -->
-		<span class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+		<span class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 			Page {currentPage} of {Math.ceil(filteredTemplates.length / itemsPerPage)}
 		</span>
 	</div>

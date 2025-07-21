@@ -25,7 +25,7 @@
 <div class="flex min-h-screen items-center justify-center">
 	<div class="rounded shadow dark:border dark:bg-transparent ">
 		<div>
-			<Card.Root class="w-[350px]  rounded-xl bg-[#fafaf9] dark:bg-[#0a0a0b]">
+			<Card.Root class="w-[350px]  rounded-xl ">
 				<Card.Header>
 					<Card.Title>Sign In</Card.Title>
 				</Card.Header>

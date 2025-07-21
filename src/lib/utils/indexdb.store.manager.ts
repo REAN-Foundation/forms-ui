@@ -18,7 +18,7 @@ export class IndexedDbStorageManager {
         let value_ = structuredClone(value);
 
         if (this.indexedDB) {
-            const indexedDBValue: IndexedDBData = { id: key, ...(value_) };
+            const indexedDBValue: IndexedDBData = { id: key, ...(value_  ) };
             await this.indexedDB.add(indexedDBValue);
         }
     }

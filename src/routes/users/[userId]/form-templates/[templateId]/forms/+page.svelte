@@ -3,7 +3,11 @@
 	import { page } from '$app/state';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { SectionEditorForm, Sidebar, FormHelper } from '$lib/index';
+	import { 
+		SectionEditorForm, 
+		Sidebar, 
+		FormHelper
+	} from '$lib/index';
 	import { healthCarePlugins, basicCards } from '$lib/components/common/questionTypes';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import Sections from './components/Sections.svelte';

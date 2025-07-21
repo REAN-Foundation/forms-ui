@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { LayoutProps } from './$types';
-	import { StorageManager } from '$lib/utils/storage';
 	import { onMount } from 'svelte';
-	import { IndexedDB } from '$lib/utils/indexedDB';
 	import { IndexedDbStorageManager } from '$lib/utils/indexdb.store.manager';
 	import { env } from '$env/dynamic/public';
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +21,7 @@
 	});
 </script>
 
-<div class="bg-yello flex h-screen flex-col">
+<div class="flex h-screen flex-col">
 	<div class="fixed top-0 z-50 w-full bg-emerald-500">
 		<!-- <Navbar /> -->
 	</div>

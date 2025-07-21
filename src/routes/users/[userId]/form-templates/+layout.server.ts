@@ -2,7 +2,7 @@
 import { error, type ServerLoadEvent } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { getFormTemplateById, getFormTemplateDetails } from '../../../api/services/form-template';
-import { browser } from '$app/environment';
+
 
 //////////////////////////////////////////////////////////////////////
 

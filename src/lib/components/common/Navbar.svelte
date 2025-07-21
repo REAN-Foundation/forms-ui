@@ -99,7 +99,7 @@
 </script>
 
 <Menubar.Root
-	class=" fixed z-50 flex   w-full items-center justify-between bg-[#F6F8FA] dark:bg-[#0a0a0b]"
+	class=" fixed z-50 flex   w-full items-center justify-between "
 >
 	<div class="fixed flex space-x-4 lg:space-x-6">
 		<div class="left-0 flex">

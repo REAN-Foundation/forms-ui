@@ -66,7 +66,7 @@
 
 	$effect(() => {
 		if (submissionStatus === 'Submitted') {
-			isSubmitted = true;
+			isSubmitted = true; 
 		}
 		answers = Object.fromEntries(
 			(questionResponseData ?? []).map((item) => {
