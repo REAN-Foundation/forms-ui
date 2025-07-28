@@ -20,15 +20,17 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
         encrypted: submissionKey
     });
 
-    console.log('Submission record is ', submissionRecord);
+    console.log('Submission record is ', JSON.stringify(submissionRecord, null, 2));
     if (!submissionRecord && submissionRecord?.Status === 'failure' && submissionRecord?.HttpCode !== 200 ) {
-        error(400, 'Invalid submission link!');
+        error(400, 'Invalid submission link on status check!');
     }
     
-    if (submissionRecord.Data?.RetrievedCount !== 1) {
-        error(400, 'Invalid submission link!');
-    }
+    // console.log('Retrieved count is ', submissionRecord.Data?.RetrievedCount);
+    // if (submissionRecord.Data?.RetrievedCount !== 1) {
+    //     error(400, 'Invalid submission link on retrieved count check!');
+    // }
 
+    console.log("This is submission record ", submissionRecord);
     const submission = submissionRecord.Data?.Items[0];
     console.log('Submission record details ', submission);
     console.log('Template id ', submission.FormTemplateId);
@@ -53,6 +55,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     console.log('Assessment template details ', assessmentTemplate.FormSections[0].Subsections);
     console.log('Submission status ', submissionStatus);
     let submissionId = submission.id;
+    console.log('Submission id is ', submissionId);
     let questionResponses = null;
     if (submissionStatus === 'InProgress' || submissionStatus === 'Submitted') {
         console.log('Submission is saved');

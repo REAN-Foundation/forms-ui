@@ -1,32 +1,14 @@
+/// <reference types="@sveltejs/kit" />
+
 declare namespace App {
-	interface Locals {
-	  sessionUser: {
-		sessionId      ?: string;
-		tenantId       ?: string;
-		tenantCode     ?: string;
-		tenantName     ?: string;
-		userId         ?: string;
-		email          ?: string;
-		username       ?: string;
-		profileImageUrl?: string;
-		fullName       ?: string;
-		firstName      ?: string;
-		roleId         ?: string;
-		roleName       ?: string;
-	  };
-  
-	  // interface PageData {}
-	  // interface Platform {}
-	}
-  
-	interface Error {
-	  message : string;
-	  code   ?: number;
-	  userId ?: string;
-	  stack  ?: string;
-	}
-  
-	interface PageData {
-	  flash?: { type: 'success' | 'error'; message: string; };
-	}
-  }
+	// interface Error {}
+	// interface Locals {}
+	// interface PageData {}
+	// interface Platform {}
+}
+
+declare module '$env/static/private' {
+	export const BACKEND_API_URL: string;
+	export const INTERNAL_API_KEY: string;
+	export const TOKEN: string;
+}

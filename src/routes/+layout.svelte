@@ -6,6 +6,7 @@
 	import Navbar from '$lib/components/common/Navbar.svelte';
 	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
+	import ErrorBoundary from '$lib/components/common/ErrorBoundary.svelte';
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +25,20 @@
 		});
 		flash.set(undefined);
 	});
+
+	// Handle errors from any child routes
+	let error = $state(null);
+	let status = $state(200);
+
+	$effect(() => {
+		if (page.error) {
+			error = page.error;
+			status = page.status;
+		} else {
+			error = null;
+			status = 200;
+		}
+	});
 </script>
 
 <svelte:head>
@@ -31,16 +46,16 @@
 	<meta name="description" content="Form Service" />
 </svelte:head>
 
-<!-- <Toaster closeButton richColors expand={true} position="top-center" /> -->
 <Toasts />
-
 <ModeWatcher />
 
-<div class="bg-yello flex flex-col">
-	<!-- <div class="fixed top-0 z-50 w-full bg-emerald-500"> -->
+<div class="flex flex-col">
 	<Navbar />
-	<!-- </div> -->
-	<div class="bg-sl h-full">
-		{@render children()}
+	<div class="h-full">
+		{#if error}
+			<ErrorBoundary {error} {status} />
+		{:else}
+			{@render children()}
+		{/if}
 	</div>
 </div>

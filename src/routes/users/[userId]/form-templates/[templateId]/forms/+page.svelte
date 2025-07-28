@@ -24,7 +24,7 @@
 
 	let errors: Record<string, string> = $state({});
 	// console.log('form data:');
-	// $inspect(errors);
+	$inspect(data);
 
 	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);

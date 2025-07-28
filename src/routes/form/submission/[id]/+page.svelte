@@ -68,9 +68,11 @@
 		if (submissionStatus === 'Submitted') {
 			isSubmitted = true; 
 		}
+		console.log('Question response data is ', questionResponseData);
 		answers = Object.fromEntries(
 			(questionResponseData ?? []).map((item) => {
 				const responseTypeKey = responseTypeMap[item.Question.ResponseType] || 'TextValue';
+				console.log('Item is ', item);
 				return [item.Question.id, item[responseTypeKey] ?? null];
 			})
 		);
@@ -173,7 +175,10 @@
 		e.preventDefault();
 
 		const schema = createSchema(sections);
+		console.log('Schema:', schema);
+		// console.log('Answers:', answers);
 		const validationResult = schema.safeParse(answers);
+		console.log('Validation result:', validationResult);
 
 		if (!validationResult.success) {
 			errors = Object.fromEntries(
@@ -313,7 +318,7 @@
 			}
 		});
 
-		console.log('Answers synced with IndexedDB:', answers);
+		// $inspect('Answers synced with IndexedDB:', answers);
 	}
 
 	$effect(() => {

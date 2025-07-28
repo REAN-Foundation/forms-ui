@@ -22,8 +22,8 @@
 		</Label>
 		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
-
-		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
+		<br />
+		<Label for="title" class="ml-2 text-xs text-red-400">{question.Description || ''}</Label><br />
 
 		<div class="pl-2 pt-2">
 			{#each optionsArray as option, index}

@@ -109,7 +109,6 @@ const handleResponse = (response: ApiResponse, url: string, method: string): voi
         console.log(chalk.yellow(`${method} ${url} - ${chalk.bgYellow.black.bold(` ${response.HttpCode} `)}: ${response.Message}`));
         throw error(response.HttpCode, response.Message);
     }
-
     console.log(chalk.hex('#009933')(`${method} ${(url)} - ${chalk.bgGreen.black.bold(' Success ')}: ${response.Message}`));
 };
 

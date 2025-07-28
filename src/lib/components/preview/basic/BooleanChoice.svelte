@@ -22,6 +22,7 @@
 		</Label>
 		<Label for="score" class="float-right">{question.Score ? `Score: ${question.Score}` : ''}</Label
 		>
+		<br />
 		<Label for="title" class="ml-2 text-xs">{question.Description || ''}</Label><br />
 
 		<div class="pl-2 pt-2">

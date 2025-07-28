@@ -22,15 +22,17 @@
 
 <!-- Render the Question with Radio Options -->
 <div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}>
-		{q.Title || 'Select :'}
-		{#if q.IsRequired}
+	<div class="flex flex-row justify-between items-center ">
+		<Label for={q.Title}>
+			{q.Title || 'Select :'}
+			{#if q.IsRequired}
 			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
-
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
-	<Label for="title" class="ml-4 ">{q.Description || ''}</Label>
+			{/if}
+		</Label>
+		
+		<Label for="score" class="">{q.Score || ''}</Label>
+	</div>
+	<Label for="title" class="ml-2 ">{q.Description || ''}</Label>
 
 	{#each optionsArray as o}
 		<div class="bg-[3a994c]">

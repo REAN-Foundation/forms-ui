@@ -69,19 +69,18 @@
 
 {#if q.ResponseType === 'DateTime'}
 	<div class="flex w-full flex-col gap-1.5 p-4">
-		<Label for="title"
-			>{q.Title || 'No title provided'}
-			{#if q.IsRequired}
-				<span class="ml-1 text-red-600">*</span>
-			{/if}
-		</Label>
-
-		{#if q.Score}
-			<Label for="score" class="float-right">{q.Score}</Label>
-		{/if}
+		<div class="flex flex-row justify-between items-center">
+			<Label for="title"
+				>{q.Title || 'No title provided'}
+				{#if q.IsRequired}
+					<span class="ml-1 text-red-600">*</span>
+				{/if}
+			</Label>
+			<Label for="score">{q.Score || ''}</Label>
+		</div>
 
 		{#if q.Description}
-			<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
+			<Label for="title" class="ml-2">{q.Description}</Label>
 		{/if}
 
 		<!-- DateTime Input with formatted value -->
@@ -105,18 +104,17 @@
 	</div>
 {:else if q.ResponseType === 'Date'}
 	<div class="flex w-full flex-col gap-1.5 p-4">
-		<Label for="title">{q.Title || 'No title provided'}
-			{#if q.IsRequired}
-				<span class="ml-1 text-red-600">*</span>
-			{/if}
-		</Label>
-
-		{#if q.Score}
-			<Label for="score" class="float-right">{q.Score}</Label>
-		{/if}
+		<div class="flex flex-row justify-between items-center">
+			<Label for="title">{q.Title || 'No title provided'}
+				{#if q.IsRequired}
+					<span class="ml-1 text-red-600">*</span>
+				{/if}
+			</Label>
+			<Label for="score">{q.Score || ''}</Label>
+		</div>
 
 		{#if q.Description}
-			<Label for="title" class="ml-4 text-slate-700">{q.Description}</Label>
+			<Label for="title" class="ml-2">{q.Description}</Label>
 		{/if}
 
 		<!-- Date Input with formatted value -->
@@ -125,6 +123,7 @@
 			class="w-full"
 			name={q.id}
 			bind:value={answers[q.id]} 
+			disabled={isSubmitted}
 		/>
 
 		{#if errors[q.id]}

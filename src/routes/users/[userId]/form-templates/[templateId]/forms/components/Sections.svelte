@@ -26,6 +26,8 @@
 		closeSheet
 	} = $props();
 
+	$inspect(uiSections,"Here is the uiSections");
+
 	let cardToDelete = $state('');
 
 	//1 For handleing drag enter
@@ -159,7 +161,7 @@
 						class=" h-full flex-col p-2 hover:bg-[#f9fafb]  hover:dark:bg-[#262626] md:w-full"
 						onclick={() => openSectionForm(section)}
 					>
-						<!-- onclick={() => sectionEditRoute(section.id)} -->
+						
 						<div class="flex-col">
 							{#if section.Title}
 								<p>{section.Title}</p>
@@ -200,11 +202,11 @@
 			</div>
 			<Collapsible.Content class="space-y-2">
 				<div class="h-fit w-full p-1" role="list" aria-label={`Cards in section: ${section.Title}`}>
-					{#if section.Questions.length === 0}
+					{#if section.FormFields.length === 0}
 						<p class="text-center text-sm text-slate-500">Drop response type cards here</p>
 					{/if}
 
-					{#each section.Questions as card, index (card.id)}
+					{#each section.FormFields as card, index (card.id)}
 						<div
 							class="hover-container mx-6 items-center justify-between"
 							draggable="true"
@@ -214,7 +216,7 @@
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
-							<!-- Subsection -->
+						
 							<div class="relative my-4 flex rounded-md border dark:bg-black">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />

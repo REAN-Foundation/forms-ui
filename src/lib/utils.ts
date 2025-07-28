@@ -12,16 +12,16 @@ interface Question {
 
 interface Section {
 	id: string;
-	Questions?: Question[];
+	FormFields?: Question[];
 	Subsections?: Section[];
 }
 
- export function cleanAssessmentTemplate(template: Section[]): Section[] {
+export function cleanAssessmentTemplate(template: Section[]): Section[] {
 	function cleanSection(section: Section): Section | null {
-		const filteredQuestions = section.Questions?.filter(q => q.Title && q.Title.trim() !== "") || [];
+		const filteredQuestions = section.FormFields?.filter(q => q.Title && q.Title.trim() !== "") || [];
 		const filteredSubsections = section.Subsections
 			?.map(cleanSection)
-			.filter((sub): sub is Section => sub !== null); 
+			.filter((sub): sub is Section => sub !== null);
 
 		if (filteredQuestions.length === 0 && filteredSubsections.length === 0) {
 			return null;
@@ -29,12 +29,12 @@ interface Section {
 
 		return {
 			...section,
-			Questions: filteredQuestions.length > 0 ? filteredQuestions : undefined,
+			FormFields: filteredQuestions.length > 0 ? filteredQuestions : undefined,
 			Subsections: filteredSubsections.length > 0 ? filteredSubsections : undefined
 		};
 	}
 
 	return template
 		.map(cleanSection)
-		.filter((section): section is Section => section !== null); 
+		.filter((section): section is Section => section !== null);
 };

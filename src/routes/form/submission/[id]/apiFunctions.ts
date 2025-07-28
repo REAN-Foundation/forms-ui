@@ -124,7 +124,7 @@ export type QuestionResponseCreateModel = {
 export function createSchema(sections) {
     let schemaObj = {};
     sections.forEach((section) => {
-        section.Questions?.forEach((q) => {
+        section.FormFields.forEach((q) => {
             if (q.IsRequired) {
                 switch (q.ResponseType) {
                     case 'Text':
@@ -236,7 +236,7 @@ export async function questionResponseModels(
 
     function extractQuestions(sectionList) {
         return sectionList.flatMap((section) => {
-            const questions = section.Questions || [];
+            const questions = section.FormFields || [];
 
             // Recursively process nested subsections if they exist
             const nestedQuestions = section.Subsections ? extractQuestions(section.Subsections) : [];
@@ -252,6 +252,7 @@ export async function questionResponseModels(
         const value = answers[key];
         const { ResponseType } = question;
 
+        console.log('questionResponseData:----------- ', questionResponseData);
         const existingResponse = Array.isArray(questionResponseData) && questionResponseData.length > 0
             ? questionResponseData.find((item) => item.Question.id === key)
             : null;
@@ -262,7 +263,7 @@ export async function questionResponseModels(
             id: questionResponseId,
             FormSubmissionId,
             ResponseType,
-            QuestionId: key,
+            FormFieldId: key,
             IntegerValue: ["Integer", "Rating", "Range"].includes(ResponseType)
                 ? (value !== undefined ? Number(value) : null)
                 : null,

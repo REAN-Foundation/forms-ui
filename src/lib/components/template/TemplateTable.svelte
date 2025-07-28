@@ -300,7 +300,7 @@
 				<tr><td colspan="8" class="p-4 text-center">No records found</td></tr>
 			{:else}
 				{#each paginatedTemplates as row, index}
-					<tr class="border-b border-l border-r p-4 hover:bg-slate-50 dark:hover:bg-[#262728]">
+					<tr class="border-b border-l border-r p-4 hover:bg-tertiary">
 						<td class="text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
 						<td class="px-3 py-1 text-sm capitalize">
 							<a
@@ -391,7 +391,7 @@
 																: 'ion:copy-outline'}
 															width="24"
 															height="24"
-															class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-white p-1"
+															class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-1"
 															onclick={copyToClipboard}
 														/>
 													</div>
@@ -453,7 +453,7 @@
 		<div class="relative">
 			<select
 				id="itemsPerPage"
-				class="appearance-none rounded-md border border-gray-300 px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:text-white"
+				class="appearance-none rounded-md border border-gray-300 px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:text-white bg-secondary"
 				onchange={updatePageSize}
 				bind:value={itemsPerPage}
 			>

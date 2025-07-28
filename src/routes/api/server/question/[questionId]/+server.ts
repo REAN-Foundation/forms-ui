@@ -1,5 +1,5 @@
 import { type RequestEvent } from '@sveltejs/kit';
-import { deleteQuestion, getQuestionById } from '../../../services/question';
+import { deleteQuestion, getQuestionById } from '../../../services/form-field';
 
 /////////////////////////////////////////////////////////////////////
 export const GET = async (event: RequestEvent) => {

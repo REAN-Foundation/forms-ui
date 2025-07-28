@@ -1,8 +1,21 @@
 import { BACKEND_API_URL } from "$env/static/private";
-import type { QuestionResponseCreateModel } from "../../form/submission/[id]/apiFunctions";
 import { get_, post_ } from "./common";
 
-export const  createQuestionResponse = async (
+export type QuestionResponseCreateModel = {
+    FormSubmissionId: string;
+    ResponseType: string;
+    QuestionId: string;
+    IntegerValue: number | null;
+    FloatValue: number | null;
+    BooleanValue: string | null;
+    DateTimeValue: string | null;
+    Url: string | null;
+    TextValue: string | null;
+    FileResourceId: any | null;
+    QuestionResponseId: string | null;
+};
+
+export const createQuestionResponse = async (
 	formSubmissionKey: string,
 	questionResponses: QuestionResponseCreateModel[]
 ) => {
@@ -11,7 +24,7 @@ export const  createQuestionResponse = async (
 		QuestionResponses: questionResponses
 	};
 
-    console.log('ResponseBode========',body )
+    console.log('ResponseBody========', body)
 
 	const url = BACKEND_API_URL + `/question-responses/save`;
 	return await post_(url, body);

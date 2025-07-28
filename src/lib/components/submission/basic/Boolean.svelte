@@ -29,15 +29,16 @@
 
 <!-- Render the Question with Radio Button Options -->
 <div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}
-		>{q.Title || 'Select:'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
-
-	<Label for="score" class="float-right">{q.Score || ''}</Label>
-	<Label for="description" class="text-xs text-gray-500">{q.Description || ''}</Label>
+	<div class="flex flex-row justify-between items-center">
+		<Label for={q.Title}
+			>{q.Title || 'Select:'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
+		<Label for="score">{q.Score || ''}</Label>
+	</div>
+	<Label for="description" class="ml-2">{q.Description || ''}</Label>
 
 	{#if optionsArray.length > 0}
 		{#each optionsArray as o}

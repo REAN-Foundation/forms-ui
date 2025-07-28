@@ -8,14 +8,14 @@ export const createQuestion = async (
 	model: any
 ) => {
 	console.log(model)
-	const url = BACKEND_API_URL + `/questions`;
+	const url = BACKEND_API_URL + `/form-fields`;
 	return await post_(url, model);
 };
 
 export const getQuestionById = async (
 	questionId: string
 ) => {
-	const url = BACKEND_API_URL + `/questions/${questionId}`;
+	const url = BACKEND_API_URL + `/form-fields/${questionId}`;
 	return await get_(url);
 };
 
@@ -38,19 +38,15 @@ export const getQuestionsByTemplateId = async (
 		}
 	}
 	console.log(`this is template id and this is node ${searchString}`)
-	const url = BACKEND_API_URL + `/questions/search${searchString}`;
+	const url = BACKEND_API_URL + `/form-fields/search${searchString}`;
 	const res = await get_(url);
-	// console.log(res," this is result of node by templatet")
 	return res
 };
 
 export const updateQuestion = async (
 	qestionId: string,
-	// parentTemplateId: string,
-	// parentSectionId: string,
 	title: string,
 	description?: string,
-	// displayCode?: string,
 	responseType?: string,
 	score?: number,
 	correctAnswer?: string,
@@ -64,7 +60,6 @@ export const updateQuestion = async (
 	const body = {
 		Title: title,
 		...(description && { Description: description }),
-		// ...(responseType && { ResponseType: responseType }),
 		ResponseType: responseType,
 		...(score && { Score: score }),
 		...(correctAnswer && { CorrectAnswer: correctAnswer }),
@@ -76,7 +71,7 @@ export const updateQuestion = async (
 		...(isRequired && { IsRequired: isRequired }),
 	};
 
-	const url = BACKEND_API_URL + `/questions/${qestionId}`;
+	const url = BACKEND_API_URL + `/form-fields/${qestionId}`;
 	return await put_(url, body);
 };
 
@@ -85,7 +80,7 @@ export const deleteQuestion = async (
 ) => {
 	console.log(chalk.red("questionId to delete.........................?", questionId))
 
-	const url = BACKEND_API_URL + `/questions/${questionId}`;
+	const url = BACKEND_API_URL + `/form-fields/${questionId}`;
 	return await delete_(url);
 };
 

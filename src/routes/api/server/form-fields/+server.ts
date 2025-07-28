@@ -3,17 +3,13 @@ import { createQuestion, deleteQuestion, updateQuestion } from '../../services/f
 import { questionSchema } from '$lib/components/forms/question-schema';
 
 //////////////////////////////////////////////////////////////
-// interface CustomError extends Error {
-//     statusCode?: number;
-//     details?: string;
-// }
 
 export const POST = async (event: RequestEvent) => {
     try {
         const request = event.request;
         const data = await request.json();
 
-        console.log('Data from api/server/question POST:', data);
+        console.log('Data from api/server/form-fields POST:', data);
 
         const model = {
             ParentTemplateId: data.parentFormTemplateId,
@@ -41,12 +37,12 @@ export const POST = async (event: RequestEvent) => {
         console.log('Response from createQuestion:', response);
         return new Response(JSON.stringify(response));
     } catch (err) {
-        const error = err as Error; // Ensures type safety for error
-        console.error(`Error creating question: ${error.message}`);
+        const error = err as Error;
+        console.error(`Error creating form field: ${error.message}`);
         return new Response(JSON.stringify({
             Status: 'failure',
             HttpCode: 500,
-            Message: error.message || 'An error occurred while creating the question.',
+            Message: error.message || 'An error occurred while creating the form field.',
         }));
     }
 };
@@ -56,54 +52,34 @@ export const DELETE = async (event: RequestEvent) => {
         const request = event.request;
         const data = await request.json();
 
-        console.log('Question ID from api/server/question DELETE:', data.questionId);
+        console.log('Form field ID from api/server/form-fields DELETE:', data.questionId);
 
         const response = await deleteQuestion(data.questionId);
 
         return json({
             status: 'success',
-            message: response.message || 'Question deleted successfully!',
+            message: response.message || 'Form field deleted successfully!',
         });
     } catch (err) {
-        const error = err as Error; // Ensures type safety for error
-        console.error(`Error deleting question: ${error.message}`);
+        const error = err as Error;
+        console.error(`Error deleting form field: ${error.message}`);
 
         return json(
             {
                 status: 'error',
-                message: error.message || 'An error occurred while deleting the question.',
+                message: error.message || 'An error occurred while deleting the form field.',
             },
             { status: 500 }
         );
     }
 };
 
-// export const questionSchema = z.object({
-//     id: z.string().uuid(),
-//     parentSectionId: z.string(),
-//     title: z.string().min(80).max(256),
-//     description: z.string().optional(),
-//     responseType: z.string(),
-//     score: zfd.numeric(z.number().default(0)).optional(),
-//     correctAnswer: z.string().optional(),
-//     hint: z.string().optional(),
-//     questionImageUrl: z.string().optional(),
-//     rangeMin: zfd.numeric(z.number()).optional(),
-//     rangeMax: zfd.numeric(z.number()).optional(),
-//     // options:z.array(z.object({
-//     // 	Sequence: z.string(),
-//     // 	Data: z.string(),
-//     // 	ImageUrl: z.string().optional(),
-//     // }))
-//     options: z.array(z.string().optional()).optional()
-// });
-
 export const PUT = async (event: RequestEvent) => {
     try {
         const request = event.request;
         const data = await request.json();
 
-        console.log('data from api/server/question:', data);
+        console.log('data from api/server/form-fields:', data);
 
         const result = await questionSchema.safeParseAsync(data);
         if (!result.success) {
@@ -127,16 +103,14 @@ export const PUT = async (event: RequestEvent) => {
             data.RangeMin,
             data.RangeMax,
             data.IsRequired
-
         );
         return new Response(JSON.stringify(response))
     } catch (error) {
-        console.error(`Error updating the section: ${error.message}`);
+        console.error(`Error updating the form field: ${error.message}`);
         return new Response(JSON.stringify({
             Status: 'failure',
             HttpCode: 500,
-            Message: error.message || 'An error occurred while updating the question.',
+            Message: error.message || 'An error occurred while updating the form field.',
         }));
     }
-};
-
+}; 

@@ -16,6 +16,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
         }
 
         const assessmentTemplate = response.Data;
+        console.log("Response data",response)
         return {
             assessmentTemplateId,
             assessmentTemplate,

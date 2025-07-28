@@ -1,23 +1,33 @@
+import { error } from '@sveltejs/kit';
+
 export class ResponseHandler {
-    static success(response: any): Response {
-        return new Response(JSON.stringify(response), {
-            status: response.HttpCode || 200, 
-            headers: { 'Content-Type': 'application/json' },
-        });
+    static success(data: any) {
+        return new Response(JSON.stringify(data));
     }
 
-    static handleError(error: any): Response {
-        console.error('Error:', error);
+    static handleError(err: any) {
+        console.error('API Error:', err);
+
+        const errorMessage = err.message || 'An unexpected error occurred';
+        const statusCode = err.status || err.statusCode || 500;
+        const errorDetails = {
+            message: errorMessage,
+            status: statusCode,
+            timestamp: new Date().toISOString(),
+            path: err.path || 'unknown',
+            stack: import.meta.env.DEV ? err.stack : undefined
+        };
 
         return new Response(
             JSON.stringify({
-                Status: 'failure',
-                HttpCode: 500,
-                Message: error instanceof Error ? error.message : 'An error occurred while processing the request.',
+                error: errorDetails,
+                success: false
             }),
             {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
+                status: statusCode,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
         );
     }

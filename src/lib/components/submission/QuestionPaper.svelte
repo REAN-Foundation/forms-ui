@@ -68,7 +68,7 @@
 			{s.Description}
 		</p>
 
-		{#each s?.Questions ?? [] as sq, index}
+		{#each s?.FormFields ?? [] as sq, index}
 			<div class="mt-2 border p-3">
 				<svelte:component this={componentsMap[sq.ResponseType]} q={sq} bind:answers bind:errors {isSubmitted}/>
 			</div>

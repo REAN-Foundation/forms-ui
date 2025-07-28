@@ -14,18 +14,17 @@
 
 <!-- {#if q.Title} -->
 <div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for={q.Title}>{q.Title || 'No title provided'}
-		{#if q.IsRequired}
+	<div class="flex flex-row justify-between items-center">
+		<Label for={q.Title}>{q.Title || 'No title provided'}
+			{#if q.IsRequired}
 				<span class="text-red-600 ml-1">*</span>
 			{/if}
-	</Label>
-
-	{#if q.score}
-		<Label for="score" class="float-right">{q.Score}</Label>
-	{/if}
+		</Label>
+		<Label for="score">{q.Score || ''}</Label>
+	</div>
 
 	{#if q.Description}
-		<Label for="title" class="ml-4 ">{q.Description}</Label><br />
+		<Label for="title" class="ml-2">{q.Description}</Label>
 	{/if}
 	<Input
 		type="number"
@@ -34,8 +33,8 @@
 		bind:value={answers[q.id]}
 		name={q.id}
 		disabled={isSubmitted}
-		/>
-		<!-- oninput={(e) => handleInput(e, q.id)} -->
+	/>
+	<!-- oninput={(e) => handleInput(e, q.id)} -->
 	{#if errors[q.id]}
 		<p class="text-red-600 text-xs mt-1">{errors[q.id]}</p>
 	{/if}

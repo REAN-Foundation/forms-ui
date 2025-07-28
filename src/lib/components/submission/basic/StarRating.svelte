@@ -22,19 +22,18 @@
 
 <!-- {#if q.Title} -->
 <div class="flex w-full flex-col gap-1.5 p-4">
-	<Label for="title" class=""
-		>{q.Title || 'No title provided'}
-		{#if q.IsRequired}
-			<span class="ml-1 text-red-600">*</span>
-		{/if}
-	</Label>
-
-	{#if q.Score}
-		<Label for="score" class="float-right">{q.Score}</Label>
-	{/if}
+	<div class="flex flex-row justify-between items-center">
+		<Label for="title"
+			>{q.Title || 'No title provided'}
+			{#if q.IsRequired}
+				<span class="ml-1 text-red-600">*</span>
+			{/if}
+		</Label>
+		<Label for="score">{q.Score || ''}</Label>
+	</div>
 
 	{#if q.Description}
-		<Label for="title" class="text-xs text-gray-500">{q.Description}</Label>
+		<Label for="title" class="ml-2">{q.Description}</Label>
 	{/if}
 <!-- 
 	<Input
