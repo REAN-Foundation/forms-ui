@@ -61,7 +61,7 @@
 	}
 </script>
 
-<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
+<Card.Root class="rounded-none border-none p-4">
 	<form
 		class="flex flex-col h-[calc(100vh-2rem)]"
 		onsubmit={(event) => {
@@ -149,7 +149,7 @@
 		</div>
 
 		<!-- Fixed Bottom Button -->
-		<div class="sticky bottom-0 z-10 bg-[#fafaf9] py-4 dark:bg-[#0a0a0b] border-t border-gray-200 mt-4">
+		<div class="sticky bottom-0 z-10 py-4 border-t border-gray-200 mt-4">
 			<Button class="w-full" type="submit">
 				<Icon icon="lucide:check" class="mr-2 h-4 w-4" />
 				Update Question Card

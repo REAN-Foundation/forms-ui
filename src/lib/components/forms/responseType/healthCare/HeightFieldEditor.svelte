@@ -6,10 +6,14 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
 	import { questionSchema } from '../../question-schema';
+	import ValidationLogicIntegration from '$lib/components/validation/ValidationLogicIntegration.svelte';
+	import SkipLogicIntegration from '$lib/components/skip-logic/SkipLogicIntegration.svelte';
+	import CalculationLogicIntegration from '$lib/components/calculation-logic/CalculationLogicIntegration.svelte';
+	import Icon from '@iconify/svelte';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
+	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate, questionList } = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -45,7 +49,7 @@
 	}
 </script>
 
-<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
+<Card.Root class="rounded-none border-none p-4">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
@@ -89,9 +93,21 @@
 		</div>
 		<Input bind:value={questionCard.ResponseType} class="hidden" />
 
-		<Dialog.Footer class="mt-4">
-			<Button type="submit">Save changes</Button>
-		</Dialog.Footer>
+		<!-- VALIDATION LOGIC INTEGRATION -->
+		<ValidationLogicIntegration {questionCard} {questionList} />
+
+		<!-- SKIP LOGIC INTEGRATION -->
+		<SkipLogicIntegration {questionCard} {questionList} />
+
+		<!-- CALCULATION LOGIC INTEGRATION -->
+		<CalculationLogicIntegration {questionCard} {questionList} />
+
+		<div class="sticky bottom-0 z-10 mt-4 border-t border-gray-200 py-4">
+			<Button class="w-full" type="submit">
+				<Icon icon="lucide:check" class="mr-2 h-4 w-4" />
+				Save changes
+			</Button>
+		</div>
 	</form>
 </Card.Root>
 

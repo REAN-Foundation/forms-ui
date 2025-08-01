@@ -5,11 +5,19 @@
 	import { Label } from '$lib/components/ui/label';
 	import type { QuestionUpdateModel } from '../../../common/questionTypes';
 	import { questionSchema } from '../../question-schema';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import Icon from '@iconify/svelte';
+	import ValidationLogicIntegration from '$lib/components/validation/ValidationLogicIntegration.svelte';
+	import CalculationLogicIntegration from '$lib/components/calculation-logic/CalculationLogicIntegration.svelte';
+	import SkipLogicIntegration from '$lib/components/skip-logic/SkipLogicIntegration.svelte';
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate } = $props();
+	let {
+		questionCard = $bindable(),
+		errors = $bindable(),
+		handleQuestionCardUpdate,
+		questionList
+	} = $props();
 
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -48,7 +56,7 @@
 <!-- use:enhance
 method="POST" -->
 
-<Card.Root class="rounded-none border-none bg-[#fafaf9] p-4 dark:bg-[#0a0a0b]">
+<Card.Root class="rounded-none border-none p-4">
 	<form
 		class="custom-scrollbar h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden px-2"
 		onsubmit={(event) => {
@@ -117,9 +125,22 @@ method="POST" -->
 		<Input bind:value={questionCard.QuestionImageUrl} />
 		<p class="text-destructive">{errors?.QuestionImageUrl}</p> -->
 
-		<Dialog.Footer class="mt-4">
-			<Button type="submit">Save changes</Button>
-		</Dialog.Footer>
+		<!-- VALIDATION LOGIC INTEGRATION -->
+		<ValidationLogicIntegration bind:questionCard {questionList} />
+
+		<!-- SKIP LOGIC INTEGRATION -->
+		<SkipLogicIntegration bind:questionCard {questionList} />
+
+		<!-- CALCULATION LOGIC INTEGRATION -->
+		<CalculationLogicIntegration bind:questionCard {questionList} />
+
+		<!-- Fixed Bottom Button -->
+		<div class="sticky bottom-0 z-10 mt-4 border-t border-gray-200 py-4">
+			<Button class="w-full" type="submit">
+				<Icon icon="lucide:check" class="mr-2 h-4 w-4" />
+				Save changes
+			</Button>
+		</div>
 	</form>
 </Card.Root>
 

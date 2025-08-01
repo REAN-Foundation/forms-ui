@@ -13,26 +13,13 @@
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	let { questionCard = $bindable(), errors = $bindable(), handleQuestionCardUpdate, questionList } = $props();
+	let {
+		questionCard = $bindable(),
+		errors = $bindable(),
+		handleQuestionCardUpdate,
+		questionList
+	} = $props();
 
-		function handleValidationSaved(validationData) {
-		console.log('Validation logic saved for field:', questionCard.id, validationData);
-		// Here you would typically send this to your backend API
-		// Following the structure you provided in the requirements
-	}
-
-	function handleSkipLogicSaved(skipLogicData) {
-		console.log('Skip logic saved for field:', questionCard.id, skipLogicData);
-		// Here you would typically send this to your backend API
-		// Following the structure you provided in the requirements
-	}
-
-	function handleCalculationLogicSaved(calculationData) {
-		console.log('Calculation logic saved for field:', questionCard.id, calculationData);
-		// Here you would typically send this to your backend API
-		// Following the structure you provided in the requirements
-	}
-	
 	async function handleSubmit(event) {
 		event.preventDefault();
 		console.log(questionCard.Title);
@@ -69,7 +56,7 @@
 
 <Card.Root class="rounded-none border-none  p-4 ">
 	<form
-		class="flex flex-col h-[calc(100vh-2rem)]"
+		class="flex h-[calc(100vh-2rem)] flex-col"
 		onsubmit={(event) => {
 			event.preventDefault();
 			handleSubmit(event);
@@ -132,41 +119,21 @@
 			<p class="text-destructive">{errors?.QuestionImageUrl}</p> -->
 
 			<!-- VALIDATION LOGIC INTEGRATION -->
-			<ValidationLogicIntegration 
-				fieldId={questionCard.id}
-				fieldName={questionCard.Title || 'Text Field'}
-				onValidationSaved={handleValidationSaved}
-				{questionCard}
-				{questionList}
-			/>
+			<ValidationLogicIntegration bind:questionCard {questionList} />
 
 			<!-- SKIP LOGIC INTEGRATION -->
-			<SkipLogicIntegration 
-				fieldId={questionCard.id}
-				fieldName={questionCard.Title || 'Text Field'}
-				onSkipLogicSaved={handleSkipLogicSaved}
-				{questionCard}
-				{questionList}
-			/>
+			<SkipLogicIntegration bind:questionCard {questionList} />
 
 			<!-- CALCULATION LOGIC INTEGRATION -->
-			<CalculationLogicIntegration 
-				fieldId={questionCard.id}
-				fieldName={questionCard.Title || 'Text Field'}
-				onCalculationLogicSaved={handleCalculationLogicSaved}
-				{questionCard}
-				{questionList}
-			/>
+			<CalculationLogicIntegration bind:questionCard {questionList} />
 		</div>
 
 		<!-- Fixed Bottom Button -->
-		<div class="sticky bottom-0 z-10  py-4  border-t border-gray-200 mt-4">
+		<div class="sticky bottom-0 z-10 mt-4 border-t border-gray-200 py-4">
 			<Button class="w-full" type="submit">
 				<Icon icon="lucide:check" class="mr-2 h-4 w-4" />
-				Update Question Card
+				Save changes
 			</Button>
 		</div>
 	</form>
 </Card.Root>
-
-

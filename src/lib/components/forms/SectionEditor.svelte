@@ -43,7 +43,7 @@
 	}
 </script>
 
-<Card.Root class=" rounded-md bg-[#fafaf9] dark:bg-[#0a0a0b]  ">
+<Card.Root class=" rounded-md ">
 	<div class=" bg-secondary text-black items-center p-4 rounded-tr-md rounded-tl-md">
 		<div class="flex items-center justify-between">
 			<h2 class="text-xl font-semibold">Edit Section</h2>

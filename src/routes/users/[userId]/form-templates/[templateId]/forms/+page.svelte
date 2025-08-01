@@ -23,8 +23,6 @@
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
 	let errors: Record<string, string> = $state({});
-	// console.log('form data:');
-	$inspect(data);
 
 	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');
 	let uiSections = $state(data.templateInfo.FormSections[0].Subsections);
@@ -48,9 +46,6 @@
 		uiSections = data.templateInfo.FormSections[0].Subsections;
 	});
 
-	// console.log('uiSections:');
-	// $inspect(uiSections);
-
 	function changeTypes(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.value === 'Basic' || target.value === 'HealthCare') {
@@ -67,10 +62,10 @@
 		event.preventDefault();
 		event.stopPropagation();
 
-		console.log('dropData: ', dropData);
-		console.log('sectionId: ', sectionId);
-		console.log('subsectionId: ', subsectionId);
-		console.log('parentFormTemplateId: ', parentFormTemplateId);
+		// console.log('dropData: ', dropData);
+		// console.log('sectionId: ', sectionId);
+		// console.log('subsectionId: ', subsectionId);
+		// console.log('parentFormTemplateId: ', parentFormTemplateId);
 		if (sectionId === null && subsectionId === null) {
 			// To create section in root section
 			// Required data: parentFormTemplateId, parentSectionId that is rootSectionId
@@ -195,8 +190,6 @@
 	// }
 
 	async function handleDeleteCard(id: string, type: 'Section' | 'Card') {
-		console.log('Inside parent handle delete card');
-		console.log(id, type);
 		switch (type) {
 			case 'Section':
 				try {
@@ -205,7 +198,7 @@
 					});
 
 					const res = await response.json();
-					console.log('res: ', res);
+					// console.log('res: ', res);
 					toastMessage(res);
 					invalidate('app:allNodes');
 				} catch (error) {
@@ -221,7 +214,7 @@
 						method: 'DELETE'
 					});
 					const res = await response.json();
-					console.log('res: ', res);
+					// console.log('res: ', res);
 					toastMessage(res);
 					invalidate('app:allNodes');
 				} catch (error) {
@@ -259,7 +252,7 @@
 			headers: { 'content-type': 'application/json' }
 		});
 		const question = await response.json();
-		console.log(question);
+		// console.log(question);
 		if (question.HttpCode === 200) {
 			closeModel('Card', question);
 			errors = {};
@@ -282,7 +275,7 @@
 			headers: { 'content-type': 'application/json' }
 		});
 		const section = await response.json();
-		console.log(section);
+		// console.log(section);
 		if (section.HttpCode === 200) {
 			closeModel('Section', section);
 			errors = {};
@@ -316,7 +309,7 @@
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors questionList={uiSections}/>
+	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors bind:questionList={uiSections}/>
 {/if}
 
 <!-- Section -->

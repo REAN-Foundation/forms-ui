@@ -5,12 +5,15 @@
     import Icon from '@iconify/svelte';
 
     // Props
-    let { fieldId, fieldName, onValidationSaved, questionCard, questionList } = $props();
+    let { questionCard = $bindable(), questionList } = $props();
 
+    console.log('questionCard from ValidationLogicIntegration.svelte', questionCard);
     // State
     let showBuilder = $state(false);
     let validationRules = $state([]);
     let editingRule = $state(null);
+    let deleteButtonClicked = $state(false);
+    let ruleToDelete = $state(null);
 
     // Initialize validation rules from backend data
     $effect(() => {
@@ -39,7 +42,10 @@
                     messageSeverity: rule.Operation?.MessageSeverity || 'error',
                     successMessage: rule.Operation?.SuccessMessage || '',
                     fallbackAction: rule.Operation?.FallbackAction || 'Allow submission with warning',
-                    createdAt: rule.CreatedAt
+                    createdAt: rule.CreatedAt,
+                    // Add the fields needed for the table
+                    isActive: rule.IsActive !== false, // Default to true if not specified
+                    description: rule.Description || rule.ErrorMessage || 'No description available'
                 };
             });
         }
@@ -59,46 +65,92 @@
         editingRule = null;
     }
 
-    async function handleSave(validationData) {
-        if (editingRule) {
-            // Update existing rule
-            const index = validationRules.findIndex(rule => rule.id === editingRule.id);
-            if (index !== -1) {
-                validationRules[index] = {
-                    ...validationRules[index],
-                    ...validationData,
-                    id: editingRule.id,
-                    createdAt: editingRule.createdAt
-                };
-            }
-        } else {
-            // Add the new rule to our list
-            const response = await fetch(`/api/server/logic/validation-logic`, {
-					method: 'POST',
-					body: JSON.stringify({
-						FieldId: fieldId,
-						Enabled: true
-					}),
-					headers: { 'content-type': 'application/json' }
-				});
-				const validationLogicData = await response.json();
-				toastMessage(validationLogicData);
-				console.log('ValidationLogicData: ', validationLogicData);
-        }
-
-        // Call the parent callback if provided
-        if (onValidationSaved) {
-            onValidationSaved(validationData);
-        }
-
-        // Close the builder
+    async function handleSave() {
         closeBuilder(null);
     }
 
-    function removeRule(index, event) {
-        event?.preventDefault();
-        event?.stopPropagation();
-        validationRules.splice(index, 1);
+    // For opening the delete modal
+    function openDeleteModal(rule) {
+        deleteButtonClicked = true;
+        ruleToDelete = rule;
+    }
+
+    // For closing the delete modal
+    function closeDeleteModal() {
+        deleteButtonClicked = false;
+        ruleToDelete = null;
+    }
+
+    // For confirming the deletion
+    async function confirmDeleteRule() {
+        if (!ruleToDelete) return;
+        
+        console.log('Removing rule with ID:', ruleToDelete.id);
+        
+        try {
+            const response = await fetch(`/api/server/rules/validation-rule/${ruleToDelete.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (result.HttpCode === 200) {
+                console.log('Rule deleted successfully');
+                toastMessage({ Message: 'Validation rule deleted successfully', HttpCode: 200 });
+                
+                // Remove the rule from the local state
+                validationRules = validationRules.filter(rule => rule.id !== ruleToDelete.id);
+                
+                // Refresh the data
+                if (questionCard?.ValidateLogic?.Rules) {
+                    validationRules = questionCard.ValidateLogic.Rules.filter(rule => rule.id !== ruleToDelete.id).map(rule => {
+                        const isLogical = rule.OperationType?.toLowerCase() === 'logical';
+                        
+                        return {
+                            id: rule.id,
+                            ruleName: rule.Name,
+                            activeTab: rule.OperationType?.toLowerCase() || 'logical',
+                            errorMessage: rule.ErrorMessage,
+                            conditions: isLogical ? [{
+                                field: rule.Operation?.FieldReference || '',
+                                operator: rule.Operation?.Operator || '',
+                                value: rule.Operation?.Value || '',
+                                connector: null
+                            }] : (rule.Operation?.Operands || []),
+                            operator: rule.Operation?.Operator || '',
+                            fieldReference: rule.Operation?.FieldReference || '',
+                            value: rule.Operation?.Value || '',
+                            regexPattern: rule.Operation?.RegexPattern || '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+                            selectedField: rule.Operation?.FieldReference || 'Email',
+                            compositeConditions: rule.Operation?.CompositeConditions || [],
+                            messageSeverity: rule.Operation?.MessageSeverity || 'error',
+                            successMessage: rule.Operation?.SuccessMessage || '',
+                            fallbackAction: rule.Operation?.FallbackAction || 'Allow submission with warning',
+                            createdAt: rule.CreatedAt,
+                            isActive: rule.IsActive !== false,
+                            description: rule.Description || rule.ErrorMessage || 'No description available'
+                        };
+                    });
+                }
+            } else {
+                console.error('Failed to delete rule:', result);
+                toastMessage({ Message: result.Message || 'Failed to delete validation rule', HttpCode: result.HttpCode || 500 });
+            }
+        } catch (error) {
+            console.error('Error deleting rule:', error);
+            toastMessage({ Message: 'An error occurred while deleting the validation rule', HttpCode: 500 });
+        }
+        
+        closeDeleteModal();
+    }
+
+    // Helper function to truncate text
+    function truncateText(text, maxLength = 15) {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     }
 </script>
 
@@ -123,57 +175,69 @@
     </div>
     
     {#if validationRules.length > 0}
-        <div class="space-y-2 max-h-48 overflow-y-auto">
-            {#each validationRules as rule, index}
-                <div class="rounded border border-gray-200 bg-white p-2 text-xs">
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="flex-1 min-w-0">
-                            <div class="font-medium text-gray-800 truncate">{rule.ruleName}</div>
-                            <div class="text-gray-600">
-                                Type: <span class="font-medium capitalize">{rule.activeTab}</span>
-                            </div>
-                            {#if rule.activeTab === 'regex'}
-                                <div class="text-gray-500 font-mono bg-gray-100 p-1 rounded text-xs truncate">
-                                    {rule.regexPattern}
+        <!-- Validation Rules Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b border-gray-200">
+                        <th class="text-left p-2 font-medium text-gray-700">Rule Name</th>
+                        <th class="text-left p-2 font-medium text-gray-700">Type of Rule</th>
+                        <th class="text-left p-2 font-medium text-gray-700">Is Active</th>
+                        <th class="text-left p-2 font-medium text-gray-700">Description</th>
+                        <th class="text-left p-2 font-medium text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each validationRules as rule, index}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="p-2 font-medium text-gray-800">
+                                {rule.ruleName || 'Unnamed Rule'}
+                            </td>
+                            <td class="p-2 text-gray-600 capitalize">
+                                {rule.activeTab || 'logical'}
+                            </td>
+                            <td class="p-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                    class:bg-green-100={rule.isActive}
+                                    class:text-green-800={rule.isActive}
+                                    class:bg-red-100={!rule.isActive}
+                                    class:text-red-800={!rule.isActive}>
+                                    <Icon 
+                                        icon={rule.isActive ? "lucide:check-circle" : "lucide:x-circle"} 
+                                        class="h-3 w-3 mr-1" 
+                                    />
+                                    {rule.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                            </td>
+                            <td class="p-2 text-gray-600" title={rule.description}>
+                                {truncateText(rule.description, 15)}
+                            </td>
+                            <td class="p-2">
+                                <div class="flex gap-1">
+                                    <Button 
+                                        type="button"
+                                        variant="outline" 
+                                        size="sm"
+                                        onclick={(e) => openBuilder(e, rule)}
+                                        class="h-6 px-1 text-xs"
+                                    >
+                                        <Icon icon="lucide:edit" class="h-2.5 w-2.5" />
+                                    </Button>
+                                    <Button 
+                                        type="button"
+                                        variant="outline" 
+                                        size="sm"
+                                        onclick={(e) => openDeleteModal(rule)}
+                                        class="h-6 px-1 text-xs text-red-600 hover:text-red-700"
+                                    >
+                                        <Icon icon="lucide:trash-2" class="h-2.5 w-2.5" />
+                                    </Button>
                                 </div>
-                            {:else if rule.activeTab === 'logical'}
-                                <div class="text-gray-500">
-                                    {rule.operator} {rule.fieldReference} {rule.value}
-                                </div>
-                            {:else if rule.activeTab === 'composite'}
-                                <div class="text-gray-500">
-                                    {rule.conditions.length} composite condition(s)
-                                </div>
-                            {/if}
-                            {#if rule.errorMessage}
-                                <div class="text-red-600 truncate">
-                                    {rule.errorMessage}
-                                </div>
-                            {/if}
-                        </div>
-                        <div class="flex gap-1 flex-shrink-0">
-                            <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onclick={(e) => openBuilder(e, rule)}
-                                class="h-6 px-1 text-xs"
-                            >
-                                <Icon icon="lucide:edit" class="h-2.5 w-2.5" />
-                            </Button>
-                            <Button 
-                                type="button"
-                                variant="outline" 
-                                size="sm"
-                                onclick={(e) => removeRule(index, e)}
-                                class="h-6 px-1 text-xs text-red-600 hover:text-red-700"
-                            >
-                                <Icon icon="lucide:trash-2" class="h-2.5 w-2.5" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            {/each}
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
         </div>
     {/if}
 </div>
@@ -187,3 +251,30 @@
     currentField={questionCard}
     {questionList}
 />
+
+<!-- Delete Confirmation Modal -->
+{#if deleteButtonClicked}
+    <div class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"></div>
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="relative z-50 w-full max-w-lg border bg-background p-6 shadow-lg sm:rounded-lg md:w-full">
+            <div class="flex flex-col space-y-2 text-center sm:text-left">
+                <h1 class="text-lg font-semibold">Are you absolutely sure?</h1>
+                <p class="text-sm text-muted-foreground">
+                    This action cannot be undone. This will permanently delete your validation rule and
+                    remove your data from our servers.
+                </p>
+            </div>
+
+            <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                <Button variant="outline" onclick={closeDeleteModal}>Cancel</Button>
+                <Button
+                    class="bg-destructive hover:bg-destructive dark:text-white"
+                    onclick={confirmDeleteRule}
+                >
+                    Delete
+                </Button>
+            </div>
+        </div>
+    </div>
+{/if}

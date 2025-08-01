@@ -7,6 +7,8 @@
 	import { Textarea } from '../ui/textarea/index.js';
 	import { logicalOperationSchema, LogicalOperatorType } from './logical-operation-schema';
 	import { validationRuleSchema, OperationType } from './validation-rule-schema';
+	import { invalidateAll } from '$app/navigation';
+	import { toastMessage } from '../toast/toast.store.js';
 
 	// Props
 	let {
@@ -102,58 +104,6 @@
 	];
 	const connectors = ['AND', 'OR'];
 
-	// Initialize form data when editing an existing rule
-	// $effect(() => {
-	//     if (editingRule) {
-	//         // Editing existing rule - populate with existing data
-	//         ruleName = editingRule.ruleName || '';
-	//         activeTab = editingRule.activeTab || 'regex';
-	//         errorMessage = editingRule.errorMessage || '';
-	//         conditions = editingRule.conditions || [];
-	//         compositeConditions = editingRule.compositeConditions || [];
-	//         operator = editingRule.operator || '';
-	//         fieldReference = editingRule.fieldReference || '';
-	//         value = editingRule.value || '';
-	//         regexPattern = editingRule.regexPattern || '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
-	//         selectedField = editingRule.selectedField || 'Email';
-	//         messageSeverity = editingRule.messageSeverity || 'error';
-	//         successMessage = editingRule.successMessage || '';
-	//         fallbackAction = editingRule.fallbackAction || 'Allow submission with warning';
-	//     } else {
-	//         // Adding new rule - reset to default values
-	//         ruleName = currentField?.ValidateLogic?.Title ? `${currentField.Title} Validation` : 'Field Validation';
-	//         activeTab = 'regex';
-	//         selectedField = currentField?.Title || 'Current Field';
-	//         activeRegexPreset = 'email';
-	//         regexPattern = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
-	//         testInput = 'user@example.com';
-	//         testResult = '✓ Pattern matches the test input';
-	//         testResultClass = 'success';
-	//         messageSeverity = 'error';
-	//         errorMessage = currentField?.Title ? `Please enter a valid ${currentField.Title.toLowerCase()}` : 'Please enter a valid value';
-	//         successMessage = 'All validation checks passed successfully!';
-	//         fallbackAction = 'Allow submission with warning';
-
-	//         // Reset logical validation conditions
-	//         conditions = [
-	//             { field: 'Age', operator: 'Is Empty', value: '', connector: 'OR' },
-	//             { field: 'Email', operator: 'Does Not Contain', value: '@', connector: 'AND' }
-	//         ];
-
-	//         // Reset composite validation conditions
-	//         compositeConditions = [
-	//             { field: 'Email', operator: 'Matches Regex', value: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', connector: 'AND' },
-	//             { field: 'Age', operator: 'Greater Than', value: '18', connector: 'AND' },
-	//             { field: 'Phone', operator: 'Matches Regex', value: '^\\+?1?[-\\.\\s]?\\(?[0-9]{3}\\)?[-\\.\\s]?[0-9]{3}[-\\.\\s]?[0-9]{4}$', connector: null }
-	//         ];
-
-	//         // Reset logical validation fields
-	//         operator = '';
-	//         fieldReference = '';
-	//         value = '';
-	//     }
-	// });
-
 	// Regex patterns
 	const regexPatterns = {
 		email: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
@@ -220,9 +170,9 @@
 		event?.preventDefault();
 		event?.stopPropagation();
 
-		console.log('=== Starting validation save process ===');
-		console.log('Current conditions:', conditions);
-		console.log('Active tab:', activeTab);
+		// console.log('=== Starting validation save process ===');
+		// console.log('Current conditions:', conditions);
+		// console.log('Active tab:', activeTab);
 
 		// Clear previous errors
 		errors = {};
@@ -256,12 +206,12 @@
 		const operations = [];
 		let hasValidationErrors = false;
 
-		console.log('Checking if we should process logical validation...');
-		console.log('Active tab is logical:', activeTab === 'logical');
-		console.log('Conditions length:', conditions.length);
+		// console.log('Checking if we should process logical validation...');
+		// console.log('Active tab is logical:', activeTab === 'logical');
+		// console.log('Conditions length:', conditions.length);
 
 		if (activeTab === 'logical' && conditions.length > 0) {
-			console.log('Processing logical validation conditions...');
+			// console.log('Processing logical validation conditions...');
 
 			// Check if we have valid conditions (not just "Select Field")
 			const validConditions = conditions.filter(
@@ -269,21 +219,21 @@
 					condition.field && condition.field !== 'Select Field' && condition.field !== ''
 			);
 
-			console.log('Valid conditions found:', validConditions.length);
+			// console.log('Valid conditions found:', validConditions.length);
 
 			if (validConditions.length === 0) {
-				console.log('No valid conditions found. Please select fields for validation.');
+				// console.log('No valid conditions found. Please select fields for validation.');
 				errors.general = 'Please select fields for validation conditions.';
 				return;
 			}
 
 			for (let i = 0; i < conditions.length; i++) {
 				const condition = conditions[i];
-				console.log(`Processing condition ${i + 1}:`, condition);
+				// console.log(`Processing condition ${i + 1}:`, condition);
 
 				// Skip conditions with "Select Field"
 				if (!condition.field || condition.field === 'Select Field' || condition.field === '') {
-					console.log(`Skipping condition ${i + 1} - no field selected`);
+					// console.log(`Skipping condition ${i + 1} - no field selected`);
 					continue;
 				}
 
@@ -300,7 +250,7 @@
 				}
 
 				if (fieldData) {
-					console.log(`Found field data for condition ${i + 1}:`, fieldData);
+					// console.log(`Found field data for condition ${i + 1}:`, fieldData);
 					// Map operator to backend format
 					const operatorMapping = {
 						'Is Empty': LogicalOperatorType.Exists,
@@ -316,8 +266,8 @@
 					};
 
 					const operation = {
-						Name: `${fieldData.Title} validation operation`,
-						Description: `Check whether ${fieldData.Title.toLowerCase()} is correct`,
+						Name: `${fieldData.Title || 'Field'} validation operation`,
+						Description: `Check whether ${(fieldData.Title || 'field').toLowerCase()} is correct`,
 						Type: operationType, // Use the selected operation type
 						Operator: operatorMapping[condition.operator],
 						Operands: JSON.stringify([
@@ -339,10 +289,10 @@
 					// Validate each operation before adding to array
 					const result = await logicalOperationSchema.safeParseAsync(operation);
 					if (!result.success) {
-						console.log(
-							`Validation error for operation ${i + 1}:`,
-							result.error.flatten().fieldErrors
-						);
+						// console.log(
+						// 	`Validation error for operation ${i + 1}:`,
+						// 	result.error.flatten().fieldErrors
+						// );
 						hasValidationErrors = true;
 						// Store errors with operation index for display
 						errors[`operation_${i}`] = Object.fromEntries(
@@ -356,7 +306,7 @@
 					}
 				} else {
 					// Field not found error
-					console.log(`Field not found for condition ${i + 1}. Field ID: ${condition.field}`);
+					// console.log(`Field not found for condition ${i + 1}. Field ID: ${condition.field}`);
 					hasValidationErrors = true;
 					errors[`operation_${i}`] = {
 						field: 'Selected field not found in question list'
@@ -365,37 +315,46 @@
 			}
 		}
 
-		console.log('Validation errors found:', hasValidationErrors);
-		console.log('Operations to create:', operations.length);
+		// console.log('Validation errors found:', hasValidationErrors);
+		// console.log('Operations to create:', operations.length);
 
 		// Only proceed with API calls if all validations pass
 		if (!hasValidationErrors && operations.length > 0) {
 			try {
-				// Step 1: Create logic
-				const logicData = {
-					Enabled: true,
-					FieldId: currentField?.id
-				};
+				// Step 1: Check if validation logic already exists or create new one
+				let logicId;
+				
+				if (currentField?.ValidateLogic?.id) {
+					// Use existing validation logic ID
+					logicId = currentField.ValidateLogic.id;
+					// console.log('Using existing validation logic ID:', logicId);
+				} else {
+					// Create new validation logic
+					const logicData = {
+						Enabled: true,
+						FieldId: currentField?.id
+					};
 
-				const logicResponse = await fetch('/api/server/logic/validation-logic', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(logicData)
-				});
+					const logicResponse = await fetch('/api/server/logic/validation-logic', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(logicData)
+					});
 
-				if (!logicResponse.ok) {
-					const errorData = await logicResponse.json().catch(() => ({}));
-					throw new Error(
-						`Failed to create logic: ${logicResponse.statusText} - ${errorData.message || ''}`
-					);
+					if (!logicResponse.ok) {
+						const errorData = await logicResponse.json().catch(() => ({}));
+						throw new Error(
+							`Failed to create logic: ${logicResponse.statusText} - ${errorData.message || ''}`
+						);
+					}
+
+					const logicDataResponse = await logicResponse.json();
+					logicId = logicDataResponse.Data.id;
+
+					// console.log('New logic created successfully:', logicId);
 				}
-
-				const logicDataResponse = await logicResponse.json();
-				const logicId = logicDataResponse.Data.id;
-
-				console.log('Logic created successfully:', logicId);
 
 				// Step 2: Create operations and rules for each operation
 				const createdRules = [];
@@ -417,7 +376,7 @@
 					}
 
 					const operationData = await response.json();
-					console.log(`Operation ${i + 1} created successfully:`, operationData);
+					// console.log(`Operation ${i + 1} created successfully:`, operationData);
 
 					// Create validation rule for this operation
 					const ruleData = {
@@ -448,15 +407,15 @@
 					}
 
 					const ruleDataResponse = await ruleResponse.json();
-					console.log(`Validation rule ${i + 1} created successfully:`, ruleDataResponse);
+					// console.log(`Validation rule ${i + 1} created successfully:`, ruleDataResponse);
 					createdRules.push(ruleDataResponse);
 				}
 
-				console.log('All operations and rules created successfully:', createdRules);
+				// console.log('All operations and rules created successfully:', createdRules);
 
-				// Step 3: Update form field with validation logic ID
-				if (currentField?.id) {
-					console.log('Updating form field with validation logic ID:', logicId);
+				// Step 3: Update form field with validation logic ID (only if we created a new logic)
+				if (currentField?.id && !currentField?.ValidateLogic?.id) {
+					// console.log('Updating form field with new validation logic ID:', logicId);
 					
 					// Create the complete model for the field update (following the same pattern as handleQuestionCardUpdate)
 					const fieldUpdateModel = {
@@ -473,7 +432,7 @@
 					});
 
 					const fieldUpdateDataResponse = await fieldUpdateResponse.json();
-					console.log('Form field update response:', fieldUpdateDataResponse);
+					// console.log('Form field update response:', fieldUpdateDataResponse);
 
 					if (fieldUpdateDataResponse.HttpCode === 200) {
 						console.log('Form field updated successfully with validation logic ID');
@@ -481,6 +440,8 @@
 						console.warn(`Warning: Failed to update form field: ${fieldUpdateDataResponse.Message || 'Unknown error'}`);
 						// Don't throw error here as the validation logic was created successfully
 					}
+				} else if (currentField?.ValidateLogic?.id) {
+					console.log('Using existing validation logic, no need to update form field');
 				} else {
 					console.warn('No current field ID available for updating validation logic');
 				}
@@ -507,12 +468,19 @@
 					logicId: logicId // Include the logic ID in the response
 				};
 
+				// Show success toast message
+				toastMessage({ 
+					Message: `Validation logic created successfully! ${createdRules.length} rule${createdRules.length !== 1 ? 's' : ''} created.`, 
+					HttpCode: 200 
+				});
+
 				onSave?.(validationData);
 			} catch (error) {
 				console.error('Error in sequential API calls:', error);
 				errors.general = error.message;
 			}
 		}
+		invalidateAll();
 	}
 
 	function handleCancel(event) {

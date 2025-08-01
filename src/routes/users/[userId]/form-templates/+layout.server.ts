@@ -23,7 +23,7 @@ export const load: LayoutServerLoad = async (event: ServerLoadEvent) => {
         const templateDetails = [];
 
         const assessmentTemplate = response.Data ?? [];
-        console.log("assessmentTemplate", assessmentTemplate);
+        // console.log("assessmentTemplate", assessmentTemplate);
         for (const item of assessmentTemplate.Items) {
             const templateId = item.id;
             const details = await getFormTemplateDetails(templateId);

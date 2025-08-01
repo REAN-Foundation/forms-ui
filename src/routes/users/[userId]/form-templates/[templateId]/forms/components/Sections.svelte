@@ -26,7 +26,7 @@
 		closeSheet
 	} = $props();
 
-	$inspect(uiSections, 'Here is the uiSections');
+	// $inspect(uiSections, 'Here is the uiSections');
 
 	let cardToDelete = $state('');
 

@@ -5,7 +5,7 @@
     import Icon from '@iconify/svelte';
 
     // Props
-    let { fieldId, fieldName, onSkipLogicSaved, questionCard, questionList } = $props();
+    let { questionCard = $bindable(), questionList } = $props();
 
     // State
     let showBuilder = $state(false);
@@ -59,7 +59,7 @@
             const response = await fetch(`/api/server/logic/skip-logic`, {
 					method: 'POST',
 					body: JSON.stringify({
-						FieldId: fieldId,
+						FieldId: questionCard.id,
 						Enabled: true
 					}),
 					headers: { 'content-type': 'application/json' }
@@ -67,11 +67,6 @@
 				const skipLogicData = await response.json();
 				toastMessage(skipLogicData);
 				console.log('SkipLogicData: ', skipLogicData);
-        }
-
-        // Call the parent callback if provided
-        if (onSkipLogicSaved) {
-            onSkipLogicSaved(skipLogicData);
         }
 
         // Close the builder
