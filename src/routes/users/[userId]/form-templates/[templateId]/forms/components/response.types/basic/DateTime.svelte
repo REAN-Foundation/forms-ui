@@ -8,7 +8,7 @@
 </script>
 
 <Button
-	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500 hover:bg-[#f9fafb] hover:dark:bg-[#262626]"
+	class="flex h-fit w-full flex-col space-y-2 p-4 hover:border hover:border-dashed hover:border-gray-500 "
 	onclick={() => {
 		openSheet(card);
 	}}

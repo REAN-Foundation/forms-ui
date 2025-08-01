@@ -55,7 +55,10 @@ export const updateQuestion = async (
 	options?: string[],
 	rangeMin?: number,
 	rangeMax?: number,
-	isRequired?: boolean
+	isRequired?: boolean,
+	validateLogicId?: string,
+	skipLogicId?: string,
+	calculateLogicId?: string
 ) => {
 	const body = {
 		Title: title,
@@ -69,7 +72,12 @@ export const updateQuestion = async (
 		...(rangeMax && { RangeMax: rangeMax }),
 		...(options && options.length > 0 && { Options: options }),
 		...(isRequired && { IsRequired: isRequired }),
+		...(validateLogicId && { ValidateLogicId: validateLogicId }),
+		...(skipLogicId && { SkipLogicId: skipLogicId }),
+		...(calculateLogicId && { CalculateLogicId: calculateLogicId })
 	};
+
+	console.log(body)
 
 	const url = BACKEND_API_URL + `/form-fields/${qestionId}`;
 	return await put_(url, body);

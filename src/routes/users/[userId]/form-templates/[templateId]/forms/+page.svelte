@@ -96,7 +96,7 @@
 					parentSectionId: sectionId,
 					responseType: dropData.value
 				};
-				const response = await fetch(`/api/server/question`, {
+				const response = await fetch(`/api/server/form-fields`, {
 					method: 'POST',
 					body: JSON.stringify(model),
 					headers: { 'content-type': 'application/json' }
@@ -128,7 +128,7 @@
 					parentSectionId: subsectionId,
 					responseType: dropData.value
 				};
-				const response = await fetch(`/api/server/question`, {
+				const response = await fetch(`/api/server/form-fields`, {
 					method: 'POST',
 					body: JSON.stringify(model),
 					headers: { 'content-type': 'application/json' }
@@ -217,7 +217,7 @@
 
 			case 'Card':
 				try {
-					const response = await fetch(`/api/server/question/${id}`, {
+					const response = await fetch(`/api/server/form-fields/${id}`, {
 						method: 'DELETE'
 					});
 					const res = await response.json();
@@ -253,7 +253,7 @@
 	}
 
 	async function handleQuestionCardUpdate(model) {
-		const response = await fetch(`/api/server/question`, {
+		const response = await fetch(`/api/server/form-fields`, {
 			method: 'PUT',
 			body: JSON.stringify(model),
 			headers: { 'content-type': 'application/json' }
@@ -316,17 +316,17 @@
 	</div>
 {/if}
 {#if showSheet}
-	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors />
+	<FormHelper {closeSheet} {handleQuestionCardUpdate} bind:questionCard={cardToOpen} bind:errors questionList={uiSections}/>
 {/if}
 
 <!-- Section -->
 
 <div class="bg-green-5 my-10 flex min-h-screen flex-row">
-	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white dark:bg-[#0a0a0b]">
+	<div class="md:w-[25%] bg-gray-100 md:bg-white border border-white">
 		<button onclick={toggleOpen} class=" m-2 md:hidden">
 			<Icon
 				icon={isOpen ? 'ant-design:close-outlined' : 'material-symbols:menu-rounded'}
-				class=" text-2xl dark:text-white"
+				class=" text-2xl"
 			/>
 		</button>
 

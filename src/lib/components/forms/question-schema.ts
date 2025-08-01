@@ -5,7 +5,8 @@ export const questionSchema = z.object({
 	Title: z
 		.string()
 		.min(8, { message: "Title must be at least 8 characters long." })
-		.max(100, { message: "Title cannot exceed 100 characters." }),
+		.max(100, { message: "Title cannot exceed 100 characters." })
+		.optional(),
 
 	Description: z
 		.string()
@@ -67,7 +68,10 @@ export const questionSchema = z.object({
 		.max(10, { message: "A maximum of 10 options are allowed." })
 		.optional(),
 
-	isRequired: z.boolean().default(false)
+	isRequired: z.boolean().default(false),
+	ValidateLogicId: z.string().optional(),
+	SkipLogicId: z.string().optional(),
+	CalculateLogicId: z.string().optional()
 });
 
 export type QuestionSchema = typeof questionSchema;

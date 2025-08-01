@@ -31,10 +31,10 @@
 </script>
 
 <!-- sidebar add section -->
-<div class="relative h-screen overflow-hidden {isOpen ? 'block' : 'hidden'} md:block">
+<div class="relative h-[calc(screen-2rem)] min-h-screen w-full overflow-y-hidden {isOpen ? 'block' : 'hidden'} md:block">
 	<!-- <div class="sticky h-screen space-y-4 bg-[#F6F8FA] px-4 py-6 dark:bg-[#0A0A0B] md:fixed"> -->
 	<Card.Root
-		class="!rounded-none !border-none bg-[#F6F8FA] px-4 py-5 !shadow-none dark:bg-[#0A0A0B] md:w-full "
+		class="!rounded-none !border-none px-4 py-5 !shadow-none md:w-full"
 	>
 		<Card.Title class="text-md mb-3">Drag Section From Here</Card.Title>
 		<div
@@ -44,7 +44,7 @@
 			aria-label="Draggable new section template"
 		>
 			<Button
-				class=" space-x-2 rounded-md border bg-[#FDFDFD] dark:border-gray-400 dark:bg-[#0A0A0B] md:w-full"
+				class=" space-x-2 rounded-md border dark:border-gray-400 md:w-full"
 				variant="secondary"
 			>
 				<Icon
@@ -59,12 +59,12 @@
 	</Card.Root>
 	<!-- Sidebar question -->
 	<Card.Root
-		class=" h-full space-y-3 !rounded-none !border-none bg-[#F6F8FA]  !shadow-none dark:bg-[#0A0A0B] md:w-full md:px-2 2xl:w-full"
+		class="!rounded-none !border-none !shadow-none md:w-full md:px-2 2xl:w-full"
 	>
 		<Card.Title class="text-md px-3">Question</Card.Title>
-		<div class=" h-full rounded-md px-3 dark:border-gray-400">
+		<div class="rounded-md px-3 dark:border-gray-400">
 			<div
-                class=" flex flex-wrap justify-around dark:bg-[#0A0A0B] bg-[#FDFDFD] py-2 px-4 rounded-tl-md rounded-tr-md border border-b-0"
+                class="flex flex-wrap justify-around py-2 px-4 rounded-tl-md rounded-tr-md border border-b-0"
             >
                 <label class="  flex cursor-pointer items-center">
                     <input
@@ -110,7 +110,7 @@
                 </label>
             </div>
 			<div
-				class="scrollbar-hide overflow-y-auto rounded-bl-md rounded-br-md border bg-[#FDFDFD] py-4 dark:border-gray-400 dark:bg-[#0A0A0B] md:h-[50%] lg:h-[60%]"
+				class="custom-scrollbar overflow-y-auto rounded-bl-md rounded-br-md border py-4"
 			>
 				<ul class="space-y-2 px-2">
 					{#if typeOfQuestion === 'HealthCare' && selectedTab === 'HealthCare'}
@@ -206,5 +206,21 @@
 	.scrollbar-hide {
 		-ms-overflow-style: none; /* IE and Edge */
 		scrollbar-width: none; /* Firefox */
+	}
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 2px;
+		height: 10px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: #d70c0c;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: #888;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: #555;
 	}
 </style>

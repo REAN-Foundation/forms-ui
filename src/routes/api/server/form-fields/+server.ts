@@ -82,6 +82,7 @@ export const PUT = async (event: RequestEvent) => {
         console.log('data from api/server/form-fields:', data);
 
         const result = await questionSchema.safeParseAsync(data);
+        console.log('result from api/server/form-fields PUT:', JSON.stringify(result, null, 2));
         if (!result.success) {
             return new Response(JSON.stringify({
                 Status: 'failure',
@@ -102,7 +103,10 @@ export const PUT = async (event: RequestEvent) => {
             data.Options,
             data.RangeMin,
             data.RangeMax,
-            data.IsRequired
+            data.IsRequired,
+            data.ValidateLogicId,
+            data.SkipLogicId,
+            data.CalculateLogicId
         );
         return new Response(JSON.stringify(response))
     } catch (error) {

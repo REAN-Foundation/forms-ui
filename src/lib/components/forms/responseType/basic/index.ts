@@ -1,4 +1,4 @@
-export { default as TextForm } from './TextFieldEditor.svelte';
+export { default as TextForm } from './TextFieldEditorWithAllLogic.svelte';
 export { default as FloatForm } from './FloatFieldEditor.svelte';
 export { default as IntegerForm } from './IntegerFieldEditor.svelte';
 export { default as BooleanForm } from './BooleanFieldEditor.svelte';

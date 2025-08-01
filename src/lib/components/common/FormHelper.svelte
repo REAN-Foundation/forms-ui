@@ -31,10 +31,11 @@
 		questionCard = $bindable(),
 		errors = $bindable(),
 		closeSheet,
-		handleQuestionCardUpdate
+		handleQuestionCardUpdate,
+		questionList
 	} = $props();
 
-	console.log('question card', questionCard);
+	// console.log('question card', questionCard);
 </script>
 
 <div class="relative">
@@ -46,13 +47,13 @@
 	></button>
 
 	<div
-		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[65%] overflow-y-auto rounded-sm bg-[#fafaf9] shadow-lg md:w-[46%]"
+		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[65%] overflow-y-auto rounded-sm  shadow-lg md:w-[46%]"
 		in:fly={{ x: 500, duration: 500 }}
 		out:fly={{ x: 500, duration: 500 }}
 		role="dialog"
 		aria-modal="true"
 	>
-		<div class="sticky top-0 z-20 flex items-center justify-between bg-[#fafaf9] dark:bg-[#0a0a0b]">
+		<div class="sticky top-0 z-20 flex items-center justify-between ">
 			<div class="bg-secondary w-full flex justify-between p-3">
 				<div class=" flex flex-col">
 					<h2 class="text-lg font-semibold text-black ">Edit Question</h2>
@@ -71,11 +72,11 @@
     <div class="h-screen overflow-y-hidden">
 
 		{#if questionCard.ResponseType === 'Text'}
-			<TextForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<TextForm bind:questionCard bind:errors {handleQuestionCardUpdate} {questionList}/>
 		{:else if questionCard.ResponseType === 'Float'}
 			<FloatForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Integer'}
-			<IntegerForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
+			<IntegerForm bind:questionCard bind:errors {handleQuestionCardUpdate} {questionList}/>
 		{:else if questionCard.ResponseType === 'Boolean'}
 			<BooleanForm bind:questionCard bind:errors {handleQuestionCardUpdate} />
 		{:else if questionCard.ResponseType === 'Object'}

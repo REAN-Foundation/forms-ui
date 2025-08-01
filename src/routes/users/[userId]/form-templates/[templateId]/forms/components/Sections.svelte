@@ -9,7 +9,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
 	import { writable } from 'svelte/store';
-        import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
+	import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -26,7 +26,7 @@
 		closeSheet
 	} = $props();
 
-	$inspect(uiSections,"Here is the uiSections");
+	$inspect(uiSections, 'Here is the uiSections');
 
 	let cardToDelete = $state('');
 
@@ -93,7 +93,7 @@
 		cardToDelete = null;
 	}
 
-	const isOpen = writable<Record<number, boolean>>({}); 
+	const isOpen = writable<Record<number, boolean>>({});
 
 	function toggleSection(sectionId: number) {
 		isOpen.update((map) => ({
@@ -101,13 +101,11 @@
 			[sectionId]: !map[sectionId]
 		}));
 	}
-
-
 </script>
 
 {#each uiSections as section, index (section.id)}
 	<div
-		class="my-4 rounded-md border border-gray-300 bg-[#F6F8FA] px-4 py-4 shadow-lg dark:border-gray-800 dark:bg-[#0a0a0b] {highlightedSection ===
+		class="my-4 rounded-md border border-gray-300 px-4 py-4 shadow-lg dark:border-gray-800 {highlightedSection ===
 		section.id
 			? ' border-1 border-blue-600'
 			: ''}"
@@ -158,10 +156,9 @@
 				<div class="flex h-full flex-row md:w-full">
 					<Button
 						variant="outline"
-						class=" h-full flex-col p-2 hover:bg-[#f9fafb]  hover:dark:bg-[#262626] md:w-full"
+						class=" h-full flex-col p-2  md:w-full"
 						onclick={() => openSectionForm(section)}
 					>
-						
 						<div class="flex-col">
 							{#if section.Title}
 								<p>{section.Title}</p>
@@ -216,8 +213,7 @@
 							role="listitem"
 							aria-label={`Card: ${card.Title}`}
 						>
-						
-							<div class="relative my-4 flex rounded-md border dark:bg-black">
+							<div class="relative my-4 flex rounded-md border">
 								{#if card.ResponseType !== 'None'}
 									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
 								{/if}
