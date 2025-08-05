@@ -227,13 +227,15 @@
                         </div>
                         <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-md bg-white">
                             {#each fields as field}
-                                <div 
-                                    class="p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 flex justify-between items-center"
+                                <button 
+                                    type="button"
+                                    class="w-full p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 flex justify-between items-center text-left"
                                     onclick={() => insertField(field.name)}
+                                    onkeydown={(e) => e.key === 'Enter' && insertField(field.name)}
                                 >
                                     <span class="font-medium">{field.name}</span>
                                     <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">{field.type}</span>
-                                </div>
+                                </button>
                             {/each}
                         </div>
                     </div>

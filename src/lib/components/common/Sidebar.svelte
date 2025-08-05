@@ -199,14 +199,7 @@
 		transform: scale(1.1);
 		transition: transform 0.2s ease-in-out;
 	}
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
-	}
-	/* Hide scrollbar for IE, Edge and Firefox */
-	.scrollbar-hide {
-		-ms-overflow-style: none; /* IE and Edge */
-		scrollbar-width: none; /* Firefox */
-	}
+
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 2px;
 		height: 10px;

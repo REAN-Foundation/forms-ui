@@ -15,6 +15,10 @@ const config = {
 		alias: {
 			"@/*": "./path/to/lib/*",
 		},
+		// Ignore Chrome DevTools requests
+		paths: {
+			base: ''
+		}
 	}
 };
 

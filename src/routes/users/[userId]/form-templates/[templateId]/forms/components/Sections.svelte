@@ -121,36 +121,28 @@
 		<Collapsible.Root class=" space-y-2">
 			<div class="flex flex-row">
 				<div class="flex items-center justify-between px-2">
-					<Collapsible.Trigger
-						class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
-					>
-						<Tooltip.Provider>
-							<Tooltip.Root>
-								<Tooltip.Trigger>
-									<Tooltip.Trigger>
-										<Button
-											variant="ghost"
-											size="sm"
-											class="w-9 p-0"
-											onclick={() => toggleSection(section.id)}
-										>
-											<Icon
-												icon="grommet-icons:down"
-												style="width: 12px; height: 12px;"
-												class={`transition-transform duration-300 ${
-													$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
-												}`}
-											/>
-											<span class="sr-only">Toggle</span>
-										</Button>
-									</Tooltip.Trigger>
-								</Tooltip.Trigger>
-								<Tooltip.Content>
-									<p>Collaps to see</p>
-								</Tooltip.Content>
-							</Tooltip.Root>
-						</Tooltip.Provider>
-					</Collapsible.Trigger>
+					<Tooltip.Provider>
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<Collapsible.Trigger
+									class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}
+									onclick={() => toggleSection(section.id)}
+								>
+									<Icon
+										icon="grommet-icons:down"
+										style="width: 12px; height: 12px;"
+										class={`transition-transform duration-300 ${
+											$isOpen[section.id] ? 'rotate-180' : 'rotate-0'
+										}`}
+									/>
+									<span class="sr-only">Toggle</span>
+								</Collapsible.Trigger>
+							</Tooltip.Trigger>
+							<Tooltip.Content>
+								<p>Collaps to see</p>
+							</Tooltip.Content>
+						</Tooltip.Root>
+					</Tooltip.Provider>
 				</div>
 
 				<div class="flex h-full flex-row md:w-full">
@@ -215,7 +207,10 @@
 						>
 							<div class="relative my-4 flex rounded-md border">
 								{#if card.ResponseType !== 'None'}
-									<svelte:component this={formComponents[card.ResponseType]} {card} {openSheet} />
+									{@const Component = formComponents[card.ResponseType]}
+									{#if Component}
+										<Component {card} {openSheet} />
+									{/if}
 								{/if}
 								<button
 									class="delete-button px-2"

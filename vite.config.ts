@@ -10,6 +10,11 @@ export default defineConfig({
     optimizeDeps: {
         entries: ['src/routes/**/+*.{js,ts,svelte}', 'src/hooks*.{js,ts}']
     },
+    server: {
+        fs: {
+            allow: ['..']
+        }
+    },
     // build: {
     //     rollupOptions: {
     //         external: ["bits-ui"]
