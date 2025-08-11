@@ -1,8 +1,6 @@
 <script lang="ts">
-	import type { ActionData, PageServerData } from './$types';
+	import type { PageServerData } from './$types';
 	import { page } from '$app/state';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { 
 		SectionEditorForm, 
 		Sidebar, 
@@ -13,14 +11,14 @@
 	import Sections from './components/Sections.svelte';
 	import { dropzone } from '$lib/components/common/dnd';
 	import { invalidate, invalidateAll } from '$app/navigation';
-	import { errorMessage } from '$lib/components/toast/message.utils';
 	import { addToast } from '$lib/components/toast/toast.store';
-	import { error } from '@sveltejs/kit';
 	import Icon from '@iconify/svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	let { data, form }: { data: PageServerData; form: ActionData } = $props();
+	let { data }: { data: PageServerData } = $props();
+
+	$inspect('data FROM FORM TEMPLATE PAGE', data);
 
 	let errors: Record<string, string> = $state({});
 

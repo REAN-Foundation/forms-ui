@@ -30,6 +30,29 @@
 	let errors = $state({} as Record<string, string>);
 	let isProcessing = $state(false);
 
+	// Helper function to format field title with hyphens
+	function formatFieldTitle(title: string): string {
+		if (!title) return '';
+		// Replace spaces and special characters with hyphens, but keep question marks and other punctuation
+		return title
+			.replace(/\s+/g, '-') // Replace spaces with hyphens
+			.replace(/[^\w\-?.,!@#$%^&*()]/g, '-') // Replace special chars except punctuation with hyphens
+			.replace(/-+/g, '-') // Replace multiple consecutive hyphens with single hyphen
+			.replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+	}
+
+	// Effect to populate form when editing
+	$effect(() => {
+		if (isEditing && editingRule) {
+			console.log('Populating composite form with editing data:', editingRule);
+			console.log('Composite conditions from parent:', compositeConditions);
+			console.log('Composite operator from parent:', compositeOperator);
+			
+			// The parent component should have already populated the compositeConditions and compositeOperator
+			// We just need to ensure they are properly displayed
+		}
+	});
+
 	// Watch for save trigger from parent
 	$effect(() => {
 		if (shouldTriggerSave && !isProcessing) {
@@ -521,8 +544,15 @@
 				const operationData = await response.json();
 				console.log('Logical operation updated successfully:', operationData);
 
-				// Dispatch the operation data to parent for update
-				// handleCompositeCompositionUpdated({ detail: { operationId: operationId, operationType: OperationType.Logical, operation: operationToUpdate } })
+				// Dispatch success event to parent to close modal
+				handleCompositeCompositionCreated({
+					detail: {
+						operationId: operationId,
+						operationType: OperationType.Logical,
+						operation: operation,
+						isEdit: true
+					}
+				});
 			} else {
 				console.log('No operation ID found for editing');
 				errors.general = 'No operation ID found for editing';
@@ -561,15 +591,15 @@
 				<!-- Field Selection -->
 				<Select.Root type="single" bind:value={condition.field}>
 					<Select.Trigger class="flex-1">
-						{condition.field || 'Select Field'}
+						{condition.field && condition.field !== 'Select Field' ? formatFieldTitle(condition.field) : 'Select Field'}
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="Select Field">Select Field</Select.Item>
 						{#each questionList as field}
 							{#each field.FormFields as f}
-								<Select.Item value={f.Title || f.DisplayCode}
-									>{f.Title || f.DisplayCode}</Select.Item
-								>
+								<Select.Item value={f.Title || f.DisplayCode}>
+									{formatFieldTitle(f.Title || f.DisplayCode)}
+								</Select.Item>
 							{/each}
 						{/each}
 					</Select.Content>

@@ -10,6 +10,7 @@
 	import * as Select from '../ui/select/index.js';
 	import Icon from '@iconify/svelte';
 	import { toastMessage } from '../toast/toast.store.js';
+	import TreeNode from './TreeNode.svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,6 +31,551 @@
 	let errors = $state({} as Record<string, string>);
 	let isProcessing = $state(false);
 	let referenceFieldCode = $state(currentField.Title || currentField.DisplayCode);
+	$inspect(conditions, 'conditions');
+
+	// Make conditions reactive with connector support
+	let reactiveConditions = $state([...conditions]);
+
+	// Store created logical operation IDs
+	let createdLogicalOperationIds = $state([] as string[]);
+
+	// -------------------------------
+	// AST types and helpers
+	// -------------------------------
+	type FlatCondition = {
+		field: string;
+		operator: string;
+		value?: string;
+		connector?: 'AND' | 'OR' | '' | null;
+	};
+
+    type LogicalNode = {
+        type: 'logical';
+        id?: string;
+        condition: FlatCondition;
+    };
+
+    type CompositeNode = {
+        type: 'composite';
+        id?: string;
+        operator: 'AND' | 'OR';
+        children: Array<LogicalNode | CompositeNode>;
+    };
+
+	function mapDisplayOperatorToBackend(op: string): LogicalOperatorType {
+		let operatorType = LogicalOperatorType.Equal;
+		switch (op) {
+			case 'Is Empty':
+				operatorType = LogicalOperatorType.Exists; // Treat as existence check (server-side handles semantics)
+				break;
+			case 'Is Not Empty':
+				operatorType = LogicalOperatorType.Exists;
+				break;
+			case 'Greater Than':
+				operatorType = LogicalOperatorType.GreaterThan;
+				break;
+			case 'Less Than':
+				operatorType = LogicalOperatorType.LessThan;
+				break;
+			case 'Equal To':
+				operatorType = LogicalOperatorType.Equal;
+				break;
+			case 'Not Equal To':
+				operatorType = LogicalOperatorType.NotEqual;
+				break;
+			case 'Contains':
+				operatorType = LogicalOperatorType.Contains;
+				break;
+			case 'Does Not Contain':
+				operatorType = LogicalOperatorType.DoesNotContain;
+				break;
+			case 'Greater Than or Equal':
+				operatorType = LogicalOperatorType.GreaterThanOrEqual;
+				break;
+			case 'Less Than or Equal':
+				operatorType = LogicalOperatorType.LessThanOrEqual;
+				break;
+			default:
+				operatorType = LogicalOperatorType.Equal;
+		}
+		return operatorType;
+	}
+
+	// Map backend operator enum to UI display label
+	function mapBackendOperatorToDisplay(op: string): string {
+		switch (op) {
+			case 'Equal':
+				return 'Equal To';
+			case 'NotEqual':
+				return 'Not Equal To';
+			case 'GreaterThan':
+				return 'Greater Than';
+			case 'LessThan':
+				return 'Less Than';
+			case 'GreaterThanOrEqual':
+				return 'Greater Than or Equal';
+			case 'LessThanOrEqual':
+				return 'Less Than or Equal';
+			case 'Contains':
+				return 'Contains';
+			case 'DoesNotContain':
+				return 'Does Not Contain';
+			case 'Exists':
+				// Treat Exists as "Is Not Empty" in UI parlance
+				return 'Is Not Empty';
+			default:
+				return op || 'Equal To';
+		}
+	}
+
+	// Build an AST from flat conditions using AND precedence over OR
+	function buildAstFromFlatConditions(flat: FlatCondition[]): LogicalNode | CompositeNode | null {
+		if (!flat || flat.length === 0) return null;
+
+		// Normalize connectors: first item has no connector; others must be 'AND' | 'OR'
+		const normalized: FlatCondition[] = flat.map((c, idx) => ({
+			...c,
+			connector: idx === 0 ? null : c.connector === 'OR' ? 'OR' : 'AND'
+		}));
+
+		// First, group consecutive AND chains
+		const groups: Array<LogicalNode | CompositeNode> = [];
+		let currentAndChain: LogicalNode[] = [];
+
+		for (let i = 0; i < normalized.length; i++) {
+			const cond = normalized[i];
+			const node: LogicalNode = { type: 'logical', condition: cond };
+
+			if (i === 0) {
+				currentAndChain.push(node);
+				continue;
+			}
+
+			if (cond.connector === 'AND') {
+				currentAndChain.push(node);
+			} else if (cond.connector === 'OR') {
+				// finalize current chain
+				if (currentAndChain.length === 1) {
+					groups.push(currentAndChain[0]);
+				} else {
+					groups.push({ type: 'composite', operator: 'AND', children: [...currentAndChain] });
+				}
+				currentAndChain = [node];
+			}
+		}
+
+		// push the last chain
+		if (currentAndChain.length === 1) {
+			groups.push(currentAndChain[0]);
+		} else if (currentAndChain.length > 1) {
+			groups.push({ type: 'composite', operator: 'AND', children: [...currentAndChain] });
+		}
+
+		// If only one group, return it; else OR them at root
+		if (groups.length === 1) {
+			return groups[0];
+		}
+		return { type: 'composite', operator: 'OR', children: groups };
+	}
+
+    // Tree state for nested UI (composite operators selected at group level)
+    let treeRoot = $state<CompositeNode>({ type: 'composite', operator: 'AND', children: [] });
+    let originalTreeRoot = $state<CompositeNode>({ type: 'composite', operator: 'AND', children: [] });
+    let initializedFromEditing = $state(false);
+    let initializedCreate = $state(false);
+    let lastEditingRuleId = $state<string | null>(null);
+
+	// Parse backend operation (Composition/Logical) recursively into our UI tree model
+    function parseBackendOperationToTree(operation: any): CompositeNode | LogicalNode | null {
+		if (!operation || !operation.Type) return null;
+		const type = (operation.Type || '').toLowerCase();
+		if (type === 'composition') {
+			const op = (operation.Operator || 'And').toLowerCase() === 'or' ? 'OR' : 'AND';
+			const children: Array<LogicalNode | CompositeNode> = [];
+			const rawChildren = Array.isArray(operation.Children) ? operation.Children : [];
+			for (const child of rawChildren) {
+				const parsed = parseBackendOperationToTree(child);
+				if (parsed) children.push(parsed);
+			}
+            return { type: 'composite', id: operation.id, operator: op, children };
+		}
+		if (type === 'logical') {
+			let field = '';
+			let value: string | undefined = '';
+			try {
+				const operands = operation.Operands ? JSON.parse(operation.Operands) : [];
+				if (Array.isArray(operands) && operands.length > 0) {
+					const first = operands[0];
+					if (first && (first.FieldId || first.fieldId)) {
+						field = first.FieldId || first.fieldId;
+					}
+					if (operands[1] && operands[1].Value !== undefined) {
+						value = operands[1].Value;
+					}
+				}
+			} catch {}
+			const operatorLabel = mapBackendOperatorToDisplay(operation.Operator || 'Equal');
+            return {
+                type: 'logical',
+                id: operation.id,
+                condition: { field, operator: operatorLabel, value, connector: null }
+            };
+		}
+		return null;
+	}
+
+	function createEmptyLogical(): LogicalNode {
+		return {
+			type: 'logical',
+			condition: { field: '', operator: 'Equal To', value: '', connector: null }
+		};
+	}
+	function createEmptyComposite(): CompositeNode {
+		return { type: 'composite', operator: 'AND', children: [] };
+	}
+
+	function getNodeByPath(path: number[]): CompositeNode | LogicalNode {
+		let node: any = treeRoot;
+		for (const idx of path) {
+			node = node.children[idx];
+		}
+		return node;
+	}
+
+	function getCompositeAtPath(path: number[]): CompositeNode {
+		if (path.length === 0) return treeRoot;
+		const parentPath = path.slice(0, -1);
+		return getNodeByPath(parentPath) as CompositeNode;
+	}
+
+	function addLogicalAt(pathToComposite: number[]) {
+		const comp =
+			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
+		comp.children = [...comp.children, createEmptyLogical()];
+	}
+
+	function addGroupAt(pathToComposite: number[]) {
+		const comp =
+			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
+		comp.children = [...comp.children, createEmptyComposite()];
+	}
+
+	function removeAt(path: number[]) {
+		if (path.length === 0) return;
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		parent.children = parent.children.filter((_, i) => i !== idx);
+	}
+
+	function toggleGroupOperator(pathToComposite: number[]) {
+		const comp =
+			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
+		comp.operator = comp.operator === 'AND' ? 'OR' : 'AND';
+	}
+
+	// Handlers for child change events
+    function onChangeGroupOperator(path: number[], op: 'AND' | 'OR') {
+		const comp = path.length === 0 ? treeRoot : (getNodeByPath(path) as CompositeNode);
+		comp.operator = op;
+		// trigger state update
+        treeRoot = { ...treeRoot };
+	}
+
+    function onChangeLeafField(path: number[], fieldId: string) {
+		const node = getNodeByPath(path) as LogicalNode;
+		if (node && node.type === 'logical') {
+			node.condition.field = fieldId;
+            treeRoot = { ...treeRoot };
+		}
+	}
+
+    function onChangeLeafOperator(path: number[], operator: string) {
+		const node = getNodeByPath(path) as LogicalNode;
+		if (node && node.type === 'logical') {
+			node.condition.operator = operator as any;
+			// clear value if switching to empty checks
+			if (operator === 'Is Empty' || operator === 'Is Not Empty') node.condition.value = '';
+            treeRoot = { ...treeRoot };
+		}
+	}
+
+    function onChangeLeafValue(path: number[], value: string) {
+		const node = getNodeByPath(path) as LogicalNode;
+		if (node && node.type === 'logical') {
+			node.condition.value = value;
+            treeRoot = { ...treeRoot };
+		}
+	}
+
+	type FlatItem =
+		| { kind: 'composite'; node: CompositeNode; depth: number; path: number[] }
+		| { kind: 'logical'; node: LogicalNode; depth: number; path: number[] };
+
+	function flattenTree(
+		node: CompositeNode | LogicalNode,
+		depth = 0,
+		path: number[] = []
+	): FlatItem[] {
+		if ((node as any).type === 'logical') {
+			return [{ kind: 'logical', node: node as LogicalNode, depth, path }];
+		}
+		const comp = node as CompositeNode;
+		let items: FlatItem[] = [{ kind: 'composite', node: comp, depth, path }];
+		comp.children.forEach((child, idx) => {
+			items = items.concat(flattenTree(child as any, depth + 1, [...path, idx]));
+		});
+		return items;
+	}
+
+	let flatItems = $derived(flattenTree(treeRoot));
+
+	// Map to hold operator selected for new groups per path
+	let newGroupOpByPath = $state({} as Record<string, 'AND' | 'OR'>);
+	function pathKey(path: number[]) {
+		return path.join('-');
+	}
+
+	function addGroupAtWithOperator(pathToComposite: number[], op: 'AND' | 'OR') {
+		const comp =
+			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
+		const grp: CompositeNode = { type: 'composite', operator: op, children: [] };
+		comp.children = [...comp.children, grp];
+	}
+
+    // Reset initialization flags when editing target changes
+    $effect(() => {
+        const id = editingRule?.originalRule?.id || editingRule?.id || null;
+        if (id !== lastEditingRuleId) {
+            lastEditingRuleId = id;
+            initializedFromEditing = false;
+            initializedCreate = false;
+        }
+    });
+
+    // Initialize treeRoot from backend nested operation if available; fallback to flat conditions
+    $effect(() => {
+        if (isEditing && editingRule && !initializedFromEditing) {
+            const op = editingRule.originalRule?.Operation;
+            if (op) {
+                const parsed = parseBackendOperationToTree(op);
+                if (parsed) {
+                    if (parsed.type === 'composite') {
+                        treeRoot = parsed as CompositeNode;
+                    } else {
+                        treeRoot = { type: 'composite', operator: 'AND', children: [parsed as LogicalNode] };
+                    }
+                    originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+                    initializedFromEditing = true;
+                    return;
+                }
+            }
+            if (
+                editingRule?.conditions &&
+                Array.isArray(editingRule.conditions) &&
+                editingRule.conditions.length > 0
+            ) {
+                const ast = buildAstFromFlatConditions(editingRule.conditions as FlatCondition[]);
+                if (ast) {
+                    if ((ast as any).type === 'composite') {
+                        treeRoot = ast as CompositeNode;
+                    } else {
+                        treeRoot = { type: 'composite', operator: 'AND', children: [ast as LogicalNode] };
+                    }
+                    originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+                }
+            }
+            initializedFromEditing = true;
+        } else if (!isEditing && !initializedCreate) {
+            treeRoot = { type: 'composite', operator: 'AND', children: [createEmptyLogical()] };
+            initializedCreate = true;
+        }
+    });
+
+	// Collapsed state per node path for better UX
+	let collapsedByPath = $state({} as Record<string, boolean>);
+	function toggleCollapse(path: number[]) {
+		const key = pathKey(path);
+		collapsedByPath[key] = !collapsedByPath[key];
+		collapsedByPath = { ...collapsedByPath };
+	}
+
+	// Create operations bottom-up, returns created operation id for the node
+	async function createOperationsForNode(node: LogicalNode | CompositeNode): Promise<string> {
+		if (node.type === 'logical') {
+			const condition = node.condition;
+			// Find selected field
+			const selectedField = getAllFields().find(
+				(field) =>
+					field.id === condition.field ||
+					field.Title === condition.field ||
+					field.DisplayCode === condition.field
+			);
+			if (!selectedField) {
+				throw new Error('Selected field not found');
+			}
+			const operatorType = mapDisplayOperatorToBackend(condition.operator);
+			let operands: any[] = [];
+			if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
+				operands = [
+					{
+						Type: 'FieldReference',
+						DataType: selectedField?.ResponseType || 'Text',
+						FieldId: selectedField?.id || '',
+						FieldCode: selectedField?.DisplayCode || ''
+					}
+				];
+			} else {
+				operands = [
+					{
+						Type: 'FieldReference',
+						DataType: selectedField?.ResponseType || 'Text',
+						FieldId: selectedField?.id || '',
+						FieldCode: selectedField?.DisplayCode || ''
+					},
+					{
+						Type: 'Constant',
+						DataType: 'Text',
+						Value: condition.value || ''
+					}
+				];
+			}
+
+			const logicalOperation = {
+				Name: `${ruleName} - Logical condition`,
+				Description: `${ruleDescription} - Logical validation condition`,
+				Type: OperationType.Logical,
+				Operator: operatorType,
+				Operands: JSON.stringify(operands)
+			};
+
+			const result = await logicalOperationSchema.safeParseAsync(logicalOperation);
+			if (!result.success) {
+				throw new Error('Invalid logical operation structure');
+			}
+
+			const logicalResponse = await fetch('/api/server/operations/logical-operation', {
+				method: 'POST',
+				body: JSON.stringify(logicalOperation),
+				headers: { 'content-type': 'application/json' }
+			});
+			if (!logicalResponse.ok) {
+				const errorData = await logicalResponse.json();
+				toastMessage(errorData);
+				throw new Error(errorData.Message || 'Failed to create logical operation');
+			}
+			const logicalData = await logicalResponse.json();
+			const opId = logicalData.Data.id as string;
+			createdLogicalOperationIds = [...createdLogicalOperationIds, opId];
+			return opId;
+		}
+
+		// composite node
+		const childIds: string[] = [];
+		for (const child of node.children) {
+			const id = await createOperationsForNode(child);
+			childIds.push(id);
+		}
+		const compositeOperation = {
+			Name: `${ruleName} - Composite validation`,
+			Description: `${ruleDescription} - Composite logical validation`,
+			Type: OperationType.Composition,
+			Operator: node.operator === 'AND' ? 'And' : 'Or',
+			Children: JSON.stringify(childIds)
+		};
+		const compositeResponse = await fetch('/api/server/operations/composition-operation', {
+			method: 'POST',
+			body: JSON.stringify(compositeOperation),
+			headers: { 'content-type': 'application/json' }
+		});
+		if (!compositeResponse.ok) {
+			const errorData = await compositeResponse.json();
+			toastMessage(errorData);
+			throw new Error(errorData.Message || 'Failed to create composite operation');
+		}
+		const compositeData = await compositeResponse.json();
+		return compositeData.Data.id as string;
+	}
+
+	// Helper function to get all available fields from questionList
+	function getAllFields() {
+		const allFields = [];
+		for (const section of questionList) {
+			for (const field of section.FormFields) {
+				allFields.push(field);
+			}
+		}
+		return allFields;
+	}
+
+	function getFieldByAny(value: string) {
+		if (!value) return null;
+		return (
+			getAllFields().find((f) => f.id === value || f.Title === value || f.DisplayCode === value) ||
+			null
+		);
+	}
+
+	function getFieldDisplay(value: string): string {
+		const f = getFieldByAny(value);
+		if (!f) return value || '';
+		const label = f.Title || f.DisplayCode || '';
+		return formatFieldTitle(label);
+	}
+
+	// Helper function to format field title with hyphens
+	function formatFieldTitle(title: string): string {
+		if (!title) return '';
+		// Replace spaces and special characters with hyphens, but keep question marks and other punctuation
+		return title
+			.replace(/\s+/g, '-') // Replace spaces with hyphens
+			.replace(/[^\w\-?.,!@#$%^&*()]/g, '-') // Replace special chars except punctuation with hyphens
+			.replace(/-+/g, '-') // Replace multiple consecutive hyphens with single hyphen
+			.replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+	}
+
+	// Effect to populate form when editing
+	$effect(() => {
+		if (isEditing && editingRule) {
+			console.log('Populating logical form with editing data:', editingRule);
+
+			// Try to use conditions from editingRule first
+			if (
+				editingRule.conditions &&
+				Array.isArray(editingRule.conditions) &&
+				editingRule.conditions.length > 0
+			) {
+				console.log('Using conditions from editingRule:', editingRule.conditions);
+				reactiveConditions = editingRule.conditions.map((condition: any, index: number) => ({
+					field: condition.field || '',
+					operator: condition.operator || '',
+					value: condition.value || '',
+					connector: index > 0 ? 'AND' : ''
+				}));
+			} else {
+				// Fallback: create a placeholder condition
+				reactiveConditions = [
+					{
+						field: '',
+						operator: '',
+						value: '',
+						connector: ''
+					}
+				];
+			}
+		} else if (!isEditing) {
+			// For new rules, ensure we have at least one condition
+			if (reactiveConditions.length === 0) {
+				reactiveConditions = [
+					{
+						field: '',
+						operator: '',
+						value: '',
+						connector: ''
+					}
+				];
+			}
+		}
+	});
 
 	// Watch for save trigger from parent
 	$effect(() => {
@@ -69,205 +615,82 @@
 	];
 
 	function addCondition() {
-		conditions = [
-			...conditions,
+		reactiveConditions = [
+			...reactiveConditions,
 			{
 				field: '',
 				operator: '',
-				value: ''
+				value: '',
+				connector: 'AND' // Default connector for additional conditions
 			}
 		];
 	}
 
 	function removeCondition(index: number) {
-		conditions = conditions.filter((_, i) => i !== index);
+		reactiveConditions = reactiveConditions.filter((_, i) => i !== index);
 	}
 
 	function updateCondition(index: number, field: string, value: string) {
-		conditions[index] = { ...conditions[index], [field]: value };
-		conditions = [...conditions];
+		reactiveConditions[index] = { ...reactiveConditions[index], [field]: value };
+		reactiveConditions = [...reactiveConditions];
 	}
 
 	async function handleSave() {
-		console.log('handleSave called with conditions:', conditions);
+		console.log('handleSave called with treeRoot:', treeRoot);
 		// Reset errors
 		errors = {} as Record<string, string>;
 
-		// // Validate required fields (only when not editing)
-		// if (!isEditing) {
-		// 	if (!conditions || conditions.length === 0) {
-		// 		errors.conditions = 'At least one condition is required';
-		// 	} else {
-		// 		// For now, only validate the first condition (single operation)
-		// 		const condition = conditions[0];
-		// 		if (!condition.field || condition.field === 'Select Field') {
-		// 			errors.condition0Field = 'Please select a field';
-		// 		}
-		// 		if (!condition.operator) {
-		// 			errors.condition0Operator = 'Please select an operator';
-		// 		}
-		// 		if (
-		// 			condition.operator &&
-		// 			condition.operator !== 'Is Empty' &&
-		// 			condition.operator !== 'Is Not Empty' &&
-		// 			!condition.value
-		// 		) {
-		// 			errors.condition0Value = 'Value is required for this operator';
-		// 		}
-		// 	}
-		// } else {
-		// 	// When editing, only validate conditions if they exist and are incomplete
-		// 	if (conditions.length > 0) {
-		// 		// For now, only validate the first condition (single operation)
-		// 		const condition = conditions[0];
-		// 		// Only validate if the condition has some data but is incomplete
-		// 		if (condition.field && condition.field !== 'Select Field' && !condition.operator) {
-		// 			errors.condition0Operator = 'Please select an operator';
-		// 		}
-		// 		if (
-		// 			condition.field &&
-		// 			condition.field !== 'Select Field' &&
-		// 			condition.operator &&
-		// 			condition.operator !== 'Is Empty' &&
-		// 			condition.operator !== 'Is Not Empty' &&
-		// 			!condition.value
-		// 		) {
-		// 			errors.condition0Value = 'Value is required for this operator';
-		// 		}
-		// 	}
-		// }
+		// Validate tree
+		function validateTree(node: LogicalNode | CompositeNode): boolean {
+			if (node.type === 'logical') {
+				const c = node.condition;
+				if (!c.field) {
+					errors.general = 'Please select a field for all logical conditions';
+					return false;
+				}
+				if (!c.operator) {
+					errors.general = 'Please select an operator for all logical conditions';
+					return false;
+				}
+				if (
+					c.operator !== 'Is Empty' &&
+					c.operator !== 'Is Not Empty' &&
+					(c.value === undefined || c.value === null || `${c.value}`.trim() === '')
+				) {
+					errors.general = 'Please provide values where required';
+					return false;
+				}
+				return true;
+			}
+			// composite
+			if (!node.children || node.children.length === 0) {
+				errors.general = 'Groups cannot be empty. Add a condition or subgroup.';
+				return false;
+			}
+			for (const child of node.children) {
+				if (!validateTree(child)) return false;
+			}
+			return true;
+		}
 
-		// If there are validation errors, don't proceed
-		if (Object.keys(errors).length > 0) {
+		if (!treeRoot || !validateTree(treeRoot)) {
 			console.log('Validation errors:', errors);
 			return;
 		}
 
 		try {
-			// For now, only handle single operation (first condition)
-			const condition = conditions[0];
-			
-			// Use currentField directly since it's already the selected field
-			const fieldData = currentField;
+			createdLogicalOperationIds = [];
+			// Create operations bottom-up directly from treeRoot
+			const rootOpId = await createOperationsForNode(treeRoot);
 
-			// Map operator to LogicalOperatorType
-			let operatorType;
-			switch (condition.operator) {
-				case 'Is Equal':
-					operatorType = LogicalOperatorType.Equal;
-					break;
-				case 'Is Not Equal':
-					operatorType = LogicalOperatorType.NotEqual;
-					break;
-				case 'Greater Than or Equal':
-					operatorType = LogicalOperatorType.GreaterThanOrEqual;
-					break;
-				case 'Greater Than':
-					operatorType = LogicalOperatorType.GreaterThan;
-					break;
-				case 'Less Than':
-					operatorType = LogicalOperatorType.LessThan;
-					break;
-				case 'Contains':
-					operatorType = LogicalOperatorType.Contains;
-					break;
-				case 'Does Not Contain':
-					operatorType = LogicalOperatorType.DoesNotContain;
-					break;
-				case 'Less Than or Equal':
-					operatorType = LogicalOperatorType.LessThanOrEqual;
-					break;
-				case 'In':
-					operatorType = LogicalOperatorType.In;
-					break;
-				case 'Not In':
-					operatorType = LogicalOperatorType.NotIn;
-					break;
-				case 'Between':
-					operatorType = LogicalOperatorType.Between;
-					break;
-				case 'Is True':
-					operatorType = LogicalOperatorType.IsTrue;
-					break;
-				case 'Is False':
-					operatorType = LogicalOperatorType.IsFalse;
-					break;
-				case 'Exists':
-					operatorType = LogicalOperatorType.Exists;
-					break;
-				case 'Has Consecutive Occurrences':
-					operatorType = LogicalOperatorType.HasConsecutiveOccurrences;
-					break;
-				case 'Ranges Overlap':
-					operatorType = LogicalOperatorType.RangesOverlap;
-					break;
-				case 'None':
-					operatorType = LogicalOperatorType.None;
-					break;
-				default:
-					operatorType = LogicalOperatorType.Equal;
-			}
-
-			// Build operands array
-			const operands: any[] = [
-				{
-					Type: 'FieldReference',
-					DataType: fieldData?.ResponseType || 'Text',
-					FieldId: fieldData?.id || '',
-					FieldCode: fieldData?.DisplayCode || ''
-				}
-			];
-
-			// Add value operand for operators that need it
-			if (condition.operator !== 'Is Empty' && condition.operator !== 'Is Not Empty') {
-				operands.push({
-					Type: 'Constant',
-					DataType: fieldData?.ResponseType || 'Text',
-					Value: condition.value
-				});
-			}
-
-			// Step 1: Create single logical operation
-			const operation = {
-				Name: `${ruleName || 'New Logical Rule'} - Logical validation`,
-				Description: `${ruleDescription || 'Logical validation condition'}`,
-				Type: OperationType.Logical,
-				Operator: operatorType,
-				Operands: JSON.stringify(operands)
+			const dispatchData = {
+				operationId: rootOpId,
+				operationType: OperationType.Composition,
+				operation: { id: rootOpId },
+				logicalOperationIds: createdLogicalOperationIds
 			};
-
-			// Validate the operation
-			const result = await logicalOperationSchema.safeParseAsync(operation);
-			if (!result.success) {
-				console.error('Logical operation validation failed:', result.error);
-				errors.general = 'Invalid operation structure';
-				return;
-			}
-
-			// Create operation
-			const operationResponse = await fetch('/api/server/operations/logical-operation', {
-				method: 'POST',
-				body: JSON.stringify(operation),
-				headers: { 'content-type': 'application/json' }
-			});
-
-			if (!operationResponse.ok) {
-				const errorData = await operationResponse.json();
-				toastMessage(errorData);
-				throw new Error(errorData.Message || 'Failed to create logical operation');
-			}
-
-			const operationData = await operationResponse.json();
-			console.log('Logical operation created successfully:', operationData);
-
-			// Dispatch the complete workflow data to parent
-			handleLogicalOperationsCreated({
-				detail: {
-					operationId: operationData.Data.id,
-					operationType: OperationType.Logical,
-					operation: operation
-				}
-			});
+			console.log('Dispatching to parent:', dispatchData);
+			handleLogicalOperationsCreated({ detail: dispatchData });
 		} catch (error) {
 			console.error('Error creating logical validation workflow:', error);
 			errors.general = error.message;
@@ -275,289 +698,157 @@
 	}
 
 	async function handleEdit() {
+		console.log('handleEdit called');
 		// Reset errors
 		errors = {} as Record<string, string>;
 
-		// When editing, all fields are optional - only validate conditions if they exist and are incomplete
-		if (conditions.length > 0) {
-			// For now, only validate the first condition (single operation)
-			const condition = conditions[0];
-			// Only validate if the condition has some data but is incomplete
-			if (condition.field && condition.field !== 'Select Field' && !condition.operator) {
-				errors.condition0Operator = 'Please select an operator';
-			}
-			if (
-				condition.field &&
-				condition.field !== 'Select Field' &&
-				condition.operator &&
-				condition.operator !== 'Is Empty' &&
-				condition.operator !== 'Is Not Empty' &&
-				!condition.value
-			) {
-				errors.condition0Value = 'Value is required for this operator';
-			}
-		}
+		// Helper to deep-compare nodes by id and properties
+		function diffNodes(current: LogicalNode | CompositeNode, original: LogicalNode | CompositeNode) {
+			const changes: Array<
+				| { kind: 'logical'; id: string; payload: any }
+				| { kind: 'composite'; id: string; payload: any }
+			> = [];
 
-		// If there are validation errors, don't proceed
-		if (Object.keys(errors).length > 0) {
-			console.log('Validation errors:', errors);
-			return;
+			if (current.type !== original.type) return changes;
+
+			if (current.type === 'logical' && original.type === 'logical') {
+				const cur = current as LogicalNode;
+				const orig = original as LogicalNode;
+				if (!cur.id) return changes; // cannot PUT without id
+				// detect field/operator/value changes
+				const hasFieldChanged = cur.condition.field !== orig.condition.field;
+				const hasOpChanged = cur.condition.operator !== orig.condition.operator;
+				const hasValChanged = (cur.condition.value || '') !== (orig.condition.value || '');
+				if (hasFieldChanged || hasOpChanged || hasValChanged) {
+					// Build new operands for PUT
+					const selectedField = getAllFields().find(
+						(f) => f.id === cur.condition.field || f.Title === cur.condition.field || f.DisplayCode === cur.condition.field
+					);
+					const operatorType = mapDisplayOperatorToBackend(cur.condition.operator);
+					let operands: any[] = [];
+					if (cur.condition.operator === 'Is Empty' || cur.condition.operator === 'Is Not Empty') {
+						operands = [
+							{
+								Type: 'FieldReference',
+								DataType: selectedField?.ResponseType || 'Text',
+								FieldId: selectedField?.id || '',
+								FieldCode: selectedField?.DisplayCode || ''
+							}
+						];
+					} else {
+						operands = [
+							{
+								Type: 'FieldReference',
+								DataType: selectedField?.ResponseType || 'Text',
+								FieldId: selectedField?.id || '',
+								FieldCode: selectedField?.DisplayCode || ''
+							},
+							{ Type: 'Constant', DataType: 'Text', Value: cur.condition.value || '' }
+						];
+					}
+					changes.push({
+						kind: 'logical',
+						id: cur.id,
+						payload: { Operator: operatorType, Operands: JSON.stringify(operands) }
+					});
+				}
+				return changes;
+			}
+
+			if (current.type === 'composite' && original.type === 'composite') {
+				const cur = current as CompositeNode;
+				const orig = original as CompositeNode;
+				if (!cur.id) return changes;
+				const hasOpChanged = cur.operator !== orig.operator;
+				// Children updates are handled via their own ids; server model typically keeps Children as ids
+				if (hasOpChanged) {
+					changes.push({
+						kind: 'composite',
+						id: cur.id,
+						payload: { Operator: cur.operator === 'AND' ? 'And' : 'Or' }
+					});
+				}
+				// Diff children by index assuming stable structure; recurse
+				const len = Math.min(cur.children.length, orig.children.length);
+				for (let i = 0; i < len; i++) {
+					changes.push(...diffNodes(cur.children[i] as any, orig.children[i] as any));
+				}
+				return changes;
+			}
+
+			return changes;
 		}
 
 		try {
-			// When editing, use props for rule name and description
-			const finalRuleName = ruleName || 'Updated Logical Rule';
-			const finalRuleDescription = ruleDescription || 'Updated logical validation';
-
-			// If no conditions provided, create a default condition
-			const finalConditions =
-				conditions.length > 0
-					? conditions
-					: [
-							{
-								field:
-									questionList.length > 0
-										? questionList[0].Title || questionList[0].DisplayCode
-										: 'Default Field',
-								operator: 'Equal To',
-								value: ''
-							}
-						];
-
-			// For now, only handle single operation (first condition)
-			const condition = finalConditions[0];
-
-			// Find the field data
-			const fieldData = questionList.find(
-				(field) =>
-					field.Title?.toLowerCase() === condition.field.toLowerCase() ||
-					field.DisplayCode?.toLowerCase() === condition.field.toLowerCase()
-			) ||
-				questionList[0] || { ResponseType: 'Text', id: '', DisplayCode: '' };
-
-			// Map operator to LogicalOperatorType
-			let operatorType;
-			switch (condition.operator) {
-				case 'Is Equal':
-					operatorType = LogicalOperatorType.Equal;
-					break;
-				case 'Is Not Equal':
-					operatorType = LogicalOperatorType.NotEqual;
-					break;
-				case 'Greater Than or Equal':
-					operatorType = LogicalOperatorType.GreaterThanOrEqual;
-					break;
-				case 'Greater Than':
-					operatorType = LogicalOperatorType.GreaterThan;
-					break;
-				case 'Less Than':
-					operatorType = LogicalOperatorType.LessThan;
-					break;
-				case 'Contains':
-					operatorType = LogicalOperatorType.Contains;
-					break;
-				case 'Does Not Contain':
-					operatorType = LogicalOperatorType.DoesNotContain;
-					break;
-				case 'Less Than or Equal':
-					operatorType = LogicalOperatorType.LessThanOrEqual;
-					break;
-				case 'In':
-					operatorType = LogicalOperatorType.In;
-					break;
-				case 'Not In':
-					operatorType = LogicalOperatorType.NotIn;
-					break;
-				case 'Contains':
-					operatorType = LogicalOperatorType.Contains;
-					break;
-				case 'Does Not Contain':
-					operatorType = LogicalOperatorType.DoesNotContain;
-					break;
-				case 'Between':
-					operatorType = LogicalOperatorType.Between;
-					break;
-				case 'Is True':
-					operatorType = LogicalOperatorType.IsTrue;
-					break;
-				case 'Is False':
-					operatorType = LogicalOperatorType.IsFalse;
-					break;
-				case 'Exists':
-					operatorType = LogicalOperatorType.Exists;
-					break;
-				case 'Has Consecutive Occurrences':
-					operatorType = LogicalOperatorType.HasConsecutiveOccurrences;
-					break;
-				case 'Ranges Overlap':
-					operatorType = LogicalOperatorType.RangesOverlap;
-					break;
-				case 'None':
-					operatorType = LogicalOperatorType.None;
-					break;
-				default:
-					operatorType = LogicalOperatorType.Equal;
-			}
-
-			// Build operands based on operator type
-			const operands = [];
-
-			// Always add the field reference as first operand
-			operands.push({
-				Type: 'FieldReference',
-				DataType: fieldData.ResponseType || 'Text',
-				FieldId: fieldData.id || '',
-				FieldCode: fieldData.DisplayCode || ''
-			});
-
-			// Add value operand for operators that need it
-			if (condition.operator !== 'Is Empty' && condition.operator !== 'Is Not Empty') {
-				operands.push({
-					Type: 'Constant',
-					DataType: fieldData.ResponseType || 'Text',
-					Value: condition.value || ''
-				});
-			}
-
-			const operation = {
-				Name: `${finalRuleName} - Logical validation`,
-				Description: `${finalRuleDescription} - Logical validation condition`,
-				Type: OperationType.Logical,
-				Operator: operatorType,
-				Operands: JSON.stringify(operands)
-			};
-
-			// Validate the operation
-			const result = await logicalOperationSchema.safeParseAsync(operation);
-			if (!result.success) {
-				console.error(`Logical operation validation failed:`, result.error);
-				errors.general = 'Invalid operation structure';
-				return;
-			}
-
-			// Get the original rule data to extract operation ID
-			const originalRule = editingRule.originalRule;
-			let operationId = null;
-
-			// Try to extract operation ID from the rule
-			if (originalRule && originalRule.OperationId) {
-				operationId = originalRule.OperationId;
-			}
-
-			if (operationId) {
-				// Update the existing operation
-				const operationEndpoint = `/api/server/operations/logical-operation/${operationId}`;
-
-				const response = await fetch(operationEndpoint, {
-					method: 'PUT',
-					body: JSON.stringify(operation),
-					headers: { 'content-type': 'application/json' }
-				});
-
-				if (!response.ok) {
-					const errorData = await response.json();
-					toastMessage(errorData);
-					// throw new Error(errorData.Message || 'Failed to update logical operation');
+			const changes = diffNodes(treeRoot, originalTreeRoot);
+			for (const change of changes) {
+				if (change.kind === 'logical') {
+					await fetch(`/api/server/operations/logical-operation/${change.id}`, {
+						method: 'PUT',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ ...change.payload })
+					});
+				} else if (change.kind === 'composite') {
+					await fetch(`/api/server/operations/composition-operation/${change.id}`, {
+						method: 'PUT',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ ...change.payload })
+					});
 				}
-
-				const operationData = await response.json();
-				console.log('Logical operation updated successfully:', operationData);
-
-				// Dispatch the operation data to parent for update
-				// handleLogicalOperationsUpdated({ detail: { operationId: operationId, operationType: OperationType.Logical, operation: operationToUpdate } })
-			} else {
-				console.log('No operation ID found for editing');
-				errors.general = 'No operation ID found for editing';
 			}
+			// Optionally notify parent success
+			toastMessage({ Message: 'Validation conditions updated', HttpCode: 200 });
 		} catch (error) {
-			console.error('Error updating logical operations:', error);
-			errors.general = error.message;
+			console.error('Error updating logical/composite operations:', error);
+			errors.general = (error as Error).message;
 		}
 	}
 </script>
 
 <!-- Logical Validation UI -->
-<div class="mb-5 rounded-lg bg-gray-50 p-5">
-	<h3 class="mb-4 font-medium text-slate-700">Logical Validation</h3>
-
-	<!-- Conditions -->
-	<div class="space-y-4">
-		{#each conditions as condition, index}
-			<div class="flex items-center gap-2 rounded-md border bg-white p-3">
-				<!-- Field Selection -->
-
-				<div class="mb-4">
-					<Label class="mb-2 block text-sm font-medium text-gray-700">Field to Validate</Label>
-					<Select.Root type="single" bind:value={currentField.Title}>
-						<Select.Trigger class="w-full">
-							{currentField ? currentField.Title || currentField.DisplayCode : 'Select a field'}
-						</Select.Trigger>
-						<Select.Content>
-							{#each questionList as field}
-								{#each field.FormFields as f}
-									<Select.Item value={f.Title || f.DisplayCode}
-										>{f.Title || f.DisplayCode}</Select.Item
-									>
-								{/each}
-							{/each}
-						</Select.Content>
-					</Select.Root>
-					{#if errors.selectedField}
-						<p class="mt-1 text-sm text-red-500">{errors.selectedField}</p>
-					{/if}
-				</div>
-
-				<!-- Operator Selection -->
-				<Select.Root type="single" bind:value={condition.operator}>
-					<Select.Trigger class="flex-1">
-						{condition.operator || 'Select Operator'}
-					</Select.Trigger>
-					<Select.Content>
-						{#each operators as op}
-							<Select.Item value={op}>{op}</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
-				{#if errors[`condition${index}Operator`]}
-					<p class="text-sm text-red-500">{errors[`condition${index}Operator`]}</p>
-				{/if}
-
-				<!-- Value Input (only for operators that need it) -->
-				{#if condition.operator !== 'Is Empty' && condition.operator !== 'Is Not Empty'}
-					<Input
-						type="text"
-						bind:value={condition.value}
-						placeholder="Enter value"
-						class="flex-1"
-					/>
-					{#if errors[`condition${index}Value`]}
-						<p class="text-sm text-red-500">{errors[`condition${index}Value`]}</p>
-					{/if}
-				{/if}
-
-				<!-- Remove Button -->
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					onclick={() => removeCondition(index)}
-					class="text-red-600 hover:text-red-800"
-				>
-					<Icon icon="mdi:close" class="h-4 w-4" />
+<div class="space-y-6">
+	<div class="mb-2 rounded-lg border-2 border-gray-200 bg-gray-50 p-4">
+		<div class="mb-3 flex items-center justify-between">
+			<div>
+				<h3 class="text-lg font-semibold text-gray-800">Condition Tree</h3>
+				<p class="text-sm text-gray-600">Compose nested groups (AND/OR) and logical leaves</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<Button type="button" variant="outline" onclick={() => addLogicalAt([])}>
+					<Icon icon="mdi:plus" class="mr-2 h-4 w-4" /> Add Logical at Root
+				</Button>
+				<Button type="button" variant="outline" onclick={() => addGroupAt([])}>
+					<Icon icon="mdi:plus" class="mr-2 h-4 w-4" /> Add Group at Root
+				</Button>
+				<Button type="button" variant="outline" onclick={() => toggleGroupOperator([])}>
+					Toggle Root: {treeRoot.operator}
 				</Button>
 			</div>
-		{/each}
-	</div>
+		</div>
 
-	<!-- Add Condition Button -->
-	<Button type="button" variant="outline" onclick={addCondition} class="mt-4">
-		<Icon icon="mdi:plus" class="mr-2 h-4 w-4" />
-		Add Condition
-	</Button>
+		<!-- Tree visual (interactive) -->
+		<div class="space-y-2">
+			<TreeNode
+				node={treeRoot}
+				path={[]}
+				fields={getAllFields()}
+				{operators}
+				onAddLogical={(p) => addLogicalAt(p)}
+				onAddGroup={(p, op) => addGroupAtWithOperator(p, op)}
+				onRemove={(p) => removeAt(p)}
+				onChangeGroupOperator={(p, op) => onChangeGroupOperator(p, op)}
+				onChangeLeafField={(p, v) => onChangeLeafField(p, v)}
+				onChangeLeafOperator={(p, v) => onChangeLeafOperator(p, v)}
+				onChangeLeafValue={(p, v) => onChangeLeafValue(p, v)}
+				{collapsedByPath}
+				onToggleCollapse={(p) => toggleCollapse(p)}
+			/>
+		</div>
+	</div>
 
 	<!-- Error Display -->
 	{#if errors.general}
-		<div class="mt-4 rounded-md border border-red-200 bg-red-50 p-3">
+		<div class="rounded-md border border-red-200 bg-red-50 p-3">
 			<p class="text-sm text-red-600">{errors.general}</p>
 		</div>
 	{/if}

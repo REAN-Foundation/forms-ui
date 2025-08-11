@@ -9,7 +9,6 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import Sections from './Sections.svelte';
 	import { writable } from 'svelte/store';
-	import AlertDialogOverlay from '$lib/components/ui/alert-dialog/alert-dialog-overlay.svelte';
 	////////////////////////////////////////////////////////////////////////////
 
 	let {
@@ -26,7 +25,7 @@
 		closeSheet
 	} = $props();
 
-	// $inspect(uiSections, 'Here is the uiSections');
+	$inspect('uiSections FROM SECTIONS.SVELTE', uiSections);
 
 	let cardToDelete = $state('');
 

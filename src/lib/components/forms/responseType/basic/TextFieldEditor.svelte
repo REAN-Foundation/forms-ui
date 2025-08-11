@@ -20,6 +20,8 @@
 		questionList
 	} = $props();
 
+	$inspect('questionCard FROM TEXT FIELD EDITOR', questionCard);
+
 	async function handleSubmit(event) {
 		event.preventDefault();
 		console.log(questionCard.Title);

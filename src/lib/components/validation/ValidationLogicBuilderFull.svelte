@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { Button } from '../ui/button/index.js';
-	import { Input } from '../ui/input/index.js';
-	import { Label } from '../ui/label/index.js';
-	import * as Select from '../ui/select/index.js';
-	import Icon from '@iconify/svelte';
-	import { Textarea } from '../ui/textarea/index.js';
-	import RegexValidation from './RegexValidationRule.svelte';
-	import LogicalValidation from './LogicalValidationRule.svelte';
-	import CompositeValidation from './CompositeValidationRule.svelte';
+    import { Button } from '../ui/button/index.js';
+    import { Input } from '../ui/input/index.js';
+    import { Label } from '../ui/label/index.js';
+    import * as Select from '../ui/select/index.js';
+    import Icon from '@iconify/svelte';
+    import { Textarea } from '../ui/textarea/index.js';
+	import RegexValidationRule from './RegexValidationRule.svelte';
+	import LogicalValidationRule from './LogicalValidationRule.svelte';
+	import CompositeValidationRule from './CompositeValidationRule.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { toastMessage } from '../toast/toast.store.js';
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Props
+    // Props
 	let {
 		isOpen = $bindable(false),
 		onSave,
@@ -23,46 +23,29 @@
 		questionList
 	} = $props();
 
-	// Derived state
+	// State
 	let isEditing = $derived(!!editingRule);
 	let shouldTriggerSave = $state(false);
+	let errors = $state({} as Record<string, string>);
 
-	// Function to reset trigger flag
-	function resetTriggerFlag() {
-		shouldTriggerSave = false;
-	}
-
-	let logicId = $state(currentField?.ValidateLogic?.id || '');
-	let ruleId = $state(null);
-	// Validation errors state
-	let errors = $state({} as Record<string, any>);
-
-	// State for form data
-	let ruleName = $state(currentField?.ValidateLogic?.Title || '');
+	// Form fields
+	let ruleName = $state('');
 	let ruleDescription = $state('');
 	let rulePriority = $state(1);
-	let activeTab = $state('regex');
-	let selectedField = $state(null);
-	let activeRegexPreset = $state('email');
-	let regexPattern = $state('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
-	let testInput = $state('user@example.com');
-	let testResult = $state('✓ Pattern matches the test input');
-	let testResultClass = $state('success');
+	let activeTab = $state('regex'); // Default to regex
+	let selectedField = $state('');
+	let activeRegexPreset = $state('');
+	let regexPattern = $state('');
+	let testInput = $state('');
+	let testResult = $state('');
+	let testResultClass = $state('');
 	let messageSeverity = $state('error');
-	let errorMessage = $state(
-		'Please enter a valid email address and ensure you are at least 18 years old.'
-	);
-	let successMessage = $state('All validation checks passed successfully!');
-	let fallbackAction = $state('Allow submission with warning');
+	let errorMessage = $state('');
+	let successMessage = $state('');
+	let fallbackAction = $state('');
 
-	// Logical validation conditions
+	// Logical validation fields
 	let conditions = $state([
-		{ field: 'Select Field', operator: '', value: '', connector: '' }
-		// { field: 'Select Field', operator: 'Greater Than', value: '10', connector: 'AND' }
-	]);
-
-	// Composite validation conditions
-	let compositeConditions = $state([
 		{
 			field: '',
 			operator: '',
@@ -71,135 +54,263 @@
 		}
 	]);
 
-	// Composite validation state
-	let compositeOperator = $state('');
+	// Composite validation fields
+	let compositeConditions = $state([
+		{
+			field: '',
+			operator: '',
+			value: '',
+			connector: ''
+		}
+	]);
+	let compositeOperator = $state('And');
 
-	// Effect to populate form fields when editing a rule
+	// Validation logic and rule IDs
+	let logicId = $state(currentField?.ValidateLogic?.id || '');
+	let ruleId = $state('');
+
+	// Validation type selection
+	let selectedValidationType = $state('regex'); // 'regex' or 'logical'
+
+	// Function to reset trigger flag
+	function resetTriggerFlag() {
+		shouldTriggerSave = false;
+	}
+
+	function resetForCreate() {
+		// Reset rule metadata
+		ruleName = '';
+		ruleDescription = '';
+		rulePriority = 1;
+		messageSeverity = 'error';
+		errorMessage = '';
+		successMessage = '';
+		fallbackAction = '';
+		// Reset type-specific fields
+		selectedValidationType = 'regex';
+		activeTab = 'regex';
+		selectedField = '';
+		activeRegexPreset = '';
+		regexPattern = '';
+		testInput = '';
+		testResult = '';
+		testResultClass = '';
+		conditions = [
+			{ field: '', operator: '', value: '', connector: '' }
+		];
+		compositeConditions = [
+			{ field: '', operator: '', value: '', connector: '' }
+		];
+		compositeOperator = 'And';
+		// Keep logicId from currentField if present; do not reset it
+		ruleId = '';
+		errors = {} as Record<string, string>;
+	}
+
+	// Function to show specific tab
+	function showTab(tabName: string) {
+		if (!isEditing) {
+			activeTab = tabName;
+		}
+	}
+
+	// Effect to initialize form per mode (edit/create) when modal opens
 	$effect(() => {
-		if (editingRule) {
-			console.log('Populating form with editing rule:', editingRule);
-			console.log('Original rule data:', editingRule.originalRule);
+		if (!isOpen) return;
+		if (isEditing && editingRule) {
+			console.log('Populating form with editing data:', editingRule);
 
-			// Populate basic rule information
-			ruleName = editingRule.ruleName || '';
-			ruleDescription = editingRule.description || '';
-			rulePriority = editingRule.priority || 1;
-			errorMessage = editingRule.errorMessage || '';
-			messageSeverity = editingRule.messageSeverity || 'error';
-			successMessage = editingRule.successMessage || '';
-			fallbackAction = editingRule.fallbackAction || '';
+			// Extract rule data
+			const originalRule = editingRule.originalRule;
+			if (originalRule) {
+				ruleName = originalRule.Name || originalRule.name || '';
+				ruleDescription = originalRule.Description || originalRule.description || '';
+				rulePriority = originalRule.Priority || originalRule.priority || 1;
+				errorMessage = originalRule.ErrorMessage || originalRule.errorMessage || '';
+				messageSeverity = originalRule.MessageSeverity || originalRule.messageSeverity || 'error';
+				successMessage = originalRule.SuccessMessage || originalRule.successMessage || '';
+				fallbackAction = originalRule.FallbackAction || originalRule.fallbackAction || '';
 
-			// Set the active tab based on the rule type
-			activeTab = editingRule.activeTab || 'logical';
-
-			// Populate based on rule type
-			if (editingRule.activeTab === 'regex') {
-				// Handle regex rule
-				regexPattern =
-					editingRule.regexPattern || '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
-				// Find the selected field object from questionList
-				if (editingRule.selectedField && questionList) {
-					// Handle different types of selectedField data
-					if (typeof editingRule.selectedField === 'string') {
-						// If selectedField is a string (like "Email" or "Q1"), try to find by title or display code
-						selectedField =
-							questionList.find(
-								(field) =>
-									field.Title === editingRule.selectedField ||
-									field.DisplayCode === editingRule.selectedField ||
-									field.id === editingRule.selectedField
-							) || null;
-					} else if (editingRule.selectedField.id || editingRule.selectedField.DisplayCode) {
-						// If selectedField is an object with id or DisplayCode
-						selectedField =
-							questionList.find(
-								(field) =>
-									field.id === editingRule.selectedField.id ||
-									field.DisplayCode === editingRule.selectedField.DisplayCode
-							) || null;
-					} else {
-						selectedField = null;
+				// Determine validation type based on operation type
+				if (originalRule.Operation?.Type === 'FunctionExpression') {
+					selectedValidationType = 'regex';
+					
+					// Extract regex pattern from variables
+					if (originalRule.Operation.Variables) {
+						try {
+							const variables = typeof originalRule.Operation.Variables === 'string' 
+								? JSON.parse(originalRule.Operation.Variables) 
+								: originalRule.Operation.Variables;
+							
+							if (variables.regex?.Value) {
+								regexPattern = variables.regex.Value;
+							}
+							
+							if (variables.input?.FieldId) {
+								selectedField = variables.input.FieldId;
+							}
+						} catch (e) {
+							console.error('Error parsing operation variables:', e);
+						}
 					}
-				} else {
-					selectedField = null;
-				}
-
-				// Determine which regex preset is active
-				const patterns = {
-					email: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
-					phone: '^\\+?1?[-\\.\\s]?\\(?[0-9]{3}\\)?[-\\.\\s]?[0-9]{3}[-\\.\\s]?[0-9]{4}$',
-					url: '^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$',
-					number: '^[0-9]+$',
-					alphanumeric: '^[a-zA-Z0-9]+$'
-				};
-
-				for (const [preset, pattern] of Object.entries(patterns)) {
-					if (pattern === regexPattern) {
-						activeRegexPreset = preset;
-						break;
+				} else if (originalRule.Operation?.Type === 'Logical' || originalRule.Operation?.Type === 'Composition') {
+					selectedValidationType = 'logical';
+					
+					// Parse operands for logical operations
+					if (originalRule.Operation.Operands) {
+						try {
+							const operands = typeof originalRule.Operation.Operands === 'string' 
+								? JSON.parse(originalRule.Operation.Operands) 
+								: originalRule.Operation.Operands;
+							
+							if (Array.isArray(operands) && operands.length > 0) {
+								conditions = [{
+									field: operands[0]?.FieldId || '',
+									operator: originalRule.Operation.Operator || '',
+									value: operands[1]?.Value || '',
+									connector: ''
+								}];
+							}
+						} catch (e) {
+							console.error('Error parsing operation operands:', e);
+						}
+					}
+					
+					// Parse children for composition operations
+					if (originalRule.Operation.Children) {
+						try {
+							const children = typeof originalRule.Operation.Children === 'string' 
+								? JSON.parse(originalRule.Operation.Children) 
+								: originalRule.Operation.Children;
+							
+							if (Array.isArray(children) && children.length > 0) {
+								compositeConditions = children.map((child: any) => ({
+									field: child?.FieldId || '',
+									operator: child?.Operator || '',
+									value: child?.Value || '',
+									connector: ''
+								}));
+								compositeOperator = originalRule.Operation.Operator || 'And';
+							}
+						} catch (e) {
+							console.error('Error parsing operation children:', e);
+						}
 					}
 				}
-				if (!patterns[activeRegexPreset]) {
-					activeRegexPreset = 'custom';
-				}
-			} else if (editingRule.activeTab === 'logical') {
-				// Handle logical rule
-				if (editingRule.conditions && editingRule.conditions.length > 0) {
-					conditions = editingRule.conditions.map((condition) => ({
-						field: condition.field || '',
-						operator: condition.operator || '',
-						value: condition.value || '',
-						connector: condition.connector || ''
-					}));
-				}
-			} else if (editingRule.activeTab === 'composite') {
-				// Handle composite rule
-				if (editingRule.compositeConditions && editingRule.compositeConditions.length > 0) {
-					compositeConditions = editingRule.compositeConditions.map((condition) => ({
-						field: condition.field || '',
-						operator: condition.operator || '',
-						value: condition.value || '',
-						connector: condition.connector || ''
-					}));
-				}
-				compositeOperator = editingRule.compositeOperator || '';
 			}
-		} else {
-			// Reset form when not editing
-			ruleName = '';
-			ruleDescription = '';
-			rulePriority = 1;
-			activeTab = 'regex';
-			selectedField = null;
-			activeRegexPreset = 'email';
-			regexPattern = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
-			errorMessage = 'Please enter a valid email address and ensure you are at least 18 years old.';
-			messageSeverity = 'error';
-			successMessage = 'All validation checks passed successfully!';
-			fallbackAction = 'Allow submission with warning';
-			conditions = [
-				{ field: '', operator: '', value: '', connector: '' }
-				// { field: 'Select Field', operator: 'Greater Than', value: '10', connector: 'AND' }
-			];
-			compositeConditions = [
-				{
-					field: '',
-					operator: '',
-					value: '',
-					connector: ''
-				}
-			];
-			compositeOperator = '';
+		} else if (!isEditing) {
+			// Ensure clean state when creating new
+			resetForCreate();
 		}
 	});
 
-	function showTab(tabName: string) {
-		activeTab = tabName;
+	// Async function to fetch composite conditions
+	async function fetchCompositeConditions(children: string[]) {
+		const fetchedConditions = [];
+		
+		for (const operationId of children) {
+			try {
+				// Fetch the logical operation details
+				const response = await fetch(`/api/server/operations/logical-operation/${operationId}`);
+				if (response.ok) {
+					const operationData = await response.json();
+					const operation = operationData.Data;
+					
+					// Parse the operands to extract field, operator, and value
+					if (operation.Operands) {
+						const operands = JSON.parse(operation.Operands);
+						
+						// Extract field information from first operand
+						let fieldTitle = '';
+						if (operands[0] && operands[0].Type === 'FieldReference') {
+							// Find the field in questionList
+							for (const section of questionList) {
+								for (const field of section.FormFields) {
+									if (field.id === operands[0].FieldId || field.DisplayCode === operands[0].FieldCode) {
+										fieldTitle = field.Title || field.DisplayCode;
+										break;
+									}
+								}
+								if (fieldTitle) break;
+							}
+						}
+						
+						// Map operator back to display name
+						let operatorDisplay = '';
+						switch (operation.Operator) {
+							case 'Equal':
+								operatorDisplay = 'Equal To';
+								break;
+							case 'NotEqual':
+								operatorDisplay = 'Not Equal To';
+								break;
+							case 'GreaterThan':
+								operatorDisplay = 'Greater Than';
+								break;
+							case 'LessThan':
+								operatorDisplay = 'Less Than';
+								break;
+							case 'GreaterThanOrEqual':
+								operatorDisplay = 'Greater Than or Equal';
+								break;
+							case 'LessThanOrEqual':
+								operatorDisplay = 'Less Than or Equal';
+								break;
+							case 'Contains':
+								operatorDisplay = 'Contains';
+								break;
+							case 'DoesNotContain':
+								operatorDisplay = 'Does Not Contain';
+								break;
+							case 'Exists':
+								operatorDisplay = 'Is Not Empty';
+								break;
+							case 'IsTrue':
+								operatorDisplay = 'Is True';
+								break;
+							case 'IsFalse':
+								operatorDisplay = 'Is False';
+								break;
+							default:
+								operatorDisplay = 'Equal To';
+						}
+						
+						// Extract value from second operand if it exists
+						let value = '';
+						if (operands[1] && operands[1].Type === 'Constant') {
+							value = operands[1].Value || '';
+						}
+						
+						fetchedConditions.push({
+							field: fieldTitle,
+							operator: operatorDisplay,
+							value: value,
+							connector: ''
+						});
+					}
+				}
+			} catch (fetchError) {
+				console.error(`Error fetching operation ${operationId}:`, fetchError);
+			}
+		}
+		
+		// Set the populated conditions
+		if (fetchedConditions.length > 0) {
+			compositeConditions = fetchedConditions;
+		} else {
+			// Fallback to empty condition if fetching failed
+			compositeConditions = [{
+				field: '',
+				operator: '',
+				value: '',
+				connector: ''
+			}];
+		}
 	}
 
 	function setSeverity(severity: string) {
-		messageSeverity = severity;
-	}
+        messageSeverity = severity;
+    }
 
 	function handleCancel() {
 		isOpen = false;
@@ -208,27 +319,43 @@
 
 	// Handler functions for child component callbacks
 	function handleRegexOperationCreated(event: CustomEvent) {
-		console.log('Regex operation created:', event.detail);
+		console.log('Regex operation created/updated:', event.detail);
 		resetTriggerFlag();
-		// Call parent's onSave with the operation data
-		handleSubmit(event.detail);
+		
+		// If this is an edit operation, close modal directly
+		if (event.detail.isEdit) {
+			isOpen = false;
+			onSave?.();
+			invalidateAll();
+		} else {
+			// Call parent's onSave with the operation data for creation
+			handleSubmit(event.detail);
+		}
 	}
 
 	function handleLogicalOperationsCreated(event: CustomEvent) {
-		console.log('Logical operations created:', event.detail);
-		resetTriggerFlag();
-		// Call parent's onSave with the operation data
+		console.log('Received logical operations data from child:', event.detail);
+		shouldTriggerSave = false;
 		handleSubmit(event.detail);
 	}
 
 	function handleCompositeCompositionCreated(event: CustomEvent) {
-		console.log('Composite composition created:', event.detail);
+		console.log('Composite composition created/updated:', event.detail);
 		resetTriggerFlag();
-		// Call parent's onSave with the operation data
-		handleSubmit(event.detail);
+		
+		// If this is an edit operation, close modal directly
+		if (event.detail.isEdit) {
+			isOpen = false;
+			onSave?.();
+			invalidateAll();
+		} else {
+			// Call parent's onSave with the operation data for creation
+			handleSubmit(event.detail);
+		}
 	}
 
 	async function handleSubmit(operationData: any) {
+		console.log('handleSubmit called with operationData:', operationData);
 		try {
 			// Reset errors
 			errors = {};
@@ -244,9 +371,12 @@
 				return;
 			}
 
+			console.log('Starting validation logic creation process...');
+
 			if (!logicId) {
 				// Step 1: Create new validation logic if it doesn't exist
 				try {
+					console.log('Creating new validation logic for field:', currentField?.id);
 					// Create new validation logic
 					const logicData = {
 						FieldId: currentField?.id,
@@ -275,6 +405,7 @@
 			}
 
 			// Step 2: Create validation rule
+			console.log('Creating validation rule with operationData:', operationData);
 
 			if (operationData) {
 				// This is a replacement, so we need to create a new rule
@@ -289,6 +420,8 @@
 					ErrorMessage: errorMessage,
 					LogicId: logicId
 				};
+
+				console.log('Rule data to create:', ruleData);
 
 				const ruleResponse = await fetch('/api/server/rules/validation-rule', {
 					method: 'POST',
@@ -309,10 +442,18 @@
 
 			// Step 3: Update form field with validation logic ID (only if we created a new logic)
 			if (logicId && ruleId) {
+				console.log('Updating field with validation logic:', {
+					fieldId: currentField?.id,
+					logicId: logicId,
+					ruleId: ruleId
+				});
+				
 				const fieldUpdateData = {
 					id: currentField?.id,
 					ValidateLogicId: logicId
 				};
+
+				console.log('Field update data:', fieldUpdateData);
 
 				const fieldResponse = await fetch(`/api/server/form-fields`, {
 					method: 'PUT',
@@ -320,36 +461,47 @@
 					headers: { 'content-type': 'application/json' }
 				});
 
+				console.log('Field update response status:', fieldResponse.status);
+
 				if (!fieldResponse.ok) {
 					const errorData = await fieldResponse.json();
+					console.error('Field update error:', errorData);
 					toastMessage(errorData);
-					// throw new Error(errorData.Message || 'Failed to update form field with validation logic');
+					throw new Error(errorData.Message || 'Failed to update form field with validation logic');
 				} else {
 					const fieldResponseData = await fieldResponse.json();
+					console.log('Field update success:', fieldResponseData);
 					toastMessage(fieldResponseData);
 					console.log('Form field updated with validation logic');
 				}
+			} else {
+				console.log('Skipping field update - missing logicId or ruleId:', { logicId, ruleId });
 			}
 
 			// Show success toast message
-			// const fieldResponseData = await fieldResponse.json();
-			// toastMessage(fieldResponseData);
+			toastMessage({
+				Success: true,
+				Message: 'Validation rule created successfully!'
+			});
 
+			// Close modal on successful operation
+			isOpen = false;
 			onSave?.();
 			invalidateAll();
 		} catch (error) {
 			console.error('Error in handleSubmit:', error);
 			errors.general = error.message;
 		}
-	}
+		invalidateAll();
+    }
 </script>
 
 {#if isOpen}
-	<!-- Modal Overlay -->
+    <!-- Modal Overlay -->
 	<div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-		<!-- Modal -->
+        <!-- Modal -->
 		<div class="flex max-h-[90vh] w-[90%] max-w-4xl flex-col rounded-lg bg-white shadow-2xl">
-			<!-- Modal Header -->
+            <!-- Modal Header -->
 			<div
 				class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-8 py-5"
 			>
@@ -362,11 +514,11 @@
 					class="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
 					<Icon icon="mdi:close" class="h-5 w-5" />
-				</button>
-			</div>
-
-			<!-- Modal Body -->
-			<div class="flex-1 overflow-y-auto p-8">
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-8">
 				<!-- General Error Display -->
 				{#if errors.general}
 					<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
@@ -386,11 +538,11 @@
 					</div>
 				{/if}
 
-				<!-- Rule Name -->
+                <!-- Rule Name -->
 				<div class="mb-4">
 					<Label class="mb-2 block font-semibold text-slate-700">Rule Name</Label>
-					<Input
-						bind:value={ruleName}
+                    <Input 
+                        bind:value={ruleName}
 						placeholder="Enter validation rule name"
 						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 					/>
@@ -407,7 +559,7 @@
 				</div>
 
 				<!-- Rule Priority -->
-				<div class="mb-4">
+				<!-- <div class="mb-4">
 					<Label class="mb-2 block font-semibold text-slate-700">Priority</Label>
 					<Input
 						type="number"
@@ -416,45 +568,30 @@
 						max="10"
 						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 					/>
+                </div> -->
+
+                <!-- Validation Type Selection -->
+				<div class="mb-6">
+					<Label class="mb-2 block font-semibold text-slate-700">Validation Type</Label>
+					<Select.Root type="single" bind:value={selectedValidationType} disabled={isEditing}>
+						<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
+							{selectedValidationType === 'regex' ? 'Regex Pattern Validation' : 'Logical Condition Validation'}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="regex">Regex Pattern Validation</Select.Item>
+							<Select.Item value="logical">Logical Condition Validation</Select.Item>
+						</Select.Content>
+					</Select.Root>
+					{#if isEditing}
+						<p class="mt-1 text-sm text-blue-600">
+							💡 Validation type cannot be changed while editing
+						</p>
+					{/if}
 				</div>
 
-				<!-- Validation Type Tabs -->
-				<div class="mb-5 flex border-b-2 border-gray-200">
-					<button
-						type="button"
-						class="border-b-3 px-6 py-3 font-semibold transition-all duration-200 {activeTab ===
-						'regex'
-							? 'border-blue-500 text-slate-700'
-							: 'border-transparent text-gray-500 hover:text-slate-700'}"
-						onclick={() => showTab('regex')}
-					>
-						Regex Validation
-					</button>
-					<button
-						type="button"
-						class="border-b-3 px-6 py-3 font-semibold transition-all duration-200 {activeTab ===
-						'logical'
-							? 'border-blue-500 text-slate-700'
-							: 'border-transparent text-gray-500 hover:text-slate-700'}"
-						onclick={() => showTab('logical')}
-					>
-						Logical Validation
-					</button>
-					<button
-						type="button"
-						class="border-b-3 px-6 py-3 font-semibold transition-all duration-200 {activeTab ===
-						'composite'
-							? 'border-blue-500 text-slate-700'
-							: 'border-transparent text-gray-500 hover:text-slate-700'}"
-						onclick={() => showTab('composite')}
-					>
-						Composite Validation
-					</button>
-				</div>
-
-				<!-- Tab Content -->
-				{#if activeTab === 'regex'}
-					<RegexValidation
+                <!-- Validation Type Content -->
+				{#if selectedValidationType === 'regex'}
+					<RegexValidationRule
 						{isEditing}
 						{editingRule}
 						{currentField}
@@ -463,145 +600,116 @@
 						{ruleDescription}
 						{activeRegexPreset}
 						{regexPattern}
-						bind:shouldTriggerSave
+						{selectedField}
 						{handleRegexOperationCreated}
+						{shouldTriggerSave}
 					/>
-				{:else if activeTab === 'logical'}
-					<LogicalValidation
+				{:else if selectedValidationType === 'logical'}
+					<LogicalValidationRule
 						{isEditing}
 						{editingRule}
 						{currentField}
-						{questionList}
 						{ruleName}
 						{ruleDescription}
+						{questionList}
 						{conditions}
-						bind:shouldTriggerSave
+						{shouldTriggerSave}
 						{handleLogicalOperationsCreated}
-					/>
-				{:else if activeTab === 'composite'}
-					<CompositeValidation
-						{isEditing}
-						{editingRule}
-						{currentField}
-						{questionList}
-						{ruleName}
-						{ruleDescription}
-						{compositeConditions}
-						{compositeOperator}
-						bind:shouldTriggerSave
-						{handleCompositeCompositionCreated}
 					/>
 				{/if}
 
-				<!-- Validation Messages Section -->
+                <!-- Validation Messages Section -->
 				<div class="mb-5 rounded-md border-2 border-gray-200 bg-white p-4">
 					<h3 class="mb-4 font-medium text-slate-700">Validation Messages</h3>
-
-					<div class="mb-4">
+                    
+                    <div class="mb-4">
 						<Label class="mb-2 block font-semibold text-slate-700">Message Severity</Label>
 						<div class="mb-4 flex gap-2">
-							<Button
-								type="button"
-								class="py- cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity ===
-								'error'
+                            <Button 
+                                type="button"
+								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'error'
 									? 'scale-105 border-red-300 bg-red-100 text-red-800 shadow-sm'
 									: 'border-red-300 bg-red-100 text-red-800'}"
-								onclick={() => setSeverity('error')}
-							>
-								Error
-							</Button>
-							<Button
-								type="button"
-								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
-								'warning'
+                                onclick={() => setSeverity('error')}
+                            >
+                                Error
+                            </Button>
+                            <Button 
+                                type="button"
+								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'warning'
 									? 'scale-105 border-yellow-300 bg-yellow-100 text-yellow-800 shadow-sm'
 									: 'border-yellow-300 bg-yellow-100 text-yellow-800'}"
-								onclick={() => setSeverity('warning')}
-							>
-								Warning
-							</Button>
-							<Button
-								type="button"
-								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
-								'info'
+                                onclick={() => setSeverity('warning')}
+                            >
+                                Warning
+                            </Button>
+                            <Button 
+                                type="button"
+								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'info'
 									? 'scale-105 border-blue-300 bg-blue-100 text-blue-800 shadow-sm'
 									: 'border-blue-300 bg-blue-100 text-blue-800'}"
-								onclick={() => setSeverity('info')}
-							>
-								Info
-							</Button>
-						</div>
-					</div>
+                                onclick={() => setSeverity('info')}
+                            >
+                                Info
+                            </Button>
+                        </div>
+                    </div>
 
-					<div class="mb-4">
+                    <div class="mb-4">
 						<Label class="mb-2 block font-semibold text-slate-700">Error Message</Label>
-						<Textarea
+						<Textarea 
 							bind:value={errorMessage}
-							placeholder="Enter validation error message"
-							class="h-24 w-full resize-y rounded-md border-2 border-gray-200 p-3 text-sm "
-						></Textarea>
-					</div>
+							placeholder="Enter validation error message" 
+							class="w-full rounded-md border-2 border-gray-200 p-3 text-sm h-24 resize-vertical"
+						/>
+                    </div>
 
-					<div class="mb-4">
-						<Label class="mb-2 block font-semibold text-slate-700">Success Message (Optional)</Label
-						>
-						<Textarea
+                    <div class="mb-4">
+						<Label class="mb-2 block font-semibold text-slate-700">Success Message (Optional)</Label>
+						<Textarea 
 							bind:value={successMessage}
-							placeholder="Enter validation success message"
-							class="h-24 w-full resize-y rounded-md border-2 border-gray-200 p-3 text-sm "
-						></Textarea>
+							placeholder="Enter validation success message" 
+							class="w-full rounded-md border-2 border-gray-200 p-3 text-sm h-24 resize-vertical"
+						/>
+                    </div>
+                </div>
+
+                <!-- Fallback Section -->
+				<div class="mb-5 rounded-md border border-yellow-200 bg-yellow-50 p-4">
+					<div class="font-semibold text-yellow-800 mb-2">Fallback Rule (Optional)</div>
+					<div class="mb-4">
+						<Select.Root type="single" bind:value={fallbackAction}>
+							<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
+								{fallbackAction || 'Select fallback action'}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="Allow submission with warning">Allow submission with warning</Select.Item>
+								<Select.Item value="Block submission">Block submission</Select.Item>
+								<Select.Item value="Skip validation">Skip validation</Select.Item>
+								<Select.Item value="Apply default value">Apply default value</Select.Item>
+							</Select.Content>
+						</Select.Root>
 					</div>
-				</div>
+                </div>
+            </div>
 
-				<!-- Fallback Section -->
-				<div class="mt-5 rounded-md border border-yellow-300 bg-yellow-50 p-4">
-					<div class="mb-2 font-semibold text-yellow-800">Fallback Rule (Optional)</div>
-					<Select.Root type="single" name="FallbackAction" bind:value={fallbackAction}>
-						<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm ">
-							{fallbackAction}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="Allow submission with warning"
-								>Allow submission with warning</Select.Item
-							>
-							<Select.Item value="Block submission">Block submission</Select.Item>
-							<Select.Item value="Skip validation">Skip validation</Select.Item>
-							<Select.Item value="Apply default value">Apply default value</Select.Item>
-						</Select.Content>
-					</Select.Root>
-				</div>
-			</div>
-
-			<!-- Modal Footer -->
-			<div class="flex flex-shrink-0 justify-end gap-2 border-t border-gray-200 px-8 py-5">
-				<Button
-					type="button"
+            <!-- Modal Footer -->
+			<div class="border-t border-gray-200 p-5 flex justify-end gap-3">
+				<Button 
+					variant="outline" 
 					onclick={handleCancel}
-					variant="outline"
-					class="rounded-md border border-gray-300 bg-gray-50 px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-100"
+					class="px-6 py-3 rounded-md font-semibold text-gray-600 border border-gray-300 hover:bg-gray-50"
 				>
 					Cancel
 				</Button>
-				<Button
-					type="button"
-					onclick={() => {
-						// Validate common fields first
-						if (!ruleName.trim()) {
-							errors.ruleName = 'Rule name is required';
-							return;
-						}
-						if (!errorMessage.trim()) {
-							errors.errorMessage = 'Error message is required';
-							return;
-						}
-						// If validation passes, trigger the child component save/edit
-						shouldTriggerSave = true;
-					}}
-					class="rounded-md bg-slate-700 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+				<Button 
+					variant="default" 
+					onclick={() => shouldTriggerSave = true}
+					class="px-6 py-3 rounded-md font-semibold bg-slate-700 text-white hover:bg-slate-800"
 				>
-					{editingRule ? 'Save Validation Rule' : 'Create Validation Rule'}
+					Save Validation Rule
 				</Button>
 			</div>
-		</div>
-	</div>
+        </div>
+    </div>
 {/if}

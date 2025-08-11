@@ -35,7 +35,7 @@
 		questionList = $bindable()
 	} = $props();
 
-	// console.log('question card', questionCard);
+	$inspect('question card FROM FORM HELPER', questionCard);
 </script>
 
 <div class="relative">

@@ -25,4 +25,4 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     } catch (error) {
         console.error(`Error retriving assessment templates: ${error}`);
     }
-}
+};

@@ -1,7 +1,7 @@
 import { BACKEND_API_URL } from '$env/static/private';
 import { delete_, get_, post_, put_ } from './common';
 
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 
 export const createFormTemplate = async (
 	id: string,
