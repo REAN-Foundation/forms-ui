@@ -14,8 +14,15 @@
 	import Icon from '@iconify/svelte';
 	import { IndexedDB } from '$lib/utils/indexedDB';
 	import { page } from '$app/state';
+	import { FormRuleExecutor } from './engine';
 
 	let { data }: { data: PageServerData } = $props();
+
+	console.log('Data is ', data);
+
+	//     const form = createMedicalAssessmentForm();
+    // const executor = new FormRuleExecutor(form);
+
 	const formSubmissionKey = page.params.id;
 	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
 	let templateInfo = $state(data.assessmentTemplate);
