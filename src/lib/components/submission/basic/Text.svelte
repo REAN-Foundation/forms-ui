@@ -5,7 +5,7 @@
 	///////////////////////////////////////////////////////////////////////////
 
     let { q, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
-    import { backendSectionsToEngineForm, FormRuleExecutor } from '../../../../routes/form/submission/[id]/engine';
+    import { backendSectionsToEngineForm, FormRuleExecutor } from '../engine';
     import { getContext } from 'svelte';
     
     // Allow parent to pass sections via context for evaluation

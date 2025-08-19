@@ -27,7 +27,7 @@
 		OperationType,
 		OperandType,
 		OperandDataType
-	} from '../../../routes/form/submission/[id]/engine'; // adjust path
+	} from './engine'; // adjust path
 
 	let { sections, answers = $bindable(), errors = $bindable(), isSubmitted } = $props();
 
@@ -90,13 +90,14 @@
 		function traverse(sections) {
 			sections?.forEach((sec) => {
 				sec.FormFields?.forEach((f) => {
+					const key = f.FieldId || f.id;
 					fields.push({
-						FieldId: f.FieldId || f.id,
+						FieldId: key,
 						Name: f.Title,
 						Label: f.Title,
 						ResponseType: f.ResponseType,
 						Required: f.IsRequired,
-						Value: answers[f.FieldId] ?? null,
+						Value: answers[key] ?? null,
 						SkipLogic: f.SkipLogic ? { ...f.SkipLogic, Rules: f.SkipLogic.Rules?.map((r) => ({ ...r, Operation: normalizeOperation(r.Operation) })) } : null,
 						CalculateLogic: f.CalculateLogic ? { ...f.CalculateLogic, Rules: f.CalculateLogic.Rules?.map((r) => ({ ...r, Operation: normalizeOperation(r.Operation), ConditionForOperation: r.ConditionForOperation ? normalizeOperation(r.ConditionForOperation) : undefined })) } : null,
 						// ✅ Preserve all validation rules + operations
@@ -126,7 +127,11 @@
 	$effect(() => {
 		const form = mapBackendToForm(sections);
 		executor = new FormRuleExecutor(form);
-		// initial compute only for visibility; errors won't show until touched
+		// Seed current answers into executor at initialization
+		for (const field of form.Fields) {
+			const v = answers[field.FieldId];
+			if (v !== undefined) executor.setFieldValue(field.FieldId, v);
+		}
 		runAllLogics();
 	});
 
@@ -151,6 +156,14 @@
 			if (touched.has(fid) && val !== null && val !== undefined && val !== '') {
 				if (Array.isArray(msgs) && msgs.length > 0) {
 					nextErrors[fid] = msgs[0];
+					// console.log('nextErrors', nextErrors);
+					// console.log('fid', fid);
+					// console.log('msgs', msgs);
+					// console.log('val', val);
+					console.log('touched', touched);
+					// console.log('answers', answers);
+					// console.log('formErrors', formErrors);
+					// console.log('errors', errors);
 				}
 			}
 		}
@@ -162,6 +175,7 @@
 		const current = answers || {};
 		let anyChanged = false;
 		for (const fid of Object.keys(current)) {
+			executor.setFieldValue(fid, current[fid]);
 			if (prevAnswers[fid] !== current[fid]) {
 				touched.add(fid);
 				anyChanged = true;
@@ -169,6 +183,7 @@
 		}
 		prevAnswers = { ...current };
 		if (anyChanged) {
+			// executor.setFieldValue(fid, answers[fid]);
 			runAllLogics();
 		}
 	});
@@ -242,14 +257,13 @@
 					{@const fid = sq.FieldId || sq.id}
 					{@const Component = componentsMap[sq.ResponseType]}
 					{#if visible.has(fid)}
-						<div class="mt-2 border p-3">
-							<Component
-								q={sq}
-								bind:answers
-								bind:errors
-								{isSubmitted}
-								oninput={(e) => handleAnswerChange(fid, e.detail?.value ?? e.target?.value)}
-							/>
+                        <div class="mt-2 border p-3">
+                            <Component
+                                q={sq}
+                                bind:answers
+                                bind:errors
+                                {isSubmitted}
+                            />
 							<!-- {#if errors[fid]}
 								<p class="text-sm text-red-500">{errors[fid]}</p>
 							{/if} -->

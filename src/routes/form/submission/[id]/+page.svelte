@@ -1,4 +1,3 @@
-
 <script lang="ts">
 	import type { PageServerData } from './$types';
 	// import { page } from '$app/stores';
@@ -14,14 +13,13 @@
 	import Icon from '@iconify/svelte';
 	import { IndexedDB } from '$lib/utils/indexedDB';
 	import { page } from '$app/state';
-	import { FormRuleExecutor } from './engine';
 
 	let { data }: { data: PageServerData } = $props();
 
 	console.log('Data is ', data);
 
 	//     const form = createMedicalAssessmentForm();
-    // const executor = new FormRuleExecutor(form);
+	// const executor = new FormRuleExecutor(form);
 
 	const formSubmissionKey = page.params.id;
 	let section = $state(data.assessmentTemplate.FormSections[0].Subsections);
@@ -73,7 +71,7 @@
 
 	$effect(() => {
 		if (submissionStatus === 'Submitted') {
-			isSubmitted = true; 
+			isSubmitted = true;
 		}
 		console.log('Question response data is ', questionResponseData);
 		answers = Object.fromEntries(
@@ -341,7 +339,6 @@
 	}
 </script>
 
-
 <div class="flex flex-row">
 	<div class="mx-auto mt-20 flex h-screen w-[80%] rounded-sm p-1">
 		<form onsubmit={handleSave} class="mx-auto w-[80%] space-y-3">
@@ -354,9 +351,7 @@
 				{/if}
 			</div>
 
-			<div
-				class="relative mx-auto h-fit rounded-md border border-gray-500 bg-[#F6F8FA] pb-7 pt-5 dark:bg-[#0a0a0b]"
-			>
+			<div class="relative mx-auto h-fit rounded-md border border-gray-500 pb-7 pt-5">
 				{#if templateInfo}
 					<div>
 						<p class="absolute right-4 top-2 mr-0 mt-0 leading-7">{templateInfo.Type}</p>
@@ -371,7 +366,7 @@
 				{/if}
 			</div>
 
-			<div class="min-h-[390px] rounded-md border border-gray-500 bg-[#f9fafb] dark:bg-[#0a0a0b]">
+			<div class="min-h-[390px] rounded-md border border-gray-500">
 				<QuestionPaper {sections} bind:answers bind:errors {isSubmitted} />
 			</div>
 

@@ -58,10 +58,10 @@ export const updateFunctionExpressionOperation = async (
     Variables: any
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Expression: Expression ? Expression : null,
-        Variables: Variables ? Variables : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Expression !== undefined && Expression !== null && { Expression }),
+        ...(Variables !== undefined && Variables !== null && { Variables })
     };
 
     const url = BACKEND_API_URL + `/field-function-expression-operations/${id}`;
@@ -132,10 +132,10 @@ export const updateCompositionOperation = async (
     Children: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Operator: Operator ? Operator : null,
-        Children: Children ? Children : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Children !== undefined && Children !== null && { Children })
     };
 
     const url = BACKEND_API_URL + `/field-composition-operations/${id}`;
@@ -206,10 +206,10 @@ export const updateMathematicalOperation = async (
     Operands: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Operator: Operator ? Operator : null,
-        Operands: Operands ? Operands : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Operands !== undefined && Operands !== null && { Operands })
     };
 
     const url = BACKEND_API_URL + `/field-mathematical-operations/${id}`;
@@ -283,11 +283,11 @@ export const updateIterateOperation = async (
     ArrayOperand: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        ItemAlias: ItemAlias ? ItemAlias : null,
-        OperationId: OperationId ? OperationId : null,
-        ArrayOperand: ArrayOperand ? ArrayOperand : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(ItemAlias !== undefined && ItemAlias !== null && { ItemAlias }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(ArrayOperand !== undefined && ArrayOperand !== null && { ArrayOperand })
     };
 
     const url = BACKEND_API_URL + `/field-iterate-operations/${id}`;
@@ -358,10 +358,10 @@ export const updateLogicalOperation = async (
     Operands: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Operator: Operator ? Operator : null,
-        Operands: Operands ? Operands : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Operands !== undefined && Operands !== null && { Operands })
     };
 
     const url = BACKEND_API_URL + `/field-logical-operations/${id}`;

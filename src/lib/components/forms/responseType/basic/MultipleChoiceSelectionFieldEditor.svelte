@@ -6,7 +6,7 @@
 	import Icon from '@iconify/svelte';
 	import type { QuestionUpdateModel } from '../../../common/questionTypes';
 	import { questionSchema } from '../../question-schema';
-	import ValidationLogicIntegration from '$lib/components/validation/ValidationLogicIntegration.svelte';
+	import ValidationLogicIntegration from '$lib/components/validation-logic/ValidationLogicIntegration.svelte';
 	import SkipLogicIntegration from '$lib/components/skip-logic/SkipLogicIntegration.svelte';
 	import CalculationLogicIntegration from '$lib/components/calculation-logic/CalculationLogicIntegration.svelte';
 

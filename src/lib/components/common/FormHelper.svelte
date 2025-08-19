@@ -39,15 +39,15 @@
 </script>
 
 <div class="relative">
-	<button
-		class="blur-background fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+    <button
+        class="blur-background fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
 		onclick={() => closeSheet()}
 		onkeydown={(e) => e.key === 'Escape' && closeSheet()}
 		aria-label="Close sheet"
 	></button>
 
-	<div
-		class="custom-scrollbar fixed right-0 top-0 z-50 h-full min-h-screen w-[65%] overflow-y-auto rounded-sm  shadow-lg md:w-[46%]"
+    <div
+        class="custom-scrollbar fixed right-0 top-0 z-[70] h-full min-h-screen w-[65%] overflow-y-auto rounded-sm  shadow-lg md:w-[46%]"
 		in:fly={{ x: 500, duration: 500 }}
 		out:fly={{ x: 500, duration: 500 }}
 		role="dialog"
@@ -117,20 +117,14 @@
 </div>
 
 <style>
+	.custom-scrollbar {
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none; /* IE and Edge */
+	}
+
 	.custom-scrollbar::-webkit-scrollbar {
-		width: 1px;
-		height: 10px;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-track {
-		background: #d70c0c;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb {
-		background: #888;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-		background: #555;
+		width: 0; /* Safari and Chrome */
+		height: 0;
+		display: none;
 	}
 </style>

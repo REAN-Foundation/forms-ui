@@ -21,15 +21,15 @@ export const createValidationRule = async (
     LogicId: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Priority: Priority,
-        IsActive: IsActive,
-        OperationType: OperationType,
-        OperationId: OperationId,
-        ErrorWhenFalse: ErrorWhenFalse,
-        ErrorMessage: ErrorMessage,
-        LogicId: LogicId
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Priority !== undefined && Priority !== null && { Priority }),
+        ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(ErrorWhenFalse !== undefined && ErrorWhenFalse !== null && { ErrorWhenFalse }),
+        ...(ErrorMessage !== undefined && ErrorMessage !== null && { ErrorMessage }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
     console.log('data from api/service/section.ts :', body);
     const url = BACKEND_API_URL + `/field-validation-rules`;
@@ -71,15 +71,15 @@ export const updateValidationRule = async (
     LogicId: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Priority: Priority ? Priority : null,
-        IsActive: IsActive ? IsActive : null,
-        OperationType: OperationType ? OperationType : null,
-        OperationId: OperationId ? OperationId : null,
-        ErrorWhenFalse: ErrorWhenFalse ? ErrorWhenFalse : null,
-        ErrorMessage: ErrorMessage ? ErrorMessage : null,
-        LogicId: LogicId ? LogicId : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Priority !== undefined && Priority !== null && { Priority }),
+        ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(ErrorWhenFalse !== undefined && ErrorWhenFalse !== null && { ErrorWhenFalse }),
+        ...(ErrorMessage !== undefined && ErrorMessage !== null && { ErrorMessage }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
 
     const url = BACKEND_API_URL + `/field-validation-rules/${id}`;

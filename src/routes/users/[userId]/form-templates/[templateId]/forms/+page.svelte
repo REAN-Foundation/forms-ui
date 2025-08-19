@@ -295,9 +295,9 @@
 </script>
 
 {#if sectionForm}
-	<div
-		class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-	>
+    <div
+        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    >
 		<SectionEditorForm
 			bind:errors
 			{handleSectionUpdate}

@@ -52,8 +52,8 @@ export const updateValidationLogic = async (
     Enabled: boolean
 ) => {
     const body = {
-        FieldId: FieldId ? FieldId : null,
-        Enabled: Enabled ? Enabled : null
+        ...(FieldId !== undefined && FieldId !== null && { FieldId }),
+        ...(Enabled !== undefined && Enabled !== null && { Enabled })
     };
 
     const url = BACKEND_API_URL + `/field-validation-logic/${id}`;
@@ -121,9 +121,9 @@ export const updateSkipLogic = async (
     DefaultSkip: boolean
 ) => {
     const body = {
-        FieldId: FieldId ? FieldId : null,
-        Enabled: Enabled ? Enabled : null,
-        DefaultSkip: DefaultSkip ? DefaultSkip : null
+        ...(FieldId !== undefined && FieldId !== null && { FieldId }),
+        ...(Enabled !== undefined && Enabled !== null && { Enabled }),
+        ...(DefaultSkip !== undefined && DefaultSkip !== null && { DefaultSkip })
     };
 
     const url = BACKEND_API_URL + `/field-skip-logic/${id}`;
@@ -191,9 +191,9 @@ export const updateCalculationLogic = async (
     FallbackValue: string
 ) => {
     const body = {
-        FieldId: FieldId ? FieldId : null,
-        Enabled: Enabled ? Enabled : null,
-        FallbackValue: FallbackValue ? FallbackValue : null
+        ...(FieldId !== undefined && FieldId !== null && { FieldId }),
+        ...(Enabled !== undefined && Enabled !== null && { Enabled }),
+        ...(FallbackValue !== undefined && FallbackValue !== null && { FallbackValue })
     };
 
     const url = BACKEND_API_URL + `/field-calculation-logic/${id}`;

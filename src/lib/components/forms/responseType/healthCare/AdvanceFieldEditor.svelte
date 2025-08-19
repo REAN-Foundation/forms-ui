@@ -1,16 +1,11 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { enhance } from '$app/forms';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Label } from '$lib/components/ui/label';
-	import InfoIcon from '$lib/components/common/InfoIcon.svelte';
-	// import InfoIcon from '';
-	// import { Label } from '../ui/label';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import type { QuestionUpdateModel } from '$lib/components/common/questionTypes';
 	import { questionSchema } from '../../question-schema';
-	import ValidationLogicIntegration from '$lib/components/validation/ValidationLogicIntegration.svelte';
+	import ValidationLogicIntegration from '$lib/components/validation-logic/ValidationLogicIntegration.svelte';
 	import SkipLogicIntegration from '$lib/components/skip-logic/SkipLogicIntegration.svelte';
 	import CalculationLogicIntegration from '$lib/components/calculation-logic/CalculationLogicIntegration.svelte';
 	import Icon from '@iconify/svelte';

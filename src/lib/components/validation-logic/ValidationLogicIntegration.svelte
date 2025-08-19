@@ -5,7 +5,6 @@
 	import Icon from '@iconify/svelte';
 	import { invalidateAll } from '$app/navigation';
 
-
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 	// Props
@@ -23,18 +22,21 @@
 	$effect(() => {
 		if (questionCard?.ValidateLogic?.Rules) {
 			console.log('🔍 Raw rules from backend:', questionCard.ValidateLogic.Rules);
-            validationRules = questionCard.ValidateLogic.Rules.map((rule) => {
-                const opType = (rule.OperationType || '').toLowerCase();
-                const isLogical = opType === 'logical';
-                const isComposite = opType === 'composite';
-                const isFunctionExpression = opType === 'functionexpression';
+			validationRules = questionCard.ValidateLogic.Rules.map((rule) => {
+				const opType = (rule.OperationType || '').toLowerCase();
+				const isLogical = opType === 'logical';
+				const isComposite = opType === 'composite';
+				const isFunctionExpression = opType === 'functionexpression';
 
 				console.log(`📋 Processing rule ${rule.id} (${rule.OperationType}):`, rule);
 
 				// Handle composite operations with expanded children
 				let conditions = [];
 				if (isComposite && rule.Operation?.Children && Array.isArray(rule.Operation.Children)) {
-					console.log('🎯 Found composite operation with expanded children:', rule.Operation.Children);
+					console.log(
+						'🎯 Found composite operation with expanded children:',
+						rule.Operation.Children
+					);
 					// Map expanded logical operation children to conditions format
 					conditions = rule.Operation.Children.map((childOperation, index) => {
 						console.log(`🔗 Processing child operation ${index}:`, childOperation);
@@ -42,7 +44,7 @@
 						let field = '';
 						let operator = '';
 						let value = '';
-						
+
 						try {
 							if (childOperation.Operands) {
 								const operands = JSON.parse(childOperation.Operands);
@@ -89,7 +91,7 @@
 					conditions = rule.Operation?.Operands || [];
 				}
 
-                const mappedRule = {
+				const mappedRule = {
 					id: rule.id,
 					ruleName: rule.Name,
 					activeTab: rule.OperationType?.toLowerCase() || 'logical',
@@ -109,10 +111,8 @@
 					// Add the fields needed for the table
 					isActive: rule.IsActive !== false, // Default to true if not specified
 					description: rule.Description || rule.ErrorMessage || 'No description available',
-                    // Human-readable type for table display
-                    typeDisplay: isFunctionExpression
-                        ? 'Function Expression'
-                        : 'Logical',
+					// Human-readable type for table display
+					typeDisplay: isFunctionExpression ? 'Function Expression' : 'Logical',
 					// Store the original rule data for editing
 					originalRule: rule,
 					// Store expanded logical operations for composite rules
@@ -189,9 +189,9 @@
 					validationRules = questionCard.ValidateLogic.Rules.filter(
 						(rule) => rule.id !== ruleToDelete.id
 					).map((rule) => {
-                        const opType = (rule.OperationType || '').toLowerCase();
-                        const isLogical = opType === 'logical';
-                        const isComposite = opType === 'composite';
+						const opType = (rule.OperationType || '').toLowerCase();
+						const isLogical = opType === 'logical';
+						const isComposite = opType === 'composite';
 
 						// Handle composite operations with expanded children
 						let conditions = [];
@@ -202,7 +202,7 @@
 								let field = '';
 								let operator = '';
 								let value = '';
-								
+
 								try {
 									if (childOperation.Operands) {
 										const operands = JSON.parse(childOperation.Operands);
@@ -241,12 +241,12 @@
 							];
 						} else {
 							// Handle other operation types
-                            conditions = rule.Operation?.Operands || [];
+							conditions = rule.Operation?.Operands || [];
 						}
 
-                        const isFunctionExpression = opType === 'functionexpression';
+						const isFunctionExpression = opType === 'functionexpression';
 
-                        return {
+						return {
 							id: rule.id,
 							ruleName: rule.Name,
 							activeTab: rule.OperationType?.toLowerCase() || 'logical',
@@ -258,18 +258,18 @@
 							regexPattern:
 								rule.Operation?.RegexPattern || '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
 							selectedField: rule.Operation?.FieldReference || null,
-												compositeConditions: rule.Operation?.CompositeConditions || [],
-					messageSeverity: rule.Operation?.MessageSeverity || 'error',
-					successMessage: rule.Operation?.SuccessMessage || '',
-					fallbackAction: rule.Operation?.FallbackAction || 'Allow submission with warning',
-					createdAt: rule.CreatedAt,
-					isActive: rule.IsActive !== false,
-					description: rule.Description || rule.ErrorMessage || 'No description available',
-                    typeDisplay: isFunctionExpression ? 'Function Expression' : 'Logical',
-					// Store the original rule data for editing
-					originalRule: rule,
-					// Store expanded logical operations for composite rules
-					logicalOperations: isComposite ? rule.Operation?.Children || [] : []
+							compositeConditions: rule.Operation?.CompositeConditions || [],
+							messageSeverity: rule.Operation?.MessageSeverity || 'error',
+							successMessage: rule.Operation?.SuccessMessage || '',
+							fallbackAction: rule.Operation?.FallbackAction || 'Allow submission with warning',
+							createdAt: rule.CreatedAt,
+							isActive: rule.IsActive !== false,
+							description: rule.Description || rule.ErrorMessage || 'No description available',
+							typeDisplay: isFunctionExpression ? 'Function Expression' : 'Logical',
+							// Store the original rule data for editing
+							originalRule: rule,
+							// Store expanded logical operations for composite rules
+							logicalOperations: isComposite ? rule.Operation?.Children || [] : []
 						};
 					});
 				}
@@ -344,8 +344,8 @@
 							<td class="p-2 font-medium text-gray-800">
 								{rule.ruleName || 'Unnamed Rule'}
 							</td>
-                            <td class="p-2 text-gray-600">
-                                {rule.typeDisplay || 'Logical'}
+							<td class="p-2 text-gray-600">
+								{rule.typeDisplay || 'Logical'}
 							</td>
 							<td class="p-2">
 								<span
@@ -433,4 +433,3 @@
 		</div>
 	</div>
 {/if}
-

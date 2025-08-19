@@ -31,7 +31,9 @@
 	let testResult = $state('✓ Pattern matches the test input');
 	let testResultClass = $state('success');
 	let isProcessing = $state(false);
-	let selectedFieldTitle = $state((selectedField || currentField)?.Title || (selectedField || currentField)?.DisplayCode || '');
+	let selectedFieldTitle = $state(
+		(selectedField || currentField)?.Title || (selectedField || currentField)?.DisplayCode || ''
+	);
 
 	// Helper function to format field title with hyphens
 	function formatFieldTitle(title: string): string {
@@ -46,37 +48,51 @@
 
 	// Effect to populate form when editing
 	$effect(() => {
-		if (isEditing && editingRule) {
-			console.log('Populating regex form with editing data:', editingRule);
-			
-			// Update selected field title
-			if (selectedField) {
-				selectedFieldTitle = selectedField.Title || selectedField.DisplayCode || '';
+		if (!isEditing || !editingRule) return;
+		const originalRule = editingRule?.originalRule;
+		const op = originalRule?.Operation;
+		if (!op || op.Type !== 'FunctionExpression') return;
+
+		// Variables may be stringified JSON or an object
+		let vars: any = op.Variables;
+		if (typeof vars === 'string') {
+			try {
+				vars = JSON.parse(vars);
+			} catch {
+				vars = {};
 			}
+		}
+
+		// Populate regex pattern
+		const pat = vars?.regex?.Value || '';
+		if (pat) {
+			regexPattern = pat;
+		}
+
+		// Populate selected field title from input variable
+		const inputVar = vars?.input || {};
+		const inputFieldId = inputVar.FieldId;
+		const inputFieldCode = inputVar.FieldCode;
+		if (inputFieldId || inputFieldCode) {
+			outer: for (const section of questionList || []) {
+				for (const f of section.FormFields || []) {
+					if (f.id === inputFieldId || f.DisplayCode === inputFieldCode) {
+						selectedFieldTitle = f.Title || f.DisplayCode || '';
+						break outer;
+					}
+				}
+			}
+		} else if (selectedField) {
+			selectedFieldTitle = selectedField.Title || selectedField.DisplayCode || '';
 		}
 	});
 
 	// Effect to automatically select preset when regexPattern changes (for editing)
 	$effect(() => {
-		if (isEditing && regexPattern) {
-			console.log('Regex pattern changed, looking for matching preset:', regexPattern);
-			
-			// Find which preset matches the current regex pattern
-			const matchingPreset = regexPresets.find(preset => preset.pattern === regexPattern);
-			
-			if (matchingPreset) {
-				// If we found a matching preset, select it
-				activeRegexPreset = matchingPreset.pattern;
-				console.log('Found matching preset:', matchingPreset.name);
-			} else {
-				// If no preset matches, it's a custom pattern
-				activeRegexPreset = 'CUSTOM';
-				console.log('No matching preset found, treating as custom pattern');
-			}
-			
-			// Test the pattern to show the result
-			testRegex();
-		}
+		if (!isEditing || !regexPattern) return;
+		const matchingPreset = regexPresets.find((preset) => preset.pattern === regexPattern);
+		activeRegexPreset = matchingPreset ? matchingPreset.pattern : 'CUSTOM';
+		testRegex();
 	});
 
 	// Effect to clear validation errors when regex pattern changes
@@ -88,53 +104,54 @@
 
 	// Regex presets with examples
 	const regexPresets = [
-		{ 
-			name: 'Email', 
+		{
+			name: 'Email',
 			pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
 			examples: ['user@example.com', 'john.doe@company.org', 'test+tag@gmail.com']
 		},
-		{ 
-			name: 'Phone Number', 
+		{
+			name: 'Phone Number',
 			pattern: '^[+]?[0-9]{10,15}$',
 			examples: ['1234567890', '+1234567890', '9876543210']
 		},
 		{
 			name: 'URL',
-			pattern: '^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$',
+			pattern:
+				'^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$',
 			examples: ['https://example.com', 'http://www.google.com', 'https://github.com/user/repo']
 		},
-		{ 
-			name: 'Number', 
+		{
+			name: 'Number',
 			pattern: '^[0-9]+$',
 			examples: ['123', '456789', '0']
 		},
-		{ 
-			name: 'Alphanumeric', 
+		{
+			name: 'Alphanumeric',
 			pattern: '^[a-zA-Z0-9]+$',
 			examples: ['abc123', 'Test456', 'user123']
 		},
-		{ 
-			name: 'Date (YYYY-MM-DD)', 
+		{
+			name: 'Date (YYYY-MM-DD)',
 			pattern: '^\\d{4}-\\d{2}-\\d{2}$',
 			examples: ['2024-01-15', '2023-12-31', '2024-02-29']
 		},
-		{ 
-			name: 'Time (HH:MM)', 
+		{
+			name: 'Time (HH:MM)',
 			pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$',
 			examples: ['09:30', '14:45', '23:59']
 		},
-		{ 
-			name: 'Postal Code (US)', 
+		{
+			name: 'Postal Code (US)',
 			pattern: '^\\d{5}(-\\d{4})?$',
 			examples: ['12345', '12345-6789', '98765']
 		},
-		{ 
-			name: 'Credit Card', 
+		{
+			name: 'Credit Card',
 			pattern: '^\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}$',
 			examples: ['1234567890123456', '1234-5678-9012-3456', '1234 5678 9012 3456']
 		},
-		{ 
-			name: 'Custom', 
+		{
+			name: 'Custom',
 			pattern: 'CUSTOM',
 			examples: [
 				'Letters only: ^[A-Za-z]+$',
@@ -148,17 +165,19 @@
 
 	// Get current examples based on selected preset
 	let currentExamples = $derived(
-		!activeRegexPreset 
+		!activeRegexPreset
 			? []
 			: (() => {
-				const selectedPreset = regexPresets.find(preset => preset.pattern === activeRegexPreset);
-				return selectedPreset?.examples || [];
-			})()
+					const selectedPreset = regexPresets.find(
+						(preset) => preset.pattern === activeRegexPreset
+					);
+					return selectedPreset?.examples || [];
+				})()
 	);
 
 	function selectRegexPreset(preset) {
 		console.log('selectRegexPreset called with preset:', preset);
-		
+
 		if (preset.name === 'Custom') {
 			activeRegexPreset = 'CUSTOM';
 			// Keep the current regexPattern for custom editing
@@ -168,12 +187,12 @@
 			regexPattern = preset.pattern;
 			console.log('Preset selected:', preset.name, 'Pattern:', preset.pattern);
 		}
-		
+
 		// Clear validation errors when a preset is selected
 		if (errors.regexPattern) {
 			errors.regexPattern = '';
 		}
-		
+
 		// Test the pattern to show the result
 		testRegex();
 	}
@@ -222,7 +241,7 @@
 		console.log('Validation debug - activeRegexPreset:', activeRegexPreset);
 		console.log('Validation debug - regexPattern:', regexPattern);
 		console.log('Validation debug - selectedFieldTitle:', selectedFieldTitle);
-		
+
 		// Reset errors
 		errors = {} as Record<string, string>;
 
@@ -243,7 +262,11 @@
 			}
 
 			// Check if a field is selected
-			if (!selectedFieldTitle || selectedFieldTitle === 'Select a field' || selectedFieldTitle === '') {
+			if (
+				!selectedFieldTitle ||
+				selectedFieldTitle === 'Select a field' ||
+				selectedFieldTitle === ''
+			) {
 				errors.selectedField = 'Please select a field to validate';
 				console.log('Validation failed: No field selected');
 			}
@@ -260,13 +283,14 @@
 			const finalRuleName = ruleName || 'New Regex Rule';
 			const finalRuleDescription = ruleDescription || 'New regex validation';
 			const finalRegexPattern = regexPattern || '.*';
-			
+
 			// Find the selected field based on selectedFieldTitle
-			const finalSelectedField = selectedField || 
-				questionList?.find(field => 
-					field.Title === selectedFieldTitle || 
-					field.DisplayCode === selectedFieldTitle
-				) || currentField;
+			const finalSelectedField =
+				selectedField ||
+				questionList?.find(
+					(field) => field.Title === selectedFieldTitle || field.DisplayCode === selectedFieldTitle
+				) ||
+				currentField;
 
 			// Step 1: Create the function expression operation
 			const operation = {
@@ -297,11 +321,14 @@
 			}
 
 			// Create operation
-			const operationResponse = await fetch('/api/server/operations/function-expression-operation', {
-				method: 'POST',
-				body: JSON.stringify(operation),
-				headers: { 'content-type': 'application/json' }
-			});
+			const operationResponse = await fetch(
+				'/api/server/operations/function-expression-operation',
+				{
+					method: 'POST',
+					body: JSON.stringify(operation),
+					headers: { 'content-type': 'application/json' }
+				}
+			);
 
 			if (!operationResponse.ok) {
 				const errorData = await operationResponse.json();
@@ -351,13 +378,14 @@
 			const finalRuleName = ruleName || 'Updated Regex Rule';
 			const finalRuleDescription = ruleDescription || 'Updated regex validation';
 			const finalRegexPattern = regexPattern || '.*';
-			
+
 			// Find the selected field based on selectedFieldTitle
-			const finalSelectedField = selectedField || 
-				questionList?.find(field => 
-					field.Title === selectedFieldTitle || 
-					field.DisplayCode === selectedFieldTitle
-				) || currentField;
+			const finalSelectedField =
+				selectedField ||
+				questionList?.find(
+					(field) => field.Title === selectedFieldTitle || field.DisplayCode === selectedFieldTitle
+				) ||
+				currentField;
 
 			// Step 1: Update the function expression operation
 			const operation = {
@@ -418,7 +446,7 @@
 				const operationData = await operationResponse.json();
 				toastMessage(operationData);
 				console.log('Regex operation updated successfully:', operationData);
-				
+
 				// Dispatch success event to parent to close modal
 				handleRegexOperationCreated({
 					detail: {
@@ -444,8 +472,8 @@
 	<!-- Validation Summary -->
 	{#if !isEditing && (Object.keys(errors).length > 0 || !activeRegexPreset || !selectedFieldTitle)}
 		<div class="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3">
-			<h4 class="font-medium text-amber-800 mb-2">⚠️ Validation Required</h4>
-			<ul class="text-sm text-amber-700 space-y-1">
+			<h4 class="mb-2 font-medium text-amber-800">⚠️ Validation Required</h4>
+			<ul class="space-y-1 text-sm text-amber-700">
 				{#if !activeRegexPreset}
 					<li>• Please select a regex preset</li>
 				{/if}
@@ -466,10 +494,16 @@
 	<div class="mb-4">
 		<Label class="mb-2 block text-sm font-medium text-gray-700">Field to Validate</Label>
 		<Select.Root type="single" bind:value={selectedFieldTitle}>
-			<Select.Trigger class="w-full {errors.selectedField ? 'border-red-500' : selectedFieldTitle && selectedFieldTitle !== 'Select a field' ? 'border-green-500' : ''}">
+			<Select.Trigger
+				class="w-full {errors.selectedField
+					? 'border-red-500'
+					: selectedFieldTitle && selectedFieldTitle !== 'Select a field'
+						? 'border-green-500'
+						: ''}"
+			>
 				{selectedFieldTitle ? formatFieldTitle(selectedFieldTitle) : 'Select a field'}
 			</Select.Trigger>
-			<Select.Content>
+			<Select.Content portalProps={{}}>
 				{#each questionList as field}
 					{#each field.FormFields as f}
 						<Select.Item value={f.Title || f.DisplayCode}>
@@ -482,7 +516,9 @@
 		{#if errors.selectedField}
 			<p class="mt-1 text-sm text-red-500">{errors.selectedField}</p>
 		{:else if selectedFieldTitle && selectedFieldTitle !== 'Select a field'}
-			<p class="mt-1 text-sm text-green-600">✓ Field selected: {formatFieldTitle(selectedFieldTitle)}</p>
+			<p class="mt-1 text-sm text-green-600">
+				✓ Field selected: {formatFieldTitle(selectedFieldTitle)}
+			</p>
 		{:else}
 			<p class="mt-1 text-sm text-amber-600">⚠️ Please select a field to validate</p>
 		{/if}
@@ -508,14 +544,14 @@
 		{:else}
 			<p class="mt-1 text-sm text-green-600">✓ Regex preset selected</p>
 		{/if}
-		
+
 		<!-- Examples for editing -->
 		{#if isEditing}
-			<div class="mt-2 p-3 bg-blue-50 rounded text-xs border border-blue-200">
-				<p class="font-medium text-blue-800 mb-1">
+			<div class="mt-2 rounded border border-blue-200 bg-blue-50 p-3 text-xs">
+				<p class="mb-1 font-medium text-blue-800">
 					💡 {activeRegexPreset === 'CUSTOM' ? 'Regex Pattern Examples:' : 'Valid Examples:'}
 				</p>
-				<ul class="text-blue-700 space-y-1">
+				<ul class="space-y-1 text-blue-700">
 					{#each currentExamples as example}
 						<li>• {example}</li>
 					{/each}
@@ -527,10 +563,10 @@
 	<!-- Custom Regex Pattern -->
 	<div class="mb-4">
 		<Label class="mb-2 block text-sm font-medium text-gray-700">Custom Regex Pattern</Label>
-		<Input 
-			type="text" 
-			bind:value={regexPattern} 
-			placeholder="Enter your custom regex pattern (e.g., ^[A-Za-z]+$ for letters only)" 
+		<Input
+			type="text"
+			bind:value={regexPattern}
+			placeholder="Enter your custom regex pattern (e.g., ^[A-Za-z]+$ for letters only)"
 			class={errors.regexPattern ? 'border-red-500' : regexPattern.trim() ? 'border-green-500' : ''}
 		/>
 		{#if errors.regexPattern}

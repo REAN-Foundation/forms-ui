@@ -293,7 +293,15 @@ export class RuleEvaluator {
             // Replace variables in the expression
             Object.entries(variables).forEach(([varName, value]) => {
                 const regex = new RegExp(`\\b${varName}\\b`, 'g');
-                processedExpression = processedExpression.replace(regex, this.formatValue(value));
+                let replacement: string;
+                // Special-case common regex variable: allow expressions like regex.test(input)
+                if (typeof value === 'string' && varName.toLowerCase() === 'regex') {
+                    // Compile the pattern at evaluation time
+                    replacement = `new RegExp(${this.formatValue(value)})`;
+                } else {
+                    replacement = this.formatValue(value);
+                }
+                processedExpression = processedExpression.replace(regex, replacement);
             });
 
             // Replace built-in functions and constants

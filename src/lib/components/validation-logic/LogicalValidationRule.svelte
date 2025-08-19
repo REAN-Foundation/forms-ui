@@ -5,14 +5,18 @@
 		OperationType
 	} from './logical-operation-schema.js';
 	import { Button } from '../ui/button/index.js';
-	import { Input } from '../ui/input/index.js';
-	import { Label } from '../ui/label/index.js';
-	import * as Select from '../ui/select/index.js';
 	import Icon from '@iconify/svelte';
 	import { toastMessage } from '../toast/toast.store.js';
 	import TreeNode from './TreeNode.svelte';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// 	now can you run a clean-up task on this validation code in that
+	// 1) remove unnecessary code (functions, variables,comments)
+	// 2) Comment brief before each function what it doing and what output will
+	// 3) make a files structure like all state variables / declared variables are should on top below imports and then functions
+	// 4) remove unnecessary console.log statements
+	// 5) keep handleEdit function and make it more readable and understandable for editing the complete tree
 
 	// Props
 	let {
@@ -24,7 +28,8 @@
 		questionList,
 		conditions = [],
 		shouldTriggerSave = $bindable(false),
-		handleLogicalOperationsCreated
+		handleLogicalOperationsCreated,
+		editedOperationId = null
 	} = $props();
 
 	// State
@@ -46,21 +51,22 @@
 		field: string;
 		operator: string;
 		value?: string;
+		name?: string;
 		connector?: 'AND' | 'OR' | '' | null;
 	};
 
-    type LogicalNode = {
-        type: 'logical';
-        id?: string;
-        condition: FlatCondition;
-    };
+	type LogicalNode = {
+		type: 'logical';
+		id?: string;
+		condition: FlatCondition;
+	};
 
-    type CompositeNode = {
-        type: 'composite';
-        id?: string;
-        operator: 'AND' | 'OR';
-        children: Array<LogicalNode | CompositeNode>;
-    };
+	type CompositeNode = {
+		type: 'composite';
+		id?: string;
+		operator: 'AND' | 'OR';
+		children: Array<LogicalNode | CompositeNode>;
+	};
 
 	function mapDisplayOperatorToBackend(op: string): LogicalOperatorType {
 		let operatorType = LogicalOperatorType.Equal;
@@ -178,26 +184,41 @@
 		return { type: 'composite', operator: 'OR', children: groups };
 	}
 
-    // Tree state for nested UI (composite operators selected at group level)
-    let treeRoot = $state<CompositeNode>({ type: 'composite', operator: 'AND', children: [] });
-    let originalTreeRoot = $state<CompositeNode>({ type: 'composite', operator: 'AND', children: [] });
-    let initializedFromEditing = $state(false);
-    let initializedCreate = $state(false);
-    let lastEditingRuleId = $state<string | null>(null);
+	// Tree state for nested UI (composite operators selected at group level)
+	let treeRoot = $state<CompositeNode>({ type: 'composite', operator: 'AND', children: [] });
+	let originalTreeRoot = $state<CompositeNode>({
+		type: 'composite',
+		operator: 'AND',
+		children: []
+	});
+	let initializedFromEditing = $state(false);
+	let initializedCreate = $state(false);
+	let lastEditingRuleId = $state<string | null>(null);
 
 	// Parse backend operation (Composition/Logical) recursively into our UI tree model
-    function parseBackendOperationToTree(operation: any): CompositeNode | LogicalNode | null {
+	function parseBackendOperationToTree(operation: any): CompositeNode | LogicalNode | null {
 		if (!operation || !operation.Type) return null;
 		const type = (operation.Type || '').toLowerCase();
 		if (type === 'composition') {
 			const op = (operation.Operator || 'And').toLowerCase() === 'or' ? 'OR' : 'AND';
-			const children: Array<LogicalNode | CompositeNode> = [];
-			const rawChildren = Array.isArray(operation.Children) ? operation.Children : [];
-			for (const child of rawChildren) {
-				const parsed = parseBackendOperationToTree(child);
-				if (parsed) children.push(parsed);
+			let rawChildren: any = operation.Children;
+			if (typeof rawChildren === 'string') {
+				try {
+					rawChildren = JSON.parse(rawChildren);
+				} catch {
+					rawChildren = [];
+				}
 			}
-            return { type: 'composite', id: operation.id, operator: op, children };
+			const children: Array<LogicalNode | CompositeNode> = [];
+			if (Array.isArray(rawChildren)) {
+				for (const child of rawChildren) {
+					if (child && typeof child === 'object' && child.Type) {
+						const parsed = parseBackendOperationToTree(child);
+						if (parsed) children.push(parsed);
+					}
+				}
+			}
+			return { type: 'composite', id: operation.id, operator: op, children };
 		}
 		if (type === 'logical') {
 			let field = '';
@@ -215,11 +236,17 @@
 				}
 			} catch {}
 			const operatorLabel = mapBackendOperatorToDisplay(operation.Operator || 'Equal');
-            return {
-                type: 'logical',
-                id: operation.id,
-                condition: { field, operator: operatorLabel, value, connector: null }
-            };
+			return {
+				type: 'logical',
+				id: operation.id,
+				condition: {
+					field,
+					operator: operatorLabel,
+					value,
+					connector: null,
+					name: operation.Name || ''
+				}
+			};
 		}
 		return null;
 	}
@@ -227,7 +254,7 @@
 	function createEmptyLogical(): LogicalNode {
 		return {
 			type: 'logical',
-			condition: { field: '', operator: 'Equal To', value: '', connector: null }
+			condition: { field: '', operator: 'Equal To', value: '', connector: null, name: '' }
 		};
 	}
 	function createEmptyComposite(): CompositeNode {
@@ -252,12 +279,14 @@
 		const comp =
 			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
 		comp.children = [...comp.children, createEmptyLogical()];
+		treeRoot = { ...treeRoot };
 	}
 
 	function addGroupAt(pathToComposite: number[]) {
 		const comp =
 			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
 		comp.children = [...comp.children, createEmptyComposite()];
+		treeRoot = { ...treeRoot };
 	}
 
 	function removeAt(path: number[]) {
@@ -265,46 +294,75 @@
 		const parent = getCompositeAtPath(path);
 		const idx = path[path.length - 1];
 		parent.children = parent.children.filter((_, i) => i !== idx);
+		treeRoot = { ...treeRoot };
 	}
 
 	function toggleGroupOperator(pathToComposite: number[]) {
 		const comp =
 			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
 		comp.operator = comp.operator === 'AND' ? 'OR' : 'AND';
+		treeRoot = { ...treeRoot };
 	}
 
 	// Handlers for child change events
-    function onChangeGroupOperator(path: number[], op: 'AND' | 'OR') {
+	function onChangeGroupOperator(path: number[], op: 'AND' | 'OR') {
 		const comp = path.length === 0 ? treeRoot : (getNodeByPath(path) as CompositeNode);
-		comp.operator = op;
-		// trigger state update
-        treeRoot = { ...treeRoot };
+		if (path.length === 0) {
+			// replace root immutably
+			treeRoot = { ...treeRoot, operator: op };
+			return;
+		}
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		parent.children = parent.children.map((child, i) =>
+			i === idx ? { ...(child as any), operator: op } : child
+		);
+		treeRoot = { ...treeRoot };
 	}
 
-    function onChangeLeafField(path: number[], fieldId: string) {
-		const node = getNodeByPath(path) as LogicalNode;
-		if (node && node.type === 'logical') {
-			node.condition.field = fieldId;
-            treeRoot = { ...treeRoot };
-		}
+	function onChangeLeafField(path: number[], fieldId: string) {
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		const child = parent.children[idx] as LogicalNode;
+		if (!child || child.type !== 'logical') return;
+		const updated: LogicalNode = { ...child, condition: { ...child.condition, field: fieldId } };
+		parent.children = parent.children.map((c, i) => (i === idx ? updated : c));
+		treeRoot = { ...treeRoot };
 	}
 
-    function onChangeLeafOperator(path: number[], operator: string) {
-		const node = getNodeByPath(path) as LogicalNode;
-		if (node && node.type === 'logical') {
-			node.condition.operator = operator as any;
-			// clear value if switching to empty checks
-			if (operator === 'Is Empty' || operator === 'Is Not Empty') node.condition.value = '';
-            treeRoot = { ...treeRoot };
-		}
+	function onChangeLeafOperator(path: number[], operator: string) {
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		const child = parent.children[idx] as LogicalNode;
+		if (!child || child.type !== 'logical') return;
+		const nextValue =
+			operator === 'Is Empty' || operator === 'Is Not Empty' ? '' : child.condition.value;
+		const updated: LogicalNode = {
+			...child,
+			condition: { ...child.condition, operator: operator as any, value: nextValue }
+		};
+		parent.children = parent.children.map((c, i) => (i === idx ? updated : c));
+		treeRoot = { ...treeRoot };
 	}
 
-    function onChangeLeafValue(path: number[], value: string) {
-		const node = getNodeByPath(path) as LogicalNode;
-		if (node && node.type === 'logical') {
-			node.condition.value = value;
-            treeRoot = { ...treeRoot };
-		}
+	function onChangeLeafValue(path: number[], value: string) {
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		const child = parent.children[idx] as LogicalNode;
+		if (!child || child.type !== 'logical') return;
+		const updated: LogicalNode = { ...child, condition: { ...child.condition, value } };
+		parent.children = parent.children.map((c, i) => (i === idx ? updated : c));
+		treeRoot = { ...treeRoot };
+	}
+
+	function onChangeLeafName(path: number[], name: string) {
+		const parent = getCompositeAtPath(path);
+		const idx = path[path.length - 1];
+		const child = parent.children[idx] as LogicalNode;
+		if (!child || child.type !== 'logical') return;
+		const updated: LogicalNode = { ...child, condition: { ...child.condition, name } };
+		parent.children = parent.children.map((c, i) => (i === idx ? updated : c));
+		treeRoot = { ...treeRoot };
 	}
 
 	type FlatItem =
@@ -340,56 +398,57 @@
 			pathToComposite.length === 0 ? treeRoot : (getNodeByPath(pathToComposite) as CompositeNode);
 		const grp: CompositeNode = { type: 'composite', operator: op, children: [] };
 		comp.children = [...comp.children, grp];
+		treeRoot = { ...treeRoot };
 	}
 
-    // Reset initialization flags when editing target changes
-    $effect(() => {
-        const id = editingRule?.originalRule?.id || editingRule?.id || null;
-        if (id !== lastEditingRuleId) {
-            lastEditingRuleId = id;
-            initializedFromEditing = false;
-            initializedCreate = false;
-        }
-    });
+	// Reset initialization flags when editing target changes
+	$effect(() => {
+		const id = editingRule?.originalRule?.id || editingRule?.id || null;
+		if (id !== lastEditingRuleId) {
+			lastEditingRuleId = id;
+			initializedFromEditing = false;
+			initializedCreate = false;
+		}
+	});
 
-    // Initialize treeRoot from backend nested operation if available; fallback to flat conditions
-    $effect(() => {
-        if (isEditing && editingRule && !initializedFromEditing) {
-            const op = editingRule.originalRule?.Operation;
-            if (op) {
-                const parsed = parseBackendOperationToTree(op);
-                if (parsed) {
-                    if (parsed.type === 'composite') {
-                        treeRoot = parsed as CompositeNode;
-                    } else {
-                        treeRoot = { type: 'composite', operator: 'AND', children: [parsed as LogicalNode] };
-                    }
-                    originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
-                    initializedFromEditing = true;
-                    return;
-                }
-            }
-            if (
-                editingRule?.conditions &&
-                Array.isArray(editingRule.conditions) &&
-                editingRule.conditions.length > 0
-            ) {
-                const ast = buildAstFromFlatConditions(editingRule.conditions as FlatCondition[]);
-                if (ast) {
-                    if ((ast as any).type === 'composite') {
-                        treeRoot = ast as CompositeNode;
-                    } else {
-                        treeRoot = { type: 'composite', operator: 'AND', children: [ast as LogicalNode] };
-                    }
-                    originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
-                }
-            }
-            initializedFromEditing = true;
-        } else if (!isEditing && !initializedCreate) {
-            treeRoot = { type: 'composite', operator: 'AND', children: [createEmptyLogical()] };
-            initializedCreate = true;
-        }
-    });
+	// Initialize treeRoot from backend nested operation if available; fallback to flat conditions
+	$effect(() => {
+		if (isEditing && editingRule && !initializedFromEditing) {
+			const op = editingRule.originalRule?.Operation;
+			if (op) {
+				const parsed = parseBackendOperationToTree(op);
+				if (parsed) {
+					if (parsed.type === 'composite') {
+						treeRoot = parsed as CompositeNode;
+					} else {
+						treeRoot = { type: 'composite', operator: 'AND', children: [parsed as LogicalNode] };
+					}
+					originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+					initializedFromEditing = true;
+					return;
+				}
+			}
+			if (
+				editingRule?.conditions &&
+				Array.isArray(editingRule.conditions) &&
+				editingRule.conditions.length > 0
+			) {
+				const ast = buildAstFromFlatConditions(editingRule.conditions as FlatCondition[]);
+				if (ast) {
+					if ((ast as any).type === 'composite') {
+						treeRoot = ast as CompositeNode;
+					} else {
+						treeRoot = { type: 'composite', operator: 'AND', children: [ast as LogicalNode] };
+					}
+					originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+				}
+			}
+			initializedFromEditing = true;
+		} else if (!isEditing && !initializedCreate) {
+			treeRoot = { type: 'composite', operator: 'AND', children: [createEmptyLogical()] };
+			initializedCreate = true;
+		}
+	});
 
 	// Collapsed state per node path for better UX
 	let collapsedByPath = $state({} as Record<string, boolean>);
@@ -441,7 +500,10 @@
 			}
 
 			const logicalOperation = {
-				Name: `${ruleName} - Logical condition`,
+				Name:
+					(condition as any).name && `${(condition as any).name}`.trim().length > 0
+						? `${(condition as any).name}`
+						: `${ruleName} - Logical condition`,
 				Description: `${ruleDescription} - Logical validation condition`,
 				Type: OperationType.Logical,
 				Operator: operatorType,
@@ -533,47 +595,42 @@
 			.replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 	}
 
-	// Effect to populate form when editing
+	// Initialize treeRoot from backend nested operation if available; fallback to flat conditions (read-only display when editing)
 	$effect(() => {
-		if (isEditing && editingRule) {
-			console.log('Populating logical form with editing data:', editingRule);
-
-			// Try to use conditions from editingRule first
+		if (isEditing && editingRule && !initializedFromEditing) {
+			const op = editingRule.originalRule?.Operation;
+			if (op) {
+				const parsed = parseBackendOperationToTree(op);
+				if (parsed) {
+					if (parsed.type === 'composite') {
+						treeRoot = parsed as CompositeNode;
+					} else {
+						treeRoot = { type: 'composite', operator: 'AND', children: [parsed as LogicalNode] };
+					}
+					originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+					initializedFromEditing = true;
+					return;
+				}
+			}
 			if (
-				editingRule.conditions &&
+				editingRule?.conditions &&
 				Array.isArray(editingRule.conditions) &&
 				editingRule.conditions.length > 0
 			) {
-				console.log('Using conditions from editingRule:', editingRule.conditions);
-				reactiveConditions = editingRule.conditions.map((condition: any, index: number) => ({
-					field: condition.field || '',
-					operator: condition.operator || '',
-					value: condition.value || '',
-					connector: index > 0 ? 'AND' : ''
-				}));
-			} else {
-				// Fallback: create a placeholder condition
-				reactiveConditions = [
-					{
-						field: '',
-						operator: '',
-						value: '',
-						connector: ''
+				const ast = buildAstFromFlatConditions(editingRule.conditions as FlatCondition[]);
+				if (ast) {
+					if ((ast as any).type === 'composite') {
+						treeRoot = ast as CompositeNode;
+					} else {
+						treeRoot = { type: 'composite', operator: 'AND', children: [ast as LogicalNode] };
 					}
-				];
+					originalTreeRoot = JSON.parse(JSON.stringify(treeRoot));
+				}
 			}
-		} else if (!isEditing) {
-			// For new rules, ensure we have at least one condition
-			if (reactiveConditions.length === 0) {
-				reactiveConditions = [
-					{
-						field: '',
-						operator: '',
-						value: '',
-						connector: ''
-					}
-				];
-			}
+			initializedFromEditing = true;
+		} else if (!isEditing && !initializedCreate) {
+			treeRoot = { type: 'composite', operator: 'AND', children: [createEmptyLogical()] };
+			initializedCreate = true;
 		}
 	});
 
@@ -590,10 +647,8 @@
 					}
 				} catch (error) {
 					console.error('Error in save/edit operation:', error);
-					// Don't throw here, just log the error
 				} finally {
 					isProcessing = false;
-					// Always reset the trigger flag to prevent infinite loops
 					shouldTriggerSave = false;
 				}
 			})();
@@ -640,52 +695,50 @@
 		// Reset errors
 		errors = {} as Record<string, string>;
 
-		// Validate tree
-		function validateTree(node: LogicalNode | CompositeNode): boolean {
-			if (node.type === 'logical') {
-				const c = node.condition;
-				if (!c.field) {
-					errors.general = 'Please select a field for all logical conditions';
-					return false;
-				}
-				if (!c.operator) {
-					errors.general = 'Please select an operator for all logical conditions';
-					return false;
-				}
-				if (
-					c.operator !== 'Is Empty' &&
-					c.operator !== 'Is Not Empty' &&
-					(c.value === undefined || c.value === null || `${c.value}`.trim() === '')
-				) {
-					errors.general = 'Please provide values where required';
-					return false;
-				}
-				return true;
-			}
-			// composite
-			if (!node.children || node.children.length === 0) {
-				errors.general = 'Groups cannot be empty. Add a condition or subgroup.';
-				return false;
-			}
-			for (const child of node.children) {
-				if (!validateTree(child)) return false;
-			}
-			return true;
+		// Helper: does operator require a value?
+		function operatorRequiresValue(op: string): boolean {
+			return op !== 'Is Empty' && op !== 'Is Not Empty';
 		}
 
-		if (!treeRoot || !validateTree(treeRoot)) {
+		// Prune incomplete logical leaves and empty groups
+		function pruneTree(node: LogicalNode | CompositeNode): LogicalNode | CompositeNode | null {
+			if (node.type === 'logical') {
+				const c = node.condition;
+				const hasField = !!c.field;
+				const hasOperator = !!c.operator;
+				const hasValue =
+					!operatorRequiresValue(c.operator) ||
+					(c.value !== undefined && c.value !== null && `${c.value}`.trim() !== '');
+				return hasField && hasOperator && hasValue ? node : null;
+			}
+			// composite
+			const prunedChildren: Array<LogicalNode | CompositeNode> = [];
+			for (const child of node.children) {
+				const pruned = pruneTree(child);
+				if (pruned) prunedChildren.push(pruned);
+			}
+			if (prunedChildren.length === 0) return null;
+			return { ...node, children: prunedChildren } as CompositeNode;
+		}
+
+		// Validate pruned tree
+		const prunedRoot = pruneTree(treeRoot);
+		if (!prunedRoot) {
+			errors.general = 'Please add at least one complete condition.';
 			console.log('Validation errors:', errors);
 			return;
 		}
 
 		try {
 			createdLogicalOperationIds = [];
-			// Create operations bottom-up directly from treeRoot
-			const rootOpId = await createOperationsForNode(treeRoot);
+			// Create operations bottom-up directly from pruned tree
+			const rootOpId = await createOperationsForNode(prunedRoot);
 
+			// Determine correct operation type for the created root
+			const isCompositeRoot = (prunedRoot as any).type === 'composite';
 			const dispatchData = {
 				operationId: rootOpId,
-				operationType: OperationType.Composition,
+				operationType: isCompositeRoot ? 'Composition' : 'Logical',
 				operation: { id: rootOpId },
 				logicalOperationIds: createdLogicalOperationIds
 			};
@@ -703,7 +756,10 @@
 		errors = {} as Record<string, string>;
 
 		// Helper to deep-compare nodes by id and properties
-		function diffNodes(current: LogicalNode | CompositeNode, original: LogicalNode | CompositeNode) {
+		function diffNodes(
+			current: LogicalNode | CompositeNode,
+			original: LogicalNode | CompositeNode
+		) {
 			const changes: Array<
 				| { kind: 'logical'; id: string; payload: any }
 				| { kind: 'composite'; id: string; payload: any }
@@ -715,14 +771,18 @@
 				const cur = current as LogicalNode;
 				const orig = original as LogicalNode;
 				if (!cur.id) return changes; // cannot PUT without id
-				// detect field/operator/value changes
+				// detect field/operator/value/name changes
 				const hasFieldChanged = cur.condition.field !== orig.condition.field;
 				const hasOpChanged = cur.condition.operator !== orig.condition.operator;
 				const hasValChanged = (cur.condition.value || '') !== (orig.condition.value || '');
-				if (hasFieldChanged || hasOpChanged || hasValChanged) {
+				const hasNameChanged = (cur.condition.name || '') !== (orig.condition.name || '');
+				if (hasFieldChanged || hasOpChanged || hasValChanged || hasNameChanged) {
 					// Build new operands for PUT
 					const selectedField = getAllFields().find(
-						(f) => f.id === cur.condition.field || f.Title === cur.condition.field || f.DisplayCode === cur.condition.field
+						(f) =>
+							f.id === cur.condition.field ||
+							f.Title === cur.condition.field ||
+							f.DisplayCode === cur.condition.field
 					);
 					const operatorType = mapDisplayOperatorToBackend(cur.condition.operator);
 					let operands: any[] = [];
@@ -749,7 +809,15 @@
 					changes.push({
 						kind: 'logical',
 						id: cur.id,
-						payload: { Operator: operatorType, Operands: JSON.stringify(operands) }
+						payload: {
+							Operator: operatorType,
+							Operands: JSON.stringify(operands),
+							Name:
+								(cur.condition.name && cur.condition.name.trim().length > 0)
+									? cur.condition.name.trim()
+									: `${ruleName} - Logical condition`,
+							Description: `${ruleDescription || ruleName || 'Validation'} - Logical validation condition`
+						}
 					});
 				}
 				return changes;
@@ -765,7 +833,11 @@
 					changes.push({
 						kind: 'composite',
 						id: cur.id,
-						payload: { Operator: cur.operator === 'AND' ? 'And' : 'Or' }
+						payload: {
+							Operator: cur.operator === 'AND' ? 'And' : 'Or',
+							Name: `${ruleName} - Composite validation`,
+							Description: `${ruleDescription || ruleName || 'Validation'} - Composite logical validation`
+						}
 					});
 				}
 				// Diff children by index assuming stable structure; recurse
@@ -778,6 +850,62 @@
 
 			return changes;
 		}
+
+		// Ensure an operation exists for a node; create if missing and return id
+		const ensureOperationForNode = async (node: LogicalNode | CompositeNode): Promise<string> => {
+			if ((node as any).id) return (node as any).id as string;
+			return await createOperationsForNode(node);
+		};
+
+		// Recursively sync composite children order and insert new nodes at the same position
+		const syncCompositeChildren = async (
+			curr: CompositeNode | LogicalNode,
+			orig: CompositeNode | LogicalNode | null,
+			path: number[] = []
+		) => {
+			if ((curr as any).type === 'logical') {
+				// logical handled by diffNodes PUT above
+				return;
+			}
+			const currComp = curr as CompositeNode;
+			const origComp = (orig && (orig as any).type === 'composite') ? (orig as CompositeNode) : null;
+
+			// Ensure each child has an operation id (create if missing)
+			const newChildIds: string[] = [];
+			for (const child of currComp.children) {
+				const childId = await ensureOperationForNode(child as any);
+				newChildIds.push(childId);
+			}
+
+			// Compare with original ids at the same path
+			const origIds = origComp ? (origComp.children || []).map((c: any) => c?.id).filter(Boolean) : [];
+			const childrenChanged =
+				newChildIds.length !== origIds.length || newChildIds.some((id, i) => id !== origIds[i]);
+			const operatorChanged = !origComp || currComp.operator !== origComp.operator;
+
+			// Update this composite if needed
+			if (currComp.id && (childrenChanged || operatorChanged)) {
+				const payload: any = {};
+				if (operatorChanged) payload.Operator = currComp.operator === 'AND' ? 'And' : 'Or';
+				if (childrenChanged) payload.Children = JSON.stringify(newChildIds);
+				payload.Name = `${ruleName} - Composite validation`;
+				payload.Description = `${ruleDescription || ruleName || 'Validation'} - Composite logical validation`;
+				await fetch(`/api/server/operations/composition-operation/${currComp.id}`, {
+					method: 'PUT',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(payload)
+				});
+			}
+
+			// Recurse into composite children
+			for (let i = 0; i < currComp.children.length; i++) {
+				const child = currComp.children[i] as any;
+				const origChild = origComp && origComp.children ? (origComp.children[i] as any) : null;
+				if (child && child.type === 'composite') {
+					await syncCompositeChildren(child, origChild, [...path, i]);
+				}
+			}
+		};
 
 		try {
 			const changes = diffNodes(treeRoot, originalTreeRoot);
@@ -796,8 +924,12 @@
 					});
 				}
 			}
+			// After updating existing nodes, ensure any new nodes are created and linked at correct positions
+			await syncCompositeChildren(treeRoot, originalTreeRoot, []);
 			// Optionally notify parent success
 			toastMessage({ Message: 'Validation conditions updated', HttpCode: 200 });
+			// ask parent to close modal (align with regex edit flow)
+			handleLogicalOperationsCreated?.({ detail: { isEdit: true } });
 		} catch (error) {
 			console.error('Error updating logical/composite operations:', error);
 			errors.general = (error as Error).message;
@@ -840,8 +972,10 @@
 				onChangeLeafField={(p, v) => onChangeLeafField(p, v)}
 				onChangeLeafOperator={(p, v) => onChangeLeafOperator(p, v)}
 				onChangeLeafValue={(p, v) => onChangeLeafValue(p, v)}
+				onChangeLeafName={(p, v) => onChangeLeafName(p, v)}
 				{collapsedByPath}
 				onToggleCollapse={(p) => toggleCollapse(p)}
+				readonly={false}
 			/>
 		</div>
 	</div>

@@ -1,19 +1,18 @@
 <script lang="ts">
-    import { Button } from '../ui/button/index.js';
-    import { Input } from '../ui/input/index.js';
-    import { Label } from '../ui/label/index.js';
-    import * as Select from '../ui/select/index.js';
-    import Icon from '@iconify/svelte';
-    import { Textarea } from '../ui/textarea/index.js';
+	import { Button } from '../ui/button/index.js';
+	import { Input } from '../ui/input/index.js';
+	import { Label } from '../ui/label/index.js';
+	import * as Select from '../ui/select/index.js';
+	import Icon from '@iconify/svelte';
+	import { Textarea } from '../ui/textarea/index.js';
 	import RegexValidationRule from './RegexValidationRule.svelte';
 	import LogicalValidationRule from './LogicalValidationRule.svelte';
-	import CompositeValidationRule from './CompositeValidationRule.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { toastMessage } from '../toast/toast.store.js';
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Props
+	// Props
 	let {
 		isOpen = $bindable(false),
 		onSave,
@@ -25,6 +24,7 @@
 
 	// State
 	let isEditing = $derived(!!editingRule);
+	let viewOnlyEditing = $derived(!!editingRule);
 	let shouldTriggerSave = $state(false);
 	let errors = $state({} as Record<string, string>);
 
@@ -72,6 +72,50 @@
 	// Validation type selection
 	let selectedValidationType = $state('regex'); // 'regex' or 'logical'
 
+	// ------------------------------
+	// Read-only summary for editing
+	// ------------------------------
+	function parseMaybeJson(val: any) {
+		if (val == null) return null;
+		if (typeof val === 'string') {
+			try {
+				return JSON.parse(val);
+			} catch {
+				return null;
+			}
+		}
+		return val;
+	}
+
+	function normalizeOperand(op: any) {
+		return {
+			Type: op?.Type,
+			DataType: op?.DataType,
+			Value: op?.Value,
+			FieldId: op?.FieldId,
+			FieldCode: op?.FieldCode
+		};
+	}
+
+	function normalizeOperation(op: any): any {
+		if (!op) return null;
+		const Type = op.Type;
+		if (Type === 'Logical' || Type === 'Mathematical') {
+			const raw = parseMaybeJson(op.Operands) ?? op.Operands ?? [];
+			const Operands = (raw as any[]).map(normalizeOperand);
+			return { ...op, Operands };
+		}
+		if (Type === 'Composition') {
+			const children = Array.isArray(op.Children) ? op.Children.map(normalizeOperation) : [];
+			return { ...op, Children: children };
+		}
+		if (Type === 'FunctionExpression') {
+			const rawVars = parseMaybeJson(op.Variables) ?? op.Variables ?? {};
+			return { ...op, Variables: rawVars };
+		}
+		return op;
+	}
+
 	// Function to reset trigger flag
 	function resetTriggerFlag() {
 		shouldTriggerSave = false;
@@ -95,12 +139,8 @@
 		testInput = '';
 		testResult = '';
 		testResultClass = '';
-		conditions = [
-			{ field: '', operator: '', value: '', connector: '' }
-		];
-		compositeConditions = [
-			{ field: '', operator: '', value: '', connector: '' }
-		];
+		conditions = [{ field: '', operator: '', value: '', connector: '' }];
+		compositeConditions = [{ field: '', operator: '', value: '', connector: '' }];
 		compositeOperator = 'And';
 		// Keep logicId from currentField if present; do not reset it
 		ruleId = '';
@@ -117,97 +157,28 @@
 	// Effect to initialize form per mode (edit/create) when modal opens
 	$effect(() => {
 		if (!isOpen) return;
-		if (isEditing && editingRule) {
-			console.log('Populating form with editing data:', editingRule);
-
-			// Extract rule data
-			const originalRule = editingRule.originalRule;
-			if (originalRule) {
-				ruleName = originalRule.Name || originalRule.name || '';
-				ruleDescription = originalRule.Description || originalRule.description || '';
-				rulePriority = originalRule.Priority || originalRule.priority || 1;
-				errorMessage = originalRule.ErrorMessage || originalRule.errorMessage || '';
-				messageSeverity = originalRule.MessageSeverity || originalRule.messageSeverity || 'error';
-				successMessage = originalRule.SuccessMessage || originalRule.successMessage || '';
-				fallbackAction = originalRule.FallbackAction || originalRule.fallbackAction || '';
-
-				// Determine validation type based on operation type
-				if (originalRule.Operation?.Type === 'FunctionExpression') {
-					selectedValidationType = 'regex';
-					
-					// Extract regex pattern from variables
-					if (originalRule.Operation.Variables) {
-						try {
-							const variables = typeof originalRule.Operation.Variables === 'string' 
-								? JSON.parse(originalRule.Operation.Variables) 
-								: originalRule.Operation.Variables;
-							
-							if (variables.regex?.Value) {
-								regexPattern = variables.regex.Value;
-							}
-							
-							if (variables.input?.FieldId) {
-								selectedField = variables.input.FieldId;
-							}
-						} catch (e) {
-							console.error('Error parsing operation variables:', e);
-						}
-					}
-				} else if (originalRule.Operation?.Type === 'Logical' || originalRule.Operation?.Type === 'Composition') {
-					selectedValidationType = 'logical';
-					
-					// Parse operands for logical operations
-					if (originalRule.Operation.Operands) {
-						try {
-							const operands = typeof originalRule.Operation.Operands === 'string' 
-								? JSON.parse(originalRule.Operation.Operands) 
-								: originalRule.Operation.Operands;
-							
-							if (Array.isArray(operands) && operands.length > 0) {
-								conditions = [{
-									field: operands[0]?.FieldId || '',
-									operator: originalRule.Operation.Operator || '',
-									value: operands[1]?.Value || '',
-									connector: ''
-								}];
-							}
-						} catch (e) {
-							console.error('Error parsing operation operands:', e);
-						}
-					}
-					
-					// Parse children for composition operations
-					if (originalRule.Operation.Children) {
-						try {
-							const children = typeof originalRule.Operation.Children === 'string' 
-								? JSON.parse(originalRule.Operation.Children) 
-								: originalRule.Operation.Children;
-							
-							if (Array.isArray(children) && children.length > 0) {
-								compositeConditions = children.map((child: any) => ({
-									field: child?.FieldId || '',
-									operator: child?.Operator || '',
-									value: child?.Value || '',
-									connector: ''
-								}));
-								compositeOperator = originalRule.Operation.Operator || 'And';
-							}
-						} catch (e) {
-							console.error('Error parsing operation children:', e);
-						}
-					}
-				}
-			}
-		} else if (!isEditing) {
-			// Ensure clean state when creating new
+		if (!isEditing) {
 			resetForCreate();
+			return;
+		}
+		// For editing: show read-only summary and detect type
+		const originalRule = editingRule?.originalRule;
+		if (!originalRule) return;
+		ruleName = originalRule.Name || originalRule.name || '';
+		ruleDescription = originalRule.Description || originalRule.description || '';
+		errorMessage = originalRule.ErrorMessage || '';
+		const op = normalizeOperation(originalRule.Operation);
+		if (op?.Type === 'FunctionExpression') {
+			selectedValidationType = 'regex';
+		} else {
+			selectedValidationType = 'logical';
 		}
 	});
 
 	// Async function to fetch composite conditions
 	async function fetchCompositeConditions(children: string[]) {
 		const fetchedConditions = [];
-		
+
 		for (const operationId of children) {
 			try {
 				// Fetch the logical operation details
@@ -215,18 +186,21 @@
 				if (response.ok) {
 					const operationData = await response.json();
 					const operation = operationData.Data;
-					
+
 					// Parse the operands to extract field, operator, and value
 					if (operation.Operands) {
 						const operands = JSON.parse(operation.Operands);
-						
+
 						// Extract field information from first operand
 						let fieldTitle = '';
 						if (operands[0] && operands[0].Type === 'FieldReference') {
 							// Find the field in questionList
 							for (const section of questionList) {
 								for (const field of section.FormFields) {
-									if (field.id === operands[0].FieldId || field.DisplayCode === operands[0].FieldCode) {
+									if (
+										field.id === operands[0].FieldId ||
+										field.DisplayCode === operands[0].FieldCode
+									) {
 										fieldTitle = field.Title || field.DisplayCode;
 										break;
 									}
@@ -234,7 +208,7 @@
 								if (fieldTitle) break;
 							}
 						}
-						
+
 						// Map operator back to display name
 						let operatorDisplay = '';
 						switch (operation.Operator) {
@@ -274,13 +248,13 @@
 							default:
 								operatorDisplay = 'Equal To';
 						}
-						
+
 						// Extract value from second operand if it exists
 						let value = '';
 						if (operands[1] && operands[1].Type === 'Constant') {
 							value = operands[1].Value || '';
 						}
-						
+
 						fetchedConditions.push({
 							field: fieldTitle,
 							operator: operatorDisplay,
@@ -293,24 +267,26 @@
 				console.error(`Error fetching operation ${operationId}:`, fetchError);
 			}
 		}
-		
+
 		// Set the populated conditions
 		if (fetchedConditions.length > 0) {
 			compositeConditions = fetchedConditions;
 		} else {
 			// Fallback to empty condition if fetching failed
-			compositeConditions = [{
-				field: '',
-				operator: '',
-				value: '',
-				connector: ''
-			}];
+			compositeConditions = [
+				{
+					field: '',
+					operator: '',
+					value: '',
+					connector: ''
+				}
+			];
 		}
 	}
 
 	function setSeverity(severity: string) {
-        messageSeverity = severity;
-    }
+		messageSeverity = severity;
+	}
 
 	function handleCancel() {
 		isOpen = false;
@@ -321,7 +297,7 @@
 	function handleRegexOperationCreated(event: CustomEvent) {
 		console.log('Regex operation created/updated:', event.detail);
 		resetTriggerFlag();
-		
+
 		// If this is an edit operation, close modal directly
 		if (event.detail.isEdit) {
 			isOpen = false;
@@ -336,13 +312,20 @@
 	function handleLogicalOperationsCreated(event: CustomEvent) {
 		console.log('Received logical operations data from child:', event.detail);
 		shouldTriggerSave = false;
+		// If this came from an edit flow, do not create a new rule
+		if (event.detail?.isEdit) {
+			isOpen = false;
+			onSave?.();
+			invalidateAll();
+			return;
+		}
 		handleSubmit(event.detail);
 	}
 
 	function handleCompositeCompositionCreated(event: CustomEvent) {
 		console.log('Composite composition created/updated:', event.detail);
 		resetTriggerFlag();
-		
+
 		// If this is an edit operation, close modal directly
 		if (event.detail.isEdit) {
 			isOpen = false;
@@ -363,6 +346,13 @@
 			// Validate required fields
 			if (!ruleName.trim()) {
 				errors.ruleName = 'Rule name is required';
+			}
+
+			// Validate operation linkage (must have type and id)
+			if (!operationData || !operationData.operationType || !operationData.operationId) {
+				errors.general = 'Missing operation. Please create or select a condition first.';
+				toastMessage({ Message: 'Missing operation: create/select a condition first', HttpCode: 400 });
+				return;
 			}
 
 			// If there are validation errors, don't proceed
@@ -447,7 +437,7 @@
 					logicId: logicId,
 					ruleId: ruleId
 				});
-				
+
 				const fieldUpdateData = {
 					id: currentField?.id,
 					ValidateLogicId: logicId
@@ -493,15 +483,15 @@
 			errors.general = error.message;
 		}
 		invalidateAll();
-    }
+	}
 </script>
 
 {#if isOpen}
-    <!-- Modal Overlay -->
+	<!-- Modal Overlay -->
 	<div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-        <!-- Modal -->
+		<!-- Modal -->
 		<div class="flex max-h-[90vh] w-[90%] max-w-4xl flex-col rounded-lg bg-white shadow-2xl">
-            <!-- Modal Header -->
+			<!-- Modal Header -->
 			<div
 				class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-8 py-5"
 			>
@@ -514,11 +504,11 @@
 					class="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
 					<Icon icon="mdi:close" class="h-5 w-5" />
-                </button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div class="flex-1 overflow-y-auto p-8">
+				</button>
+			</div>
+
+			<!-- Modal Body -->
+			<div class="flex-1 overflow-y-auto p-8">
 				<!-- General Error Display -->
 				{#if errors.general}
 					<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
@@ -538,11 +528,11 @@
 					</div>
 				{/if}
 
-                <!-- Rule Name -->
+				<!-- Rule Name -->
 				<div class="mb-4">
 					<Label class="mb-2 block font-semibold text-slate-700">Rule Name</Label>
-                    <Input 
-                        bind:value={ruleName}
+					<Input
+						bind:value={ruleName}
 						placeholder="Enter validation rule name"
 						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 					/>
@@ -570,16 +560,18 @@
 					/>
                 </div> -->
 
-                <!-- Validation Type Selection -->
+				<!-- Validation Type Selection -->
 				<div class="mb-6">
 					<Label class="mb-2 block font-semibold text-slate-700">Validation Type</Label>
-					<Select.Root type="single" bind:value={selectedValidationType} disabled={isEditing}>
+					<Select.Root type="single" bind:value={selectedValidationType} disabled={false}>
 						<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
-							{selectedValidationType === 'regex' ? 'Regex Pattern Validation' : 'Logical Condition Validation'}
+							{selectedValidationType === 'regex'
+								? 'Regex Pattern Validation'
+								: 'Logical Condition Validation'}
 						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="regex">Regex Pattern Validation</Select.Item>
-							<Select.Item value="logical">Logical Condition Validation</Select.Item>
+						<Select.Content portalProps={{}}>
+							<Select.Item value="regex" label="Regex Pattern Validation" />
+							<Select.Item value="logical" label="Logical Condition Validation" />
 						</Select.Content>
 					</Select.Root>
 					{#if isEditing}
@@ -589,127 +581,133 @@
 					{/if}
 				</div>
 
-                <!-- Validation Type Content -->
-				{#if selectedValidationType === 'regex'}
-					<RegexValidationRule
-						{isEditing}
-						{editingRule}
-						{currentField}
-						{questionList}
-						{ruleName}
-						{ruleDescription}
-						{activeRegexPreset}
-						{regexPattern}
-						{selectedField}
-						{handleRegexOperationCreated}
-						{shouldTriggerSave}
-					/>
-				{:else if selectedValidationType === 'logical'}
-					<LogicalValidationRule
-						{isEditing}
-						{editingRule}
-						{currentField}
-						{ruleName}
-						{ruleDescription}
-						{questionList}
-						{conditions}
-						{shouldTriggerSave}
-						{handleLogicalOperationsCreated}
-					/>
-				{/if}
+				<!-- Validation Type Content -->
+				{#key selectedValidationType}
+					{#if selectedValidationType === 'regex'}
+						<RegexValidationRule
+							{isEditing}
+							{editingRule}
+							{currentField}
+							{questionList}
+							{ruleName}
+							{ruleDescription}
+							{activeRegexPreset}
+							{regexPattern}
+							{selectedField}
+							{handleRegexOperationCreated}
+							{shouldTriggerSave}
+						/>
+					{:else if selectedValidationType === 'logical'}
+						<LogicalValidationRule
+							{isEditing}
+							{editingRule}
+							{currentField}
+							{ruleName}
+							{ruleDescription}
+							{questionList}
+							{conditions}
+							{shouldTriggerSave}
+							{handleLogicalOperationsCreated}
+						/>
+					{/if}
+				{/key}
 
-                <!-- Validation Messages Section -->
+				<!-- Validation Messages Section -->
 				<div class="mb-5 rounded-md border-2 border-gray-200 bg-white p-4">
 					<h3 class="mb-4 font-medium text-slate-700">Validation Messages</h3>
-                    
-                    <div class="mb-4">
+
+					<div class="mb-4">
 						<Label class="mb-2 block font-semibold text-slate-700">Message Severity</Label>
 						<div class="mb-4 flex gap-2">
-                            <Button 
-                                type="button"
-								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'error'
+							<Button
+								type="button"
+								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
+								'error'
 									? 'scale-105 border-red-300 bg-red-100 text-red-800 shadow-sm'
 									: 'border-red-300 bg-red-100 text-red-800'}"
-                                onclick={() => setSeverity('error')}
-                            >
-                                Error
-                            </Button>
-                            <Button 
-                                type="button"
-								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'warning'
+								onclick={() => setSeverity('error')}
+							>
+								Error
+							</Button>
+							<Button
+								type="button"
+								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
+								'warning'
 									? 'scale-105 border-yellow-300 bg-yellow-100 text-yellow-800 shadow-sm'
 									: 'border-yellow-300 bg-yellow-100 text-yellow-800'}"
-                                onclick={() => setSeverity('warning')}
-                            >
-                                Warning
-                            </Button>
-                            <Button 
-                                type="button"
-								class="py-1 cursor-pointer rounded-full border px-5 text-xs font-semibold transition-transform {messageSeverity === 'info'
+								onclick={() => setSeverity('warning')}
+							>
+								Warning
+							</Button>
+							<Button
+								type="button"
+								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
+								'info'
 									? 'scale-105 border-blue-300 bg-blue-100 text-blue-800 shadow-sm'
 									: 'border-blue-300 bg-blue-100 text-blue-800'}"
-                                onclick={() => setSeverity('info')}
-                            >
-                                Info
-                            </Button>
-                        </div>
-                    </div>
+								onclick={() => setSeverity('info')}
+							>
+								Info
+							</Button>
+						</div>
+					</div>
 
-                    <div class="mb-4">
+					<div class="mb-4">
 						<Label class="mb-2 block font-semibold text-slate-700">Error Message</Label>
-						<Textarea 
+						<Textarea
 							bind:value={errorMessage}
-							placeholder="Enter validation error message" 
-							class="w-full rounded-md border-2 border-gray-200 p-3 text-sm h-24 resize-vertical"
+							placeholder="Enter validation error message"
+							class="resize-vertical h-24 w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 						/>
-                    </div>
+					</div>
 
-                    <div class="mb-4">
-						<Label class="mb-2 block font-semibold text-slate-700">Success Message (Optional)</Label>
-						<Textarea 
+					<div class="mb-4">
+						<Label class="mb-2 block font-semibold text-slate-700">Success Message (Optional)</Label
+						>
+						<Textarea
 							bind:value={successMessage}
-							placeholder="Enter validation success message" 
-							class="w-full rounded-md border-2 border-gray-200 p-3 text-sm h-24 resize-vertical"
+							placeholder="Enter validation success message"
+							class="resize-vertical h-24 w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 						/>
-                    </div>
-                </div>
+					</div>
+				</div>
 
-                <!-- Fallback Section -->
+				<!-- Fallback Section -->
 				<div class="mb-5 rounded-md border border-yellow-200 bg-yellow-50 p-4">
-					<div class="font-semibold text-yellow-800 mb-2">Fallback Rule (Optional)</div>
+					<div class="mb-2 font-semibold text-yellow-800">Fallback Rule (Optional)</div>
 					<div class="mb-4">
 						<Select.Root type="single" bind:value={fallbackAction}>
 							<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
 								{fallbackAction || 'Select fallback action'}
 							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="Allow submission with warning">Allow submission with warning</Select.Item>
-								<Select.Item value="Block submission">Block submission</Select.Item>
-								<Select.Item value="Skip validation">Skip validation</Select.Item>
-								<Select.Item value="Apply default value">Apply default value</Select.Item>
+							<Select.Content portalProps={{}}>
+								<Select.Item value="Allow submission with warning" label="Allow submission with warning" />
+								<Select.Item value="Block submission" label="Block submission" />
+								<Select.Item value="Skip validation" label="Skip validation" />
+								<Select.Item value="Apply default value" label="Apply default value" />
 							</Select.Content>
 						</Select.Root>
 					</div>
-                </div>
-            </div>
+				</div>
+			</div>
 
-            <!-- Modal Footer -->
-			<div class="border-t border-gray-200 p-5 flex justify-end gap-3">
-				<Button 
-					variant="outline" 
+			<!-- Modal Footer -->
+			<div class="flex justify-end gap-3 border-t border-gray-200 p-5">
+				<Button
+					variant="outline"
 					onclick={handleCancel}
-					class="px-6 py-3 rounded-md font-semibold text-gray-600 border border-gray-300 hover:bg-gray-50"
+					class="rounded-md border border-gray-300 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50"
 				>
 					Cancel
 				</Button>
-				<Button 
-					variant="default" 
-					onclick={() => shouldTriggerSave = true}
-					class="px-6 py-3 rounded-md font-semibold bg-slate-700 text-white hover:bg-slate-800"
+				<Button
+					variant="default"
+					onclick={() => (shouldTriggerSave = true)}
+					class="rounded-md bg-slate-700 px-6 py-3 font-semibold text-white hover:bg-slate-800"
 				>
 					Save Validation Rule
 				</Button>
 			</div>
-        </div>
-    </div>
+		</div>
+	</div>
 {/if}
