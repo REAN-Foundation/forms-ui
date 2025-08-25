@@ -24,8 +24,9 @@ export const POST = async (event: RequestEvent) => {
         const response = await createCalculationRule(
             data.Name,
             data.Description,
-            data.Priority,
-            data.IsActive,
+            data.BaseOperationId,
+            // data.Priority,
+            // data.IsActive,
             data.OperationType,
             data.ConditionForOperationId,
             data.OperationId,

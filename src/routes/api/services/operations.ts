@@ -18,10 +18,10 @@ export const createFunctionExpressionOperation = async (
     Variables: any
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Expression: Expression,
-        Variables: Variables
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Expression !== undefined && Expression !== null && { Expression }),
+        ...(Variables !== undefined && Variables !== null && { Variables })
     };
     console.log('data from api/service/operations.ts (function-expression):', body);
     const url = BACKEND_API_URL + `/field-function-expression-operations`;
@@ -92,10 +92,10 @@ export const createCompositionOperation = async (
     Children: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Operator: Operator,
-        Children: Children
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Children !== undefined && Children !== null && { Children })
     };
     console.log('data from api/service/operations.ts (composition):', body);
     const url = BACKEND_API_URL + `/field-composition-operations`;
@@ -166,10 +166,10 @@ export const createMathematicalOperation = async (
     Operands: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Operator: Operator,
-        Operands: Operands
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Operands !== undefined && Operands !== null && { Operands })
     };
     console.log('data from api/service/operations.ts (mathematical):', body);
     const url = BACKEND_API_URL + `/field-mathematical-operations`;
@@ -241,11 +241,11 @@ export const createIterateOperation = async (
     ArrayOperand: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        ItemAlias: ItemAlias,
-        OperationId: OperationId,
-        ArrayOperand: ArrayOperand
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(ItemAlias !== undefined && ItemAlias !== null && { ItemAlias }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(ArrayOperand !== undefined && ArrayOperand !== null && { ArrayOperand })
     };
     console.log('data from api/service/operations.ts (iterate):', body);
     const url = BACKEND_API_URL + `/field-iterate-operations`;
@@ -318,10 +318,10 @@ export const createLogicalOperation = async (
     Operands: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Operator: Operator,
-        Operands: Operands
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Operator !== undefined && Operator !== null && { Operator }),
+        ...(Operands !== undefined && Operands !== null && { Operands })
     };
     console.log('data from api/service/operations.ts (logical):', body);
     const url = BACKEND_API_URL + `/field-logical-operations`;

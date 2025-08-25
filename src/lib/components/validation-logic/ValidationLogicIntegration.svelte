@@ -21,25 +21,17 @@
 	// Initialize validation rules from backend data
 	$effect(() => {
 		if (questionCard?.ValidateLogic?.Rules) {
-			console.log('🔍 Raw rules from backend:', questionCard.ValidateLogic.Rules);
 			validationRules = questionCard.ValidateLogic.Rules.map((rule) => {
 				const opType = (rule.OperationType || '').toLowerCase();
 				const isLogical = opType === 'logical';
 				const isComposite = opType === 'composite';
 				const isFunctionExpression = opType === 'functionexpression';
 
-				console.log(`📋 Processing rule ${rule.id} (${rule.OperationType}):`, rule);
-
 				// Handle composite operations with expanded children
 				let conditions = [];
 				if (isComposite && rule.Operation?.Children && Array.isArray(rule.Operation.Children)) {
-					console.log(
-						'🎯 Found composite operation with expanded children:',
-						rule.Operation.Children
-					);
 					// Map expanded logical operation children to conditions format
 					conditions = rule.Operation.Children.map((childOperation, index) => {
-						console.log(`🔗 Processing child operation ${index}:`, childOperation);
 						// Parse the operands to extract field, operator, and value
 						let field = '';
 						let operator = '';
@@ -48,7 +40,6 @@
 						try {
 							if (childOperation.Operands) {
 								const operands = JSON.parse(childOperation.Operands);
-								console.log(`📊 Parsed operands for child ${index}:`, operands);
 								if (Array.isArray(operands) && operands.length >= 2) {
 									// First operand is usually the field reference
 									if (operands[0]?.FieldId) {
@@ -62,7 +53,7 @@
 							}
 							operator = childOperation.Operator || '';
 						} catch (error) {
-							console.error('❌ Error parsing logical operation operands:', error);
+							console.error('Error parsing logical operation operands:', error);
 						}
 
 						const condition = {
@@ -71,11 +62,9 @@
 							value: value,
 							connector: index > 0 ? 'AND' : null // Default connector for composite operations
 						};
-						console.log(`✅ Created condition for child ${index}:`, condition);
 						return condition;
 					});
 				} else if (isLogical) {
-					console.log('🔗 Processing single logical operation');
 					// Handle single logical operations
 					conditions = [
 						{
@@ -86,7 +75,6 @@
 						}
 					];
 				} else {
-					console.log('📝 Processing other operation type');
 					// Handle other operation types
 					conditions = rule.Operation?.Operands || [];
 				}
@@ -119,7 +107,6 @@
 					logicalOperations: isComposite ? rule.Operation?.Children || [] : []
 				};
 
-				console.log(`✅ Mapped rule ${rule.id}:`, mappedRule);
 				return mappedRule;
 			});
 		}
@@ -128,10 +115,8 @@
 	function openBuilder(event, rule = null) {
 		event?.preventDefault();
 		event?.stopPropagation();
-		console.log('Opening builder with rule:', rule);
 		if (rule) {
-			console.log('Rule original data:', rule.originalRule);
-			console.log('Rule original data keys:', Object.keys(rule.originalRule || {}));
+			// keep minimal logging to avoid noise
 		}
 		editingRule = rule;
 		showBuilder = true;
@@ -165,8 +150,6 @@
 	async function confirmDeleteRule() {
 		if (!ruleToDelete) return;
 
-		console.log('Removing rule with ID:', ruleToDelete.id);
-
 		try {
 			const response = await fetch(`/api/server/rules/validation-rule/${ruleToDelete.id}`, {
 				method: 'DELETE',
@@ -178,7 +161,6 @@
 			const result = await response.json();
 
 			if (result.HttpCode === 200) {
-				console.log('Rule deleted successfully');
 				toastMessage({ Message: 'Validation rule deleted successfully', HttpCode: 200 });
 
 				// Remove the rule from the local state
@@ -223,14 +205,13 @@
 								}
 
 								return {
-									field: field,
-									operator: operator,
-									value: value,
-									connector: index > 0 ? 'AND' : null // Default connector for composite operations
+									field,
+									operator,
+									value,
+									connector: index > 0 ? 'AND' : null
 								};
 							});
 						} else if (isLogical) {
-							// Handle single logical operations
 							conditions = [
 								{
 									field: rule.Operation?.FieldReference || '',
@@ -240,18 +221,15 @@
 								}
 							];
 						} else {
-							// Handle other operation types
 							conditions = rule.Operation?.Operands || [];
 						}
-
-						const isFunctionExpression = opType === 'functionexpression';
 
 						return {
 							id: rule.id,
 							ruleName: rule.Name,
 							activeTab: rule.OperationType?.toLowerCase() || 'logical',
 							errorMessage: rule.ErrorMessage,
-							conditions: conditions,
+							conditions,
 							operator: rule.Operation?.Operator || '',
 							fieldReference: rule.Operation?.FieldReference || '',
 							value: rule.Operation?.Value || '',
@@ -265,31 +243,18 @@
 							createdAt: rule.CreatedAt,
 							isActive: rule.IsActive !== false,
 							description: rule.Description || rule.ErrorMessage || 'No description available',
-							typeDisplay: isFunctionExpression ? 'Function Expression' : 'Logical',
-							// Store the original rule data for editing
+							typeDisplay: isComposite ? 'Logical' : 'Function Expression',
 							originalRule: rule,
-							// Store expanded logical operations for composite rules
 							logicalOperations: isComposite ? rule.Operation?.Children || [] : []
 						};
 					});
 				}
 			} else {
 				console.error('Failed to delete rule:', result);
-				toastMessage({
-					Message: result.Message || 'Failed to delete validation rule',
-					HttpCode: result.HttpCode || 500
-				});
 			}
 		} catch (error) {
 			console.error('Error deleting rule:', error);
-			toastMessage({
-				Message: 'An error occurred while deleting the validation rule',
-				HttpCode: 500
-			});
 		}
-
-		closeDeleteModal();
-		invalidateAll();
 	}
 
 	// Helper function to truncate text

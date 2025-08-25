@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		functionExpressionOperationSchema,
-		OperationType
-	} from './function-expression-operation-schema.js';
+	import { functionExpressionOperationSchema, OperationType } from './schemas/function-expression-operation-schema.js';
 	import { Button } from '../ui/button/index.js';
 	import { Input } from '../ui/input/index.js';
 	import { Label } from '../ui/label/index.js';
@@ -176,16 +173,11 @@
 	);
 
 	function selectRegexPreset(preset) {
-		console.log('selectRegexPreset called with preset:', preset);
-
 		if (preset.name === 'Custom') {
 			activeRegexPreset = 'CUSTOM';
-			// Keep the current regexPattern for custom editing
-			console.log('Custom preset selected, activeRegexPreset set to CUSTOM');
 		} else {
 			activeRegexPreset = preset.pattern;
 			regexPattern = preset.pattern;
-			console.log('Preset selected:', preset.name, 'Pattern:', preset.pattern);
 		}
 
 		// Clear validation errors when a preset is selected
@@ -233,15 +225,6 @@
 	});
 
 	async function handleSave() {
-		console.log('handleSave called with selectedField:', currentField);
-		console.log('handleSave - selectedField type:', typeof currentField);
-		console.log('handleSave - selectedField.id:', currentField?.id);
-		console.log('handleSave - selectedField.DisplayCode:', currentField?.DisplayCode);
-		console.log('Validation debug - isEditing:', isEditing);
-		console.log('Validation debug - activeRegexPreset:', activeRegexPreset);
-		console.log('Validation debug - regexPattern:', regexPattern);
-		console.log('Validation debug - selectedFieldTitle:', selectedFieldTitle);
-
 		// Reset errors
 		errors = {} as Record<string, string>;
 
@@ -250,14 +233,12 @@
 			// Check if a regex preset is selected (including Custom)
 			if (!activeRegexPreset || activeRegexPreset === '') {
 				errors.regexPattern = 'Please select a regex preset';
-				console.log('Validation failed: No regex preset selected');
 			} else if (regexPattern.trim()) {
 				// Validate the regex pattern
 				try {
 					new RegExp(regexPattern);
 				} catch (e) {
 					errors.regexPattern = 'Invalid regex pattern';
-					console.log('Validation failed: Invalid regex pattern');
 				}
 			}
 
@@ -268,13 +249,11 @@
 				selectedFieldTitle === ''
 			) {
 				errors.selectedField = 'Please select a field to validate';
-				console.log('Validation failed: No field selected');
 			}
 		}
 
 		// If there are validation errors, don't proceed
 		if (Object.keys(errors).length > 0) {
-			console.log('Validation errors:', errors);
 			return;
 		}
 
@@ -296,7 +275,11 @@
 			const operation = {
 				Name: `${finalRuleName} - Regex validation`,
 				Description: `${finalRuleDescription} - Regex pattern validation`,
-				Expression: 'regex.test(input)',
+				// Instead of raw string, stringify a JSON object
+				Expression: JSON.stringify({
+					source: finalRegexPattern,
+					flags: '' // add 'i', 'g' if you want later
+				}),
 				Variables: JSON.stringify({
 					regex: {
 						Type: 'Constant',
@@ -332,7 +315,6 @@
 
 			if (!operationResponse.ok) {
 				const errorData = await operationResponse.json();
-				toastMessage(errorData);
 				throw new Error(errorData.Message || 'Failed to create regex operation');
 			}
 
@@ -354,7 +336,6 @@
 	}
 
 	async function handleEdit() {
-		console.log('handleEdit called with selectedField:', currentField);
 		// Reset errors
 		errors = {} as Record<string, string>;
 
@@ -369,7 +350,6 @@
 
 		// If there are validation errors, don't proceed
 		if (Object.keys(errors).length > 0) {
-			console.log('Validation errors:', errors);
 			return;
 		}
 
@@ -391,7 +371,11 @@
 			const operation = {
 				Name: `${finalRuleName} - Regex validation`,
 				Description: `${finalRuleDescription} - Regex pattern validation`,
-				Expression: 'regex.test(input)',
+				// Instead of raw string, stringify a JSON object
+				Expression: JSON.stringify({
+					source: finalRegexPattern,
+					flags: '' // add 'i', 'g' if you want later
+				}),
 				Variables: JSON.stringify({
 					regex: {
 						Type: 'Constant',
@@ -439,12 +423,10 @@
 
 				if (!operationResponse.ok) {
 					const errorData = await operationResponse.json();
-					toastMessage(errorData);
 					throw new Error(errorData.Message || 'Failed to update regex operation');
 				}
 
 				const operationData = await operationResponse.json();
-				toastMessage(operationData);
 				console.log('Regex operation updated successfully:', operationData);
 
 				// Dispatch success event to parent to close modal

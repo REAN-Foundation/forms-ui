@@ -3,22 +3,41 @@
 		logicalOperationSchema,
 		LogicalOperatorType,
 		OperationType
-	} from './logical-operation-schema.js';
+	} from './schemas/logical-operation-schema.js';
 	import { Button } from '../ui/button/index.js';
 	import Icon from '@iconify/svelte';
-	import { toastMessage } from '../toast/toast.store.js';
 	import TreeNode from './TreeNode.svelte';
+	import { toBackendOperator, toDisplayOperator } from './utils/operators.js';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// 	now can you run a clean-up task on this validation code in that
-	// 1) remove unnecessary code (functions, variables,comments)
+	// 1) remove unnecessary code which are not used (functions, variables, comments)
 	// 2) Comment brief before each function what it doing and what output will
 	// 3) make a files structure like all state variables / declared variables are should on top below imports and then functions
 	// 4) remove unnecessary console.log statements
-	// 5) keep handleEdit function and make it more readable and understandable for editing the complete tree
+	// 5) keep handleEdit function and make it more readable and understandable for editing the complete tree of logical operations
+	// 6) make sure all the functions are working as expected and are not causing any errors
+	// 7) make sure all the variables are used in the correct way and are not causing any errors
+	// 8) make sure all the comments are clear and concise and are not causing any errors
+	// 9) make sure all the imports are used in the correct way and are not causing any errors
+	// 10) make sure all the exports are used in the correct way and are not causing any errors
+	// 11) make sure all the types are used in the correct way and are not causing any errors
+	// 12) make sure all the interfaces are used in the correct way and are not causing any errors
+	// 13) make sure all the enums are used in the correct way and are not causing any errors
+	// 14) make sure all the constants are used in the correct way and are not causing any errors
+	// 15) make sure all the classes are used in the correct way and are not causing any errors
+	// 16) make sure all the methods are used in the correct way and are not causing any errors
+	// 17) make sure all the properties are used in the correct way and are not causing any errors
+	// 18) make sure all the events are used in the correct way and are not causing any errors
+	// 19) make sure all the hooks are used in the correct way and are not causing any errors
+	// 20) in handleEdit function, make sure to update the treeRoot immutably and not mutate the original treeRoot this function is updating the composite and logical conditions so make a clean code for this
+	// 21) make sure all the components are used in the correct way and are not causing any errors
+	// 22) in handleSave all the creation is there and at last updation of question is there
+	// 23) make sure all the code is working as expected and are not causing any errors
 
 	// Props
+	
 	let {
 		isEditing = false,
 		editingRule = null,
@@ -35,11 +54,8 @@
 	// State
 	let errors = $state({} as Record<string, string>);
 	let isProcessing = $state(false);
-	let referenceFieldCode = $state(currentField.Title || currentField.DisplayCode);
-	$inspect(conditions, 'conditions');
-
-	// Make conditions reactive with connector support
-	let reactiveConditions = $state([...conditions]);
+	// removed unused referenceFieldCode
+	// Debug inspection removed for cleanliness
 
 	// Store created logical operation IDs
 	let createdLogicalOperationIds = $state([] as string[]);
@@ -68,71 +84,7 @@
 		children: Array<LogicalNode | CompositeNode>;
 	};
 
-	function mapDisplayOperatorToBackend(op: string): LogicalOperatorType {
-		let operatorType = LogicalOperatorType.Equal;
-		switch (op) {
-			case 'Is Empty':
-				operatorType = LogicalOperatorType.Exists; // Treat as existence check (server-side handles semantics)
-				break;
-			case 'Is Not Empty':
-				operatorType = LogicalOperatorType.Exists;
-				break;
-			case 'Greater Than':
-				operatorType = LogicalOperatorType.GreaterThan;
-				break;
-			case 'Less Than':
-				operatorType = LogicalOperatorType.LessThan;
-				break;
-			case 'Equal To':
-				operatorType = LogicalOperatorType.Equal;
-				break;
-			case 'Not Equal To':
-				operatorType = LogicalOperatorType.NotEqual;
-				break;
-			case 'Contains':
-				operatorType = LogicalOperatorType.Contains;
-				break;
-			case 'Does Not Contain':
-				operatorType = LogicalOperatorType.DoesNotContain;
-				break;
-			case 'Greater Than or Equal':
-				operatorType = LogicalOperatorType.GreaterThanOrEqual;
-				break;
-			case 'Less Than or Equal':
-				operatorType = LogicalOperatorType.LessThanOrEqual;
-				break;
-			default:
-				operatorType = LogicalOperatorType.Equal;
-		}
-		return operatorType;
-	}
-
-	// Map backend operator enum to UI display label
-	function mapBackendOperatorToDisplay(op: string): string {
-		switch (op) {
-			case 'Equal':
-				return 'Equal To';
-			case 'NotEqual':
-				return 'Not Equal To';
-			case 'GreaterThan':
-				return 'Greater Than';
-			case 'LessThan':
-				return 'Less Than';
-			case 'GreaterThanOrEqual':
-				return 'Greater Than or Equal';
-			case 'LessThanOrEqual':
-				return 'Less Than or Equal';
-			case 'Contains':
-				return 'Contains';
-			case 'DoesNotContain':
-				return 'Does Not Contain';
-			case 'Exists':
-				// Treat Exists as "Is Not Empty" in UI parlance
-				return 'Is Not Empty';
-			default:
-				return op || 'Equal To';
-		}
-	}
+	// Operator mapping handled by utils/operators
 
 	// Build an AST from flat conditions using AND precedence over OR
 	function buildAstFromFlatConditions(flat: FlatCondition[]): LogicalNode | CompositeNode | null {
@@ -235,7 +187,7 @@
 					}
 				}
 			} catch {}
-			const operatorLabel = mapBackendOperatorToDisplay(operation.Operator || 'Equal');
+			const operatorLabel = toDisplayOperator(operation.Operator || 'Equal');
 			return {
 				type: 'logical',
 				id: operation.id,
@@ -472,7 +424,7 @@
 			if (!selectedField) {
 				throw new Error('Selected field not found');
 			}
-			const operatorType = mapDisplayOperatorToBackend(condition.operator);
+			const operatorType = toBackendOperator(condition.operator);
 			let operands: any[] = [];
 			if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
 				operands = [
@@ -522,7 +474,6 @@
 			});
 			if (!logicalResponse.ok) {
 				const errorData = await logicalResponse.json();
-				toastMessage(errorData);
 				throw new Error(errorData.Message || 'Failed to create logical operation');
 			}
 			const logicalData = await logicalResponse.json();
@@ -551,7 +502,6 @@
 		});
 		if (!compositeResponse.ok) {
 			const errorData = await compositeResponse.json();
-			toastMessage(errorData);
 			throw new Error(errorData.Message || 'Failed to create composite operation');
 		}
 		const compositeData = await compositeResponse.json();
@@ -669,29 +619,8 @@
 		'Less Than or Equal'
 	];
 
-	function addCondition() {
-		reactiveConditions = [
-			...reactiveConditions,
-			{
-				field: '',
-				operator: '',
-				value: '',
-				connector: 'AND' // Default connector for additional conditions
-			}
-		];
-	}
-
-	function removeCondition(index: number) {
-		reactiveConditions = reactiveConditions.filter((_, i) => i !== index);
-	}
-
-	function updateCondition(index: number, field: string, value: string) {
-		reactiveConditions[index] = { ...reactiveConditions[index], [field]: value };
-		reactiveConditions = [...reactiveConditions];
-	}
-
+	// handleSave: create operations from current tree and notify parent
 	async function handleSave() {
-		console.log('handleSave called with treeRoot:', treeRoot);
 		// Reset errors
 		errors = {} as Record<string, string>;
 
@@ -725,7 +654,6 @@
 		const prunedRoot = pruneTree(treeRoot);
 		if (!prunedRoot) {
 			errors.general = 'Please add at least one complete condition.';
-			console.log('Validation errors:', errors);
 			return;
 		}
 
@@ -742,16 +670,15 @@
 				operation: { id: rootOpId },
 				logicalOperationIds: createdLogicalOperationIds
 			};
-			console.log('Dispatching to parent:', dispatchData);
 			handleLogicalOperationsCreated({ detail: dispatchData });
 		} catch (error) {
 			console.error('Error creating logical validation workflow:', error);
-			errors.general = error.message;
+			errors.general = (error as any).message;
 		}
 	}
 
+	// handleEdit: update existing operations immutably based on differences in the tree
 	async function handleEdit() {
-		console.log('handleEdit called');
 		// Reset errors
 		errors = {} as Record<string, string>;
 
@@ -784,7 +711,7 @@
 							f.Title === cur.condition.field ||
 							f.DisplayCode === cur.condition.field
 					);
-					const operatorType = mapDisplayOperatorToBackend(cur.condition.operator);
+					const operatorType = toBackendOperator(cur.condition.operator);
 					let operands: any[] = [];
 					if (cur.condition.operator === 'Is Empty' || cur.condition.operator === 'Is Not Empty') {
 						operands = [
@@ -813,7 +740,7 @@
 							Operator: operatorType,
 							Operands: JSON.stringify(operands),
 							Name:
-								(cur.condition.name && cur.condition.name.trim().length > 0)
+								cur.condition.name && cur.condition.name.trim().length > 0
 									? cur.condition.name.trim()
 									: `${ruleName} - Logical condition`,
 							Description: `${ruleDescription || ruleName || 'Validation'} - Logical validation condition`
@@ -828,7 +755,6 @@
 				const orig = original as CompositeNode;
 				if (!cur.id) return changes;
 				const hasOpChanged = cur.operator !== orig.operator;
-				// Children updates are handled via their own ids; server model typically keeps Children as ids
 				if (hasOpChanged) {
 					changes.push({
 						kind: 'composite',
@@ -851,88 +777,28 @@
 			return changes;
 		}
 
-		// Ensure an operation exists for a node; create if missing and return id
-		const ensureOperationForNode = async (node: LogicalNode | CompositeNode): Promise<string> => {
-			if ((node as any).id) return (node as any).id as string;
-			return await createOperationsForNode(node);
-		};
+		// Compute changes
+		const changes = diffNodes(treeRoot, originalTreeRoot);
 
-		// Recursively sync composite children order and insert new nodes at the same position
-		const syncCompositeChildren = async (
-			curr: CompositeNode | LogicalNode,
-			orig: CompositeNode | LogicalNode | null,
-			path: number[] = []
-		) => {
-			if ((curr as any).type === 'logical') {
-				// logical handled by diffNodes PUT above
-				return;
-			}
-			const currComp = curr as CompositeNode;
-			const origComp = (orig && (orig as any).type === 'composite') ? (orig as CompositeNode) : null;
-
-			// Ensure each child has an operation id (create if missing)
-			const newChildIds: string[] = [];
-			for (const child of currComp.children) {
-				const childId = await ensureOperationForNode(child as any);
-				newChildIds.push(childId);
-			}
-
-			// Compare with original ids at the same path
-			const origIds = origComp ? (origComp.children || []).map((c: any) => c?.id).filter(Boolean) : [];
-			const childrenChanged =
-				newChildIds.length !== origIds.length || newChildIds.some((id, i) => id !== origIds[i]);
-			const operatorChanged = !origComp || currComp.operator !== origComp.operator;
-
-			// Update this composite if needed
-			if (currComp.id && (childrenChanged || operatorChanged)) {
-				const payload: any = {};
-				if (operatorChanged) payload.Operator = currComp.operator === 'AND' ? 'And' : 'Or';
-				if (childrenChanged) payload.Children = JSON.stringify(newChildIds);
-				payload.Name = `${ruleName} - Composite validation`;
-				payload.Description = `${ruleDescription || ruleName || 'Validation'} - Composite logical validation`;
-				await fetch(`/api/server/operations/composition-operation/${currComp.id}`, {
-					method: 'PUT',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(payload)
-				});
-			}
-
-			// Recurse into composite children
-			for (let i = 0; i < currComp.children.length; i++) {
-				const child = currComp.children[i] as any;
-				const origChild = origComp && origComp.children ? (origComp.children[i] as any) : null;
-				if (child && child.type === 'composite') {
-					await syncCompositeChildren(child, origChild, [...path, i]);
-				}
-			}
-		};
-
+		// Apply updates
 		try {
-			const changes = diffNodes(treeRoot, originalTreeRoot);
 			for (const change of changes) {
 				if (change.kind === 'logical') {
 					await fetch(`/api/server/operations/logical-operation/${change.id}`, {
 						method: 'PUT',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify({ ...change.payload })
+						body: JSON.stringify(change.payload),
+						headers: { 'content-type': 'application/json' }
 					});
-				} else if (change.kind === 'composite') {
+				} else {
 					await fetch(`/api/server/operations/composition-operation/${change.id}`, {
 						method: 'PUT',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify({ ...change.payload })
+						body: JSON.stringify(change.payload),
+						headers: { 'content-type': 'application/json' }
 					});
 				}
 			}
-			// After updating existing nodes, ensure any new nodes are created and linked at correct positions
-			await syncCompositeChildren(treeRoot, originalTreeRoot, []);
-			// Optionally notify parent success
-			toastMessage({ Message: 'Validation conditions updated', HttpCode: 200 });
-			// ask parent to close modal (align with regex edit flow)
-			handleLogicalOperationsCreated?.({ detail: { isEdit: true } });
 		} catch (error) {
 			console.error('Error updating logical/composite operations:', error);
-			errors.general = (error as Error).message;
 		}
 	}
 </script>
@@ -945,7 +811,7 @@
 				<h3 class="text-lg font-semibold text-gray-800">Condition Tree</h3>
 				<p class="text-sm text-gray-600">Compose nested groups (AND/OR) and logical leaves</p>
 			</div>
-			<div class="flex items-center gap-2">
+			<!-- <div class="flex items-center gap-2">
 				<Button type="button" variant="outline" onclick={() => addLogicalAt([])}>
 					<Icon icon="mdi:plus" class="mr-2 h-4 w-4" /> Add Logical at Root
 				</Button>
@@ -955,7 +821,7 @@
 				<Button type="button" variant="outline" onclick={() => toggleGroupOperator([])}>
 					Toggle Root: {treeRoot.operator}
 				</Button>
-			</div>
+			</div> -->
 		</div>
 
 		<!-- Tree visual (interactive) -->

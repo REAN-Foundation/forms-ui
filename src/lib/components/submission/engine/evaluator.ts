@@ -281,7 +281,32 @@ export class RuleEvaluator {
             resolvedVariables[varName] = this.resolveOperand(operand);
         }
 
-        // Parse and evaluate the expression
+        // Support regex expression encoded as JSON: { source: string, flags?: string }
+        const expr = operation.Expression;
+        if (typeof expr === 'string') {
+            try {
+                const maybeRegex = JSON.parse(expr);
+                if (maybeRegex && typeof maybeRegex.source === 'string') {
+                    const pattern: string = maybeRegex.source;
+                    const flags: string = typeof maybeRegex.flags === 'string' ? maybeRegex.flags : '';
+
+                    // Determine input value: prefer 'input' variable, else current field value
+                    const inputValue = resolvedVariables.input ?? this.context.FieldValues.get(this.context.CurrentFieldId);
+                    const text = inputValue == null ? '' : String(inputValue);
+
+                    try {
+                        const re = new RegExp(pattern, flags);
+                        return re.test(text);
+                    } catch (e: any) {
+                        throw new Error(`Invalid regex: ${e.message}`);
+                    }
+                }
+            } catch {
+                // Not a JSON regex expression; continue with default evaluator
+            }
+        }
+
+        // Parse and evaluate the expression (legacy/function expressions)
         return this.parseAndEvaluateExpression(operation.Expression, resolvedVariables);
     }
 

@@ -115,14 +115,14 @@ export const createSkipRule = async (
     LogicId: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Priority: Priority,
-        IsActive: IsActive,
-        OperationType: OperationType,
-        OperationId: OperationId,
-        SkipWhenTrue: SkipWhenTrue,
-        LogicId: LogicId
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Priority !== undefined && Priority !== null && { Priority }),
+        ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(SkipWhenTrue !== undefined && SkipWhenTrue !== null && { SkipWhenTrue }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
     console.log('data from api/service/rule.ts (skip):', body);
     const url = BACKEND_API_URL + `/field-skip-rules`;
@@ -163,14 +163,14 @@ export const updateSkipRule = async (
     LogicId: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Priority: Priority ? Priority : null,
-        IsActive: IsActive ? IsActive : null,
-        OperationType: OperationType ? OperationType : null,
-        OperationId: OperationId ? OperationId : null,
-        SkipWhenTrue: SkipWhenTrue ? SkipWhenTrue : null,
-        LogicId: LogicId ? LogicId : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(Priority !== undefined && Priority !== null && { Priority }),
+        ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(SkipWhenTrue !== undefined && SkipWhenTrue !== null && { SkipWhenTrue }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
 
     const url = BACKEND_API_URL + `/field-skip-rules/${id}`;
@@ -197,22 +197,24 @@ export const getCalculationRuleById = async (
 export const createCalculationRule = async (
     Name: string,
     Description: string,
-    Priority: number,
-    IsActive: boolean,
+    BaseOperationId: string,
+    // Priority: number,
+    // IsActive: boolean,
     OperationType: string,
     ConditionForOperationId: string,
     OperationId: string,
     LogicId: string
 ) => {
     const body = {
-        Name: Name,
-        Description: Description,
-        Priority: Priority,
-        IsActive: IsActive,
-        OperationType: OperationType,
-        ConditionForOperationId: ConditionForOperationId,
-        OperationId: OperationId,
-        LogicId: LogicId
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(BaseOperationId !== undefined && BaseOperationId !== null && { BaseOperationId }),
+        // ...(Priority !== undefined && Priority !== null && { Priority }),
+        // ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
     console.log('data from api/service/rule.ts (calculation):', body);
     const url = BACKEND_API_URL + `/field-calculation-rules`;
@@ -245,22 +247,24 @@ export const updateCalculationRule = async (
     id: string,
     Name: string,
     Description: string,
-    Priority: number,
-    IsActive: boolean,
+    BaseOperationId: string,
+    // Priority: number,
+    // IsActive: boolean,
     OperationType: string,
     ConditionForOperationId: string,
     OperationId: string,
     LogicId: string
 ) => {
     const body = {
-        Name: Name ? Name : null,
-        Description: Description ? Description : null,
-        Priority: Priority ? Priority : null,
-        IsActive: IsActive ? IsActive : null,
-        OperationType: OperationType ? OperationType : null,
-        ConditionForOperationId: ConditionForOperationId ? ConditionForOperationId : null,
-        OperationId: OperationId ? OperationId : null,
-        LogicId: LogicId ? LogicId : null
+        ...(Name !== undefined && Name !== null && { Name }),
+        ...(Description !== undefined && Description !== null && { Description }),
+        ...(BaseOperationId !== undefined && BaseOperationId !== null && { BaseOperationId }),
+        // ...(Priority !== undefined && Priority !== null && { Priority }),
+        // ...(IsActive !== undefined && IsActive !== null && { IsActive }),
+        ...(OperationType !== undefined && OperationType !== null && { OperationType }),
+        ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
+        ...(OperationId !== undefined && OperationId !== null && { OperationId }),
+        ...(LogicId !== undefined && LogicId !== null && { LogicId })
     };
 
     const url = BACKEND_API_URL + `/field-calculation-rules/${id}`;

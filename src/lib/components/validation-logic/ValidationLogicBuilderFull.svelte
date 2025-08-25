@@ -295,7 +295,6 @@
 
 	// Handler functions for child component callbacks
 	function handleRegexOperationCreated(event: CustomEvent) {
-		console.log('Regex operation created/updated:', event.detail);
 		resetTriggerFlag();
 
 		// If this is an edit operation, close modal directly
@@ -310,7 +309,6 @@
 	}
 
 	function handleLogicalOperationsCreated(event: CustomEvent) {
-		console.log('Received logical operations data from child:', event.detail);
 		shouldTriggerSave = false;
 		// If this came from an edit flow, do not create a new rule
 		if (event.detail?.isEdit) {
@@ -323,7 +321,6 @@
 	}
 
 	function handleCompositeCompositionCreated(event: CustomEvent) {
-		console.log('Composite composition created/updated:', event.detail);
 		resetTriggerFlag();
 
 		// If this is an edit operation, close modal directly
@@ -338,7 +335,6 @@
 	}
 
 	async function handleSubmit(operationData: any) {
-		console.log('handleSubmit called with operationData:', operationData);
 		try {
 			// Reset errors
 			errors = {};
@@ -357,16 +353,12 @@
 
 			// If there are validation errors, don't proceed
 			if (Object.keys(errors).length > 0) {
-				console.log('Validation errors:', errors);
 				return;
 			}
-
-			console.log('Starting validation logic creation process...');
 
 			if (!logicId) {
 				// Step 1: Create new validation logic if it doesn't exist
 				try {
-					console.log('Creating new validation logic for field:', currentField?.id);
 					// Create new validation logic
 					const logicData = {
 						FieldId: currentField?.id,
@@ -387,7 +379,6 @@
 
 					const logicResult = await logicResponse.json();
 					logicId = logicResult.Data.id;
-					console.log('Validation logic created successfully:', logicResult);
 				} catch (error) {
 					console.error('Error creating validation logic:', error);
 					errors.general = error.message;
@@ -395,8 +386,6 @@
 			}
 
 			// Step 2: Create validation rule
-			console.log('Creating validation rule with operationData:', operationData);
-
 			if (operationData) {
 				// This is a replacement, so we need to create a new rule
 				const ruleData = {
@@ -411,8 +400,6 @@
 					LogicId: logicId
 				};
 
-				console.log('Rule data to create:', ruleData);
-
 				const ruleResponse = await fetch('/api/server/rules/validation-rule', {
 					method: 'POST',
 					body: JSON.stringify(ruleData),
@@ -422,7 +409,6 @@
 				const ruleResult = await ruleResponse.json();
 				toastMessage(ruleResult);
 				ruleId = ruleResult.Data.id;
-				console.log('Validation rule created successfully:', ruleResult);
 				if (!ruleResponse.ok) {
 					const errorData = await ruleResponse.json();
 					toastMessage(errorData);
@@ -432,18 +418,10 @@
 
 			// Step 3: Update form field with validation logic ID (only if we created a new logic)
 			if (logicId && ruleId) {
-				console.log('Updating field with validation logic:', {
-					fieldId: currentField?.id,
-					logicId: logicId,
-					ruleId: ruleId
-				});
-
 				const fieldUpdateData = {
 					id: currentField?.id,
 					ValidateLogicId: logicId
 				};
-
-				console.log('Field update data:', fieldUpdateData);
 
 				const fieldResponse = await fetch(`/api/server/form-fields`, {
 					method: 'PUT',
@@ -451,28 +429,17 @@
 					headers: { 'content-type': 'application/json' }
 				});
 
-				console.log('Field update response status:', fieldResponse.status);
-
 				if (!fieldResponse.ok) {
 					const errorData = await fieldResponse.json();
 					console.error('Field update error:', errorData);
 					toastMessage(errorData);
 					throw new Error(errorData.Message || 'Failed to update form field with validation logic');
 				} else {
-					const fieldResponseData = await fieldResponse.json();
-					console.log('Field update success:', fieldResponseData);
-					toastMessage(fieldResponseData);
 					console.log('Form field updated with validation logic');
 				}
 			} else {
 				console.log('Skipping field update - missing logicId or ruleId:', { logicId, ruleId });
 			}
-
-			// Show success toast message
-			toastMessage({
-				Success: true,
-				Message: 'Validation rule created successfully!'
-			});
 
 			// Close modal on successful operation
 			isOpen = false;

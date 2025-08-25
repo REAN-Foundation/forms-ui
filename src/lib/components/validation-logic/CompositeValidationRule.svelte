@@ -1,10 +1,6 @@
 <script lang="ts">
-	import {
-		logicalOperationSchema,
-		LogicalOperatorType,
-		OperationType
-	} from './logical-operation-schema.js';
-	import { compositionOperationSchema } from './composition-operation-schema.js';
+	import { logicalOperationSchema, LogicalOperatorType, OperationType } from './schemas/logical-operation-schema.js';
+	import { compositionOperationSchema } from './schemas/composition-operation-schema.js';
 	import { Button } from '../ui/button/index.js';
 	import { Input } from '../ui/input/index.js';
 	import { Label } from '../ui/label/index.js';
@@ -44,10 +40,6 @@
 	// Effect to populate form when editing
 	$effect(() => {
 		if (isEditing && editingRule) {
-			console.log('Populating composite form with editing data:', editingRule);
-			console.log('Composite conditions from parent:', compositeConditions);
-			console.log('Composite operator from parent:', compositeOperator);
-			
 			// The parent component should have already populated the compositeConditions and compositeOperator
 			// We just need to ensure they are properly displayed
 		}

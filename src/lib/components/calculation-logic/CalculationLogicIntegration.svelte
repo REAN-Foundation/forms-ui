@@ -12,19 +12,31 @@
 	let calculationLogicRules = $state([]);
 	let editingRule = $state(null);
 
-	// Initialize calculation logic rules from backend data
+	// Initialize calculation logic rules from backend data (table-friendly shape)
 	$effect(() => {
 		if (questionCard?.CalculateLogic?.Rules) {
-			calculationLogicRules = questionCard.CalculateLogic.Rules.map((rule) => ({
-				id: rule.id,
-				ruleName: rule.Name,
-				targetField: rule.Operation?.TargetField || '',
-				expression: rule.Operation?.Expression || '',
-				conditionalCalculations: rule.Operation?.ConditionalCalculations || [],
-				numberFormat: rule.Operation?.NumberFormat || 'decimal',
-				decimalPlaces: rule.Operation?.DecimalPlaces || 2,
-				createdAt: rule.CreatedAt
-			}));
+			calculationLogicRules = questionCard.CalculateLogic.Rules.map((rule) => {
+				const opType = (rule.OperationType || '').toLowerCase();
+				const typeDisplay =
+					opType === 'functionexpression'
+						? 'Function Expression'
+						: opType === 'logical'
+							? 'Logical'
+							: opType === 'composition'
+								? 'Composition'
+								: rule.OperationType || 'Calculation';
+				return {
+					id: rule.id,
+					ruleName: rule.Name,
+					typeDisplay,
+					isActive: rule.IsActive !== false,
+					description: rule.Description || rule.Name || 'No description available',
+					createdAt: rule.CreatedAt,
+					originalRule: rule
+				};
+			});
+		} else {
+			calculationLogicRules = [];
 		}
 	});
 
@@ -107,50 +119,68 @@
 	</div>
 
 	{#if calculationLogicRules.length > 0}
-		<div class="max-h-48 space-y-2 overflow-y-auto">
-			{#each calculationLogicRules as rule, index}
-				<div class="rounded border border-gray-200 bg-white p-2 text-xs">
-					<div class="flex items-start justify-between gap-2">
-						<div class="min-w-0 flex-1">
-							<div class="truncate font-medium text-gray-800">{rule.ruleName}</div>
-							<div class="text-gray-600">
-								Target: <span class="font-medium">{rule.targetField}</span>
-							</div>
-							<div class="mt-1 truncate rounded bg-gray-100 p-1 font-mono text-xs text-gray-500">
-								{rule.expression}
-							</div>
-							{#if rule.conditionalCalculations && rule.conditionalCalculations.length > 0}
-								<div class="mt-1 text-xs text-blue-600">
-									{rule.conditionalCalculations.length} conditional calculation(s)
+		<div class="overflow-x-auto">
+			<table class="w-full border-collapse text-xs">
+				<thead>
+					<tr class="border-b border-gray-200 bg-gray-100">
+						<th class="p-2 text-left font-medium text-gray-700">Rule Name</th>
+						<th class="p-2 text-left font-medium text-gray-700">Type</th>
+						<th class="p-2 text-left font-medium text-gray-700">Is Active</th>
+						<th class="p-2 text-left font-medium text-gray-700">Description</th>
+						<th class="p-2 text-left font-medium text-gray-700">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each calculationLogicRules as rule, index}
+						<tr class="border-b border-gray-100 hover:bg-gray-50">
+							<td class="p-2 font-medium text-gray-800">{rule.ruleName || 'Unnamed Rule'}</td>
+							<td class="p-2 text-gray-600">{rule.typeDisplay || 'Calculation'}</td>
+							<td class="p-2">
+								<span
+									class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
+									class:bg-green-100={rule.isActive}
+									class:text-green-800={rule.isActive}
+									class:bg-red-100={!rule.isActive}
+									class:text-red-800={!rule.isActive}
+								>
+									<Icon
+										icon={rule.isActive ? 'lucide:check-circle' : 'lucide:x-circle'}
+										class="mr-1 h-3 w-3"
+									/>
+									{rule.isActive ? 'Active' : 'Inactive'}
+								</span>
+							</td>
+							<td class="p-2 text-gray-600" title={rule.description}
+								>{rule.description?.length > 40
+									? `${rule.description.slice(0, 40)}...`
+									: rule.description}</td
+							>
+							<td class="p-2">
+								<div class="flex gap-1">
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onclick={(e) => openBuilder(e, rule)}
+										class="h-6 px-1 text-xs"
+									>
+										<Icon icon="lucide:edit" class="h-2.5 w-2.5" />
+									</Button>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onclick={(e) => removeRule(index, e)}
+										class="h-6 px-1 text-xs text-red-600 hover:text-red-700"
+									>
+										<Icon icon="lucide:trash-2" class="h-2.5 w-2.5" />
+									</Button>
 								</div>
-							{/if}
-							<div class="mt-1 text-xs text-gray-500">
-								Format: {rule.numberFormat} • Decimals: {rule.decimalPlaces}
-							</div>
-						</div>
-						<div class="flex flex-shrink-0 gap-1">
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								onclick={(e) => openBuilder(e, rule)}
-								class="h-6 px-1 text-xs"
-							>
-								<Icon icon="lucide:edit" class="h-2.5 w-2.5" />
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								onclick={(e) => removeRule(index, e)}
-								class="h-6 px-1 text-xs text-red-600 hover:text-red-700"
-							>
-								<Icon icon="lucide:trash-2" class="h-2.5 w-2.5" />
-							</Button>
-						</div>
-					</div>
-				</div>
-			{/each}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	{/if}
 </div>
@@ -162,4 +192,5 @@
 	onCancel={closeBuilder}
 	{editingRule}
 	{questionList}
+	currentField={questionCard}
 />
