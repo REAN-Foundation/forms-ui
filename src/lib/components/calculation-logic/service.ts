@@ -7,10 +7,14 @@ export function toBackendOperator(displayOp: string): string {
         'Not Equal To': 'NotEqual',
         'Greater Than': 'GreaterThan',
         'Greater Than or Equal To': 'GreaterThanOrEqual',
+        'Greater Than or Equal': 'GreaterThanOrEqual',
         'Less Than': 'LessThan',
         'Less Than or Equal To': 'LessThanOrEqual',
+        'Less Than or Equal': 'LessThanOrEqual',
         'Contains': 'Contains',
         'Does Not Contain': 'DoesNotContain',
+        'Starts With': 'Contains', // Map to Contains for now
+        'Ends With': 'Contains',   // Map to Contains for now
         'Is Empty': 'Exists',
         'Is Not Empty': 'Exists',
         'Is True': 'IsTrue',
@@ -203,7 +207,7 @@ export async function createFunctionExpressionOperation(expr: string, ruleName: 
         Name: `${ruleName || 'Calculation'} - Function expression`,
         Description: `${ruleName || 'Calculation'} - Function expression`,
         Expression: backendExpr,
-        Variables: variables
+        Variables: JSON.stringify(variables)
     };
     const res = await fetch('/api/server/operations/function-expression-operation', {
         method: 'POST',
@@ -227,7 +231,7 @@ export async function updateFunctionExpressionOperation(opId: string, expr: stri
         Name: `${ruleName || 'Calculation'} - Function expression`,
         Description: `${ruleName || 'Calculation'} - Function expression`,
         Expression: backendExpr,
-        Variables: variables
+        Variables: JSON.stringify(variables)
     };
     const res = await fetch(`/api/server/operations/function-expression-operation/${opId}`, {
         method: 'PUT',
@@ -243,18 +247,29 @@ export async function updateFunctionExpressionOperation(opId: string, expr: stri
 /**
  * Create a calculation rule
  */
-export async function createCalculationRule(params: { logicId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; }) {
-    const { logicId, functionOperationId, ruleName, ruleDescription, settings } = params;
+export async function createCalculationRule(params: { logicId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
+    const { logicId, functionOperationId, ruleName, ruleDescription, settings, ruleOutcome } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        BaseOperationId: functionOperationId,
         OperationType: 'FunctionExpression',
+        BaseOperationId: functionOperationId,
         OperationId: functionOperationId,
         LogicId: logicId
     };
-    const sanitized = sanitizeSettings(settings);
-    if (Object.keys(sanitized).length > 0) payload.Settings = sanitized;
+
+    // Add Settings if provided
+    if (settings) {
+        const sanitized = sanitizeSettings(settings);
+        if (Object.keys(sanitized).length > 0) {
+            payload.Settings = sanitized;
+        }
+    }
+
+    // Add RuleOutcome if provided
+    if (ruleOutcome) {
+        payload.RuleOutcome = ruleOutcome;
+    }
     const res = await fetch('/api/server/rules/calculation-rule', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -269,17 +284,29 @@ export async function createCalculationRule(params: { logicId: string; functionO
 /**
  * Update a calculation rule
  */
-export async function updateCalculationRule(params: { ruleId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; }) {
-    const { ruleId, functionOperationId, ruleName, ruleDescription, settings } = params;
+export async function updateCalculationRule(params: { ruleId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
+    const { ruleId, functionOperationId, ruleName, ruleDescription, settings, ruleOutcome } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        BaseOperationId: functionOperationId,
         OperationType: 'FunctionExpression',
+        BaseOperationId: functionOperationId,
         OperationId: functionOperationId
     };
-    const sanitized = sanitizeSettings(settings);
-    if (Object.keys(sanitized).length > 0) payload.Settings = sanitized;
+
+    // Add Settings if provided
+    if (settings) {
+        const sanitized = sanitizeSettings(settings);
+        if (Object.keys(sanitized).length > 0) {
+            payload.Settings = sanitized;
+        }
+    }
+
+    // Add RuleOutcome if provided
+    if (ruleOutcome) {
+        payload.RuleOutcome = ruleOutcome;
+    }
+
     const res = await fetch(`/api/server/rules/calculation-rule/${ruleId}`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },

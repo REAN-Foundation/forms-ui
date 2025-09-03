@@ -25,13 +25,11 @@ export const POST = async (event: RequestEvent) => {
             data.Name,
             data.Description,
             data.BaseOperationId,
-            // data.Priority,
-            // data.IsActive,
             data.OperationType,
-            // data.ConditionForOperationId,
             data.OperationId,
             data.LogicId,
-            data.Settings || {}
+            data.Settings || {},
+            data.RuleOutcome || {}
         );
         return new Response(JSON.stringify(response));
     } catch (err) {

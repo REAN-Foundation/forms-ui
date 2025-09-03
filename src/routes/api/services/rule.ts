@@ -204,7 +204,8 @@ export const createCalculationRule = async (
     // ConditionForOperationId: string,
     OperationId: string,
     LogicId: string,
-    Settings?: any
+    Settings?: any,
+    RuleOutcome?: any
 ) => {
     const body = {
         ...(Name !== undefined && Name !== null && { Name }),
@@ -216,7 +217,8 @@ export const createCalculationRule = async (
         // ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
         ...(OperationId !== undefined && OperationId !== null && { OperationId }),
         ...(LogicId !== undefined && LogicId !== null && { LogicId }),
-        ...(Settings !== undefined && Settings !== null && { Settings })
+        ...(Settings !== undefined && Settings !== null && { Settings }),
+        ...(RuleOutcome !== undefined && RuleOutcome !== null && { RuleOutcome })
     };
     console.log('data from api/service/rule.ts (calculation):', body);
     const url = BACKEND_API_URL + `/field-calculation-rules`;
@@ -256,7 +258,8 @@ export const updateCalculationRule = async (
     // ConditionForOperationId: string,
     OperationId: string,
     LogicId: string,
-    Settings?: any
+    Settings?: any,
+    RuleOutcome?: any
 ) => {
     const body = {
         ...(Name !== undefined && Name !== null && { Name }),
@@ -268,7 +271,8 @@ export const updateCalculationRule = async (
         // ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
         ...(OperationId !== undefined && OperationId !== null && { OperationId }),
         ...(LogicId !== undefined && LogicId !== null && { LogicId }),
-        ...(Settings !== undefined && Settings !== null && { Settings })
+        ...(Settings !== undefined && Settings !== null && { Settings }),
+        ...(RuleOutcome !== undefined && RuleOutcome !== null && { RuleOutcome })
     };
 
     const url = BACKEND_API_URL + `/field-calculation-rules/${id}`;
