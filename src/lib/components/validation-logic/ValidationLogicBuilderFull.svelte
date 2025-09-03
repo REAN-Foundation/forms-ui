@@ -39,9 +39,7 @@
 	let testInput = $state('');
 	let testResult = $state('');
 	let testResultClass = $state('');
-	let messageSeverity = $state('error');
 	let errorMessage = $state('');
-	let successMessage = $state('');
 	let fallbackAction = $state('');
 
 	// Logical validation fields
@@ -126,9 +124,7 @@
 		ruleName = '';
 		ruleDescription = '';
 		rulePriority = 1;
-		messageSeverity = 'error';
 		errorMessage = '';
-		successMessage = '';
 		fallbackAction = '';
 		// Reset type-specific fields
 		selectedValidationType = 'regex';
@@ -284,9 +280,7 @@
 		}
 	}
 
-	function setSeverity(severity: string) {
-		messageSeverity = severity;
-	}
+
 
 	function handleCancel() {
 		isOpen = false;
@@ -582,58 +576,11 @@
 				<!-- Validation Messages Section -->
 				<div class="mb-5 rounded-md border-2 border-gray-200 bg-white p-4">
 					<h3 class="mb-4 font-medium text-slate-700">Validation Messages</h3>
-
-					<div class="mb-4">
-						<Label class="mb-2 block font-semibold text-slate-700">Message Severity</Label>
-						<div class="mb-4 flex gap-2">
-							<Button
-								type="button"
-								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
-								'error'
-									? 'scale-105 border-red-300 bg-red-100 text-red-800 shadow-sm'
-									: 'border-red-300 bg-red-100 text-red-800'}"
-								onclick={() => setSeverity('error')}
-							>
-								Error
-							</Button>
-							<Button
-								type="button"
-								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
-								'warning'
-									? 'scale-105 border-yellow-300 bg-yellow-100 text-yellow-800 shadow-sm'
-									: 'border-yellow-300 bg-yellow-100 text-yellow-800'}"
-								onclick={() => setSeverity('warning')}
-							>
-								Warning
-							</Button>
-							<Button
-								type="button"
-								class="cursor-pointer rounded-full border px-5 py-1 text-xs font-semibold transition-transform {messageSeverity ===
-								'info'
-									? 'scale-105 border-blue-300 bg-blue-100 text-blue-800 shadow-sm'
-									: 'border-blue-300 bg-blue-100 text-blue-800'}"
-								onclick={() => setSeverity('info')}
-							>
-								Info
-							</Button>
-						</div>
-					</div>
-
-					<div class="mb-4">
+					<div class="mb-0">
 						<Label class="mb-2 block font-semibold text-slate-700">Error Message</Label>
 						<Textarea
 							bind:value={errorMessage}
 							placeholder="Enter validation error message"
-							class="resize-vertical h-24 w-full rounded-md border-2 border-gray-200 p-3 text-sm"
-						/>
-					</div>
-
-					<div class="mb-4">
-						<Label class="mb-2 block font-semibold text-slate-700">Success Message (Optional)</Label
-						>
-						<Textarea
-							bind:value={successMessage}
-							placeholder="Enter validation success message"
 							class="resize-vertical h-24 w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 						/>
 					</div>

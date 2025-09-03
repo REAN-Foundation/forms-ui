@@ -163,10 +163,8 @@
 					</Button>
 
 					<AlertDialog.Root>
-						<AlertDialog.Trigger class="{buttonVariants} bg-red400">
-							<Button variant="ghost" class="ml-1 h-full w-full "
-								><Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
-							</Button>
+						<AlertDialog.Trigger class="{buttonVariants({ variant: 'ghost' })} ml-1 h-full w-full bg-red400">
+							<Icon icon="weui:delete-outlined" width="20" height="20" style="color:red" />
 						</AlertDialog.Trigger>
 						<AlertDialog.Content>
 							<AlertDialog.Header>

@@ -28,9 +28,10 @@ export const POST = async (event: RequestEvent) => {
             // data.Priority,
             // data.IsActive,
             data.OperationType,
-            data.ConditionForOperationId,
+            // data.ConditionForOperationId,
             data.OperationId,
-            data.LogicId
+            data.LogicId,
+            data.Settings || {}
         );
         return new Response(JSON.stringify(response));
     } catch (err) {

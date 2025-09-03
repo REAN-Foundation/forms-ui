@@ -2,7 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { Button } from '../ui/button';
+	import { Button, buttonVariants } from '../ui/button';
 	import { errorMessage, successMessage } from '../toast/message.utils';
 	import { toastMessage } from '../toast/toast.store';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
@@ -328,11 +328,9 @@
 								<Popover.Content class=" !flex !flex-col !items-start" sideOffset={-10}>
 									{#if activeMenu === row.id}
 										<Dialog.Root bind:open={isOpen}>
-											<Dialog.Trigger onclick={() => (isOpen = true)}>
-												<Button variant="ghost" class="w-36 justify-start ">
-													<Icon icon="material-symbols:edit-outline" width="24" height="24" />
-													<span>Edit</span>
-												</Button>
+											<Dialog.Trigger class="{buttonVariants({ variant: 'ghost' })} w-36 justify-start" onclick={() => (isOpen = true)}>
+												<Icon icon="material-symbols:edit-outline" width="24" height="24" />
+												<span>Edit</span>
 											</Dialog.Trigger>
 											<Dialog.Content
 												class=" scrollbar-hide max-h-[90%] max-w-[95%] overflow-y-auto rounded-md md:max-w-[85%] lg:max-w-[45%] "
@@ -364,11 +362,9 @@
 										</div>
 
 										<AlertDialog.Root>
-											<AlertDialog.Trigger>
-												<Button variant="ghost" class="w-36 justify-start"
-													><Icon icon="material-symbols:link" width="20" height="20" />
-													<span>Generate Link</span>
-												</Button>
+											<AlertDialog.Trigger class="{buttonVariants({ variant: 'ghost' })} w-36 justify-start">
+												<Icon icon="material-symbols:link" width="20" height="20" />
+												<span>Generate Link</span>
 											</AlertDialog.Trigger>
 											<AlertDialog.Content>
 												<AlertDialog.Header>
@@ -406,16 +402,14 @@
 										</AlertDialog.Root>
 
 										<AlertDialog.Root bind:open>
-											<AlertDialog.Trigger class="">
-												<Button variant="ghost" class="w-36 justify-start ">
-													<Icon
-														icon="material-symbols:delete-outline"
-														class="text-red-500"
-														width="24"
-														height="24"
-													/>
-													<span>Delete</span>
-												</Button>
+											<AlertDialog.Trigger class="{buttonVariants({ variant: 'ghost' })} w-36 justify-start">
+												<Icon
+													icon="material-symbols:delete-outline"
+													class="text-red-500"
+													width="24"
+													height="24"
+												/>
+												<span>Delete</span>
 											</AlertDialog.Trigger>
 											<AlertDialog.Content>
 												<AlertDialog.Header>

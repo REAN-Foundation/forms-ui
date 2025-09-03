@@ -21,7 +21,7 @@
 
 	async function handleSubmit(event) {
 		event.preventDefault();
-		console.log(questionCard.Title);
+		// console.log(questionCard.Title);
 
 		const model: QuestionUpdateModel = {
 			id: questionCard.id,

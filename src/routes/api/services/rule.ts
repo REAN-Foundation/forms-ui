@@ -201,9 +201,10 @@ export const createCalculationRule = async (
     // Priority: number,
     // IsActive: boolean,
     OperationType: string,
-    ConditionForOperationId: string,
+    // ConditionForOperationId: string,
     OperationId: string,
-    LogicId: string
+    LogicId: string,
+    Settings?: any
 ) => {
     const body = {
         ...(Name !== undefined && Name !== null && { Name }),
@@ -212,9 +213,10 @@ export const createCalculationRule = async (
         // ...(Priority !== undefined && Priority !== null && { Priority }),
         // ...(IsActive !== undefined && IsActive !== null && { IsActive }),
         ...(OperationType !== undefined && OperationType !== null && { OperationType }),
-        ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
+        // ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
         ...(OperationId !== undefined && OperationId !== null && { OperationId }),
-        ...(LogicId !== undefined && LogicId !== null && { LogicId })
+        ...(LogicId !== undefined && LogicId !== null && { LogicId }),
+        ...(Settings !== undefined && Settings !== null && { Settings })
     };
     console.log('data from api/service/rule.ts (calculation):', body);
     const url = BACKEND_API_URL + `/field-calculation-rules`;
@@ -251,9 +253,10 @@ export const updateCalculationRule = async (
     // Priority: number,
     // IsActive: boolean,
     OperationType: string,
-    ConditionForOperationId: string,
+    // ConditionForOperationId: string,
     OperationId: string,
-    LogicId: string
+    LogicId: string,
+    Settings?: any
 ) => {
     const body = {
         ...(Name !== undefined && Name !== null && { Name }),
@@ -262,9 +265,10 @@ export const updateCalculationRule = async (
         // ...(Priority !== undefined && Priority !== null && { Priority }),
         // ...(IsActive !== undefined && IsActive !== null && { IsActive }),
         ...(OperationType !== undefined && OperationType !== null && { OperationType }),
-        ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
+        // ...(ConditionForOperationId !== undefined && ConditionForOperationId !== null && { ConditionForOperationId }),
         ...(OperationId !== undefined && OperationId !== null && { OperationId }),
-        ...(LogicId !== undefined && LogicId !== null && { LogicId })
+        ...(LogicId !== undefined && LogicId !== null && { LogicId }),
+        ...(Settings !== undefined && Settings !== null && { Settings })
     };
 
     const url = BACKEND_API_URL + `/field-calculation-rules/${id}`;

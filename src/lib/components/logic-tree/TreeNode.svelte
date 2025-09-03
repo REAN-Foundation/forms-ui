@@ -171,13 +171,13 @@
 	<div class="relative z-10 rounded-md border bg-white p-3 shadow-sm">
 		<div class="grid grid-cols-12 gap-3">
 			<div class="col-span-12">
-				<Label class="mb-1 block text-xs font-medium text-gray-700">Condition Name (optional)</Label
+				<Label class="mb-1 block text-xs font-medium text-gray-700">Condition Name</Label
 				>
 				{#if !readonly}
 					<Input
 						type="text"
 						bind:value={localName}
-						placeholder="Enter a condition name"
+						placeholder="Enter condition name"
 						class="w-full"
 						oninput={changeName}
 					/>

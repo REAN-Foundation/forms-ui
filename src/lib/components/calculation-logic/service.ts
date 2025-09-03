@@ -1,0 +1,325 @@
+// Shared calculation-logic helpers and backend calls (UI-agnostic)
+
+// Helper function to convert display operators to backend operators
+export function toBackendOperator(displayOp: string): string {
+    const operatorMap: Record<string, string> = {
+        'Equal To': 'Equal',
+        'Not Equal To': 'NotEqual',
+        'Greater Than': 'GreaterThan',
+        'Greater Than or Equal To': 'GreaterThanOrEqual',
+        'Less Than': 'LessThan',
+        'Less Than or Equal To': 'LessThanOrEqual',
+        'Contains': 'Contains',
+        'Does Not Contain': 'DoesNotContain',
+        'Is Empty': 'Exists',
+        'Is Not Empty': 'Exists',
+        'Is True': 'IsTrue',
+        'Is False': 'IsFalse'
+    };
+    return operatorMap[displayOp] || displayOp;
+}
+
+export type QuestionSection = { FormFields: any[] };
+
+export function sanitizeSettings(settings: any) {
+    const out: any = {};
+    if (!settings) return out;
+    const dp = (settings as any).DecimalPlaces;
+    if (dp !== '' && dp !== null && dp !== undefined && !Number.isNaN(Number(dp))) {
+        out.DecimalPlaces = Number(dp);
+    }
+    if (settings.RoundingMethod && String(settings.RoundingMethod).trim() !== '') {
+        out.RoundingMethod = settings.RoundingMethod;
+    }
+    ['AutoUpdate', 'ShowFormula', 'AllowManualOverride'].forEach((k) => {
+        if ((settings as any)[k] === true) out[k] = true;
+    });
+    if (settings.NumberFormat && String(settings.NumberFormat).trim() !== '') {
+        out.NumberFormat = settings.NumberFormat;
+    }
+    return out;
+}
+
+export function mapResponseTypeToOperandDataType(rt: string): string {
+    if (!rt) return 'Text';
+    const v = `${rt}`.toLowerCase();
+    if (v.includes('int')) return 'Integer';
+    if (
+        v.includes('float') ||
+        v.includes('double') ||
+        v.includes('decimal') ||
+        v.includes('number') ||
+        v.includes('currency')
+    )
+        return 'Float';
+    if (v.includes('bool')) return 'Boolean';
+    if (v.includes('date') && v.includes('time')) return 'DateTime';
+    if (v.includes('date')) return 'Date';
+    return 'Text';
+}
+
+export function prepareExpressionAndVariables(expr: string, questionList: QuestionSection[]) {
+    const tokenRegex = /\{([a-z0-9_\-]+)\}/gi;
+    const foundTokens: string[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = tokenRegex.exec(expr)) !== null) {
+        const t = m[1].toLowerCase();
+        if (!foundTokens.includes(t)) foundTokens.push(t);
+    }
+
+    const toHyphenSlug = (s: string) =>
+        (s || '')
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+    const toVarName = (slug: string) => {
+        let v = (slug || '')
+            .toString()
+            .toLowerCase()
+            .replace(/[^a-z0-9_]+/g, '_')
+            .replace(/_+/g, '_');
+        if (/^[^a-z_]/.test(v)) v = `v_${v}`;
+        return v;
+    };
+
+    const variables: Record<string, any> = {};
+    for (const token of foundTokens) {
+        let matchedField: any = null;
+        outer: for (const section of questionList || []) {
+            for (const f of section?.FormFields || []) {
+                const fSlugTitle = toHyphenSlug(f?.Title || '');
+                const fSlugCode = toHyphenSlug(f?.DisplayCode || '');
+                if (token === fSlugTitle || token === fSlugCode) {
+                    matchedField = f;
+                    break outer;
+                }
+            }
+        }
+        if (matchedField) {
+            const varName = toVarName(token);
+            variables[varName] = {
+                Type: 'FieldReference',
+                DataType: mapResponseTypeToOperandDataType(matchedField?.ResponseType),
+                FieldId: matchedField?.id || ''
+            };
+        }
+    }
+
+    let backendExpr = expr.replace(/×/g, '*');
+    for (const token of foundTokens) {
+        const varName = toVarName(token);
+        const re = new RegExp(`\\{${token}\\}`, 'gi');
+        backendExpr = backendExpr.replace(re, varName);
+    }
+
+    return { backendExpr, variables };
+}
+
+// API functions for calculation logic operations and rules
+
+/**
+ * Create a logical operation (single condition)
+ */
+export async function createLogicalOperation(ruleName: string, ruleDescription: string, condition: any, allFields: any[]) {
+    const selectedField = allFields.find(
+        (f: any) => f.id === condition.field || f.Title === condition.field || f.DisplayCode === condition.field
+    );
+    if (!selectedField) {
+        throw new Error('Selected field not found');
+    }
+    const operatorType = toBackendOperator(condition.operator);
+    let operands: any[] = [];
+    if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
+        operands = [
+            {
+                Type: 'FieldReference',
+                DataType: selectedField?.ResponseType || 'Text',
+                FieldId: selectedField?.id || '',
+                FieldCode: selectedField?.DisplayCode || ''
+            }
+        ];
+    } else {
+        operands = [
+            {
+                Type: 'FieldReference',
+                DataType: selectedField?.ResponseType || 'Text',
+                FieldId: selectedField?.id || '',
+                FieldCode: selectedField?.DisplayCode || ''
+            },
+            { Type: 'Constant', DataType: 'Text', Value: condition.value || '' }
+        ];
+    }
+    const payload = {
+        Name: condition.name && condition.name.trim().length > 0 ? condition.name : `${ruleName} - Logical condition`,
+        Description: `${ruleDescription} - Logical calculation condition`,
+        Operator: operatorType,
+        Operands: JSON.stringify(operands)
+    };
+    const res = await fetch('/api/server/operations/logical-operation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d?.Message || 'Failed to create logical operation');
+    }
+    const data = await res.json();
+    return data?.Data?.id as string;
+}
+
+/**
+ * Create a composite operation (group of conditions)
+ */
+export async function createCompositeOperation(ruleName: string, ruleDescription: string, operator: 'AND' | 'OR', childIds: string[]) {
+    const payload = {
+        Name: `${ruleName} - Composite calculation`,
+        Description: `${ruleDescription} - Composite logical calculation`,
+        Operator: operator === 'AND' ? 'And' : 'Or',
+        Children: JSON.stringify(childIds)
+    };
+    const res = await fetch('/api/server/operations/composition-operation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d?.Message || 'Failed to create composite operation');
+    }
+    const data = await res.json();
+    return data?.Data?.id as string;
+}
+
+/**
+ * Create a function expression operation
+ */
+export async function createFunctionExpressionOperation(expr: string, ruleName: string, questionList: QuestionSection[]) {
+    const { backendExpr, variables } = prepareExpressionAndVariables(expr || '', questionList);
+    const payload = {
+        Name: `${ruleName || 'Calculation'} - Function expression`,
+        Description: `${ruleName || 'Calculation'} - Function expression`,
+        Expression: backendExpr,
+        Variables: variables
+    };
+    const res = await fetch('/api/server/operations/function-expression-operation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.Message || 'Failed to create function expression operation');
+    }
+    const data = await res.json();
+    return data?.Data?.id as string;
+}
+
+/**
+ * Update a function expression operation
+ */
+export async function updateFunctionExpressionOperation(opId: string, expr: string, ruleName: string, questionList: QuestionSection[]) {
+    const { backendExpr, variables } = prepareExpressionAndVariables(expr || '', questionList);
+    const payload = {
+        Name: `${ruleName || 'Calculation'} - Function expression`,
+        Description: `${ruleName || 'Calculation'} - Function expression`,
+        Expression: backendExpr,
+        Variables: variables
+    };
+    const res = await fetch(`/api/server/operations/function-expression-operation/${opId}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.Message || 'Failed to update function expression operation');
+    }
+}
+
+/**
+ * Create a calculation rule
+ */
+export async function createCalculationRule(params: { logicId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; }) {
+    const { logicId, functionOperationId, ruleName, ruleDescription, settings } = params;
+    const payload: any = {
+        Name: ruleName || 'Calculation Rule',
+        Description: ruleDescription || 'Field Calculation-rule Description',
+        BaseOperationId: functionOperationId,
+        OperationType: 'FunctionExpression',
+        OperationId: functionOperationId,
+        LogicId: logicId
+    };
+    const sanitized = sanitizeSettings(settings);
+    if (Object.keys(sanitized).length > 0) payload.Settings = sanitized;
+    const res = await fetch('/api/server/rules/calculation-rule', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.Message || 'Failed to create calculation rule');
+    }
+}
+
+/**
+ * Update a calculation rule
+ */
+export async function updateCalculationRule(params: { ruleId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; }) {
+    const { ruleId, functionOperationId, ruleName, ruleDescription, settings } = params;
+    const payload: any = {
+        Name: ruleName || 'Calculation Rule',
+        Description: ruleDescription || 'Field Calculation-rule Description',
+        BaseOperationId: functionOperationId,
+        OperationType: 'FunctionExpression',
+        OperationId: functionOperationId
+    };
+    const sanitized = sanitizeSettings(settings);
+    if (Object.keys(sanitized).length > 0) payload.Settings = sanitized;
+    const res = await fetch(`/api/server/rules/calculation-rule/${ruleId}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.Message || 'Failed to update calculation rule');
+    }
+}
+
+/**
+ * Ensure calculation logic exists for a field
+ */
+export async function ensureCalculationLogic(currentField: any) {
+    if (!currentField?.id) throw new Error('Missing field id');
+    const res = await fetch('/api/server/logic/calculation-logic', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ FieldId: currentField.id, Enabled: true })
+    });
+    const data = await res.json();
+    if (res.ok && data?.Data?.id) return data.Data.id as string;
+    throw new Error(data?.Message || 'Failed to create calculation logic');
+}
+
+/**
+ * Link calculation logic to a form field
+ */
+export async function linkLogicToField(currentField: any, logicId: string) {
+    const payload = { id: currentField.id, CalculateLogicId: logicId } as any;
+    const res = await fetch('/api/server/form-fields', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.Message || 'Failed to update form field');
+    }
+}
+
+

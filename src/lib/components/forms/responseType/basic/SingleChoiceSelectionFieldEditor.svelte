@@ -197,7 +197,7 @@
 		<p class="text-destructive">{errors?.QuestionImageUrl}</p> -->
 
 		<!-- VALIDATION LOGIC INTEGRATION -->
-		<ValidationLogicIntegration bind:questionCard {questionList} />
+		<!-- <ValidationLogicIntegration bind:questionCard {questionList} /> -->
 
 		<!-- SKIP LOGIC INTEGRATION -->
 		<SkipLogicIntegration bind:questionCard {questionList} />

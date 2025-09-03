@@ -4,14 +4,15 @@
 	import { Input } from '../ui/input/index.js';
 	import { Button } from '../ui/button/index.js';
 	import Icon from '@iconify/svelte';
+	import ExpressionBuilder from './ExpressionBuilder.svelte';
 	// Self-import to support recursion (replaces deprecated <svelte:self>)
-	import TreeNode from './TreeNode.svelte';
+	import TreeNodeClean from './TreeNodeClean.svelte';
 
 	// Props
 	let {
 		node,
 		path = [] as number[],
-		fields = [] as Array<{ id: string; Title?: string; DisplayCode?: string }>,
+		fields = [] as Array<{ id: string; Title?: string; DisplayCode?: string; ResponseType?: string }>,
 		operators = [] as string[],
 		// callbacks from parent to mutate tree state
 		onAddLogical,
@@ -22,10 +23,15 @@
 		onChangeLeafOperator,
 		onChangeLeafValue,
 		onChangeLeafName,
+		onChangeExpression,
 		errorsByPath = {} as Record<string, { field?: string; operator?: string; value?: string; name?: string }>,
 		collapsedByPath = {} as Record<string, boolean>,
 		onToggleCollapse,
-		readonly = false
+		expressionsByPath = {} as Record<string, string>,
+		readonly = false,
+		// Mode controls
+		showOnlyConditions = false,
+		showOnlyOutcomes = false
 	} = $props();
 
 	// Determine if composite features are allowed based on presence of onAddGroup
@@ -40,42 +46,43 @@
 	let localValue = $state(node?.type !== 'composite' ? (node?.condition?.value as any) : '');
 	let localName = $state(node?.type !== 'composite' ? (node?.condition as any)?.name || '' : '');
 
-	// Explicit emit handlers (avoid reactive ping-pong)
-	function selectGroupOperator(val: 'AND' | 'OR') {
-		localGroupOperator = val;
-		onChangeGroupOperator?.(path, val);
-	}
-	function selectField(id: string) {
-		localField = id;
-		onChangeLeafField?.(path, id);
-	}
-	function selectOperator(op: string) {
-		localOperator = op as any;
-		onChangeLeafOperator?.(path, op);
-		if (op === 'Is Empty' || op === 'Is Not Empty') {
-			localValue = '';
-		}
-	}
-	function changeValue(e: Event) {
-		const target = e.currentTarget as HTMLInputElement;
-		localValue = target?.value ?? '';
-		onChangeLeafValue?.(path, localValue as any);
+	// Add choice for dropdown
+	let addChoice = $state('');
+
+	// Helper functions
+	function formatFieldTitle(title: string): string {
+		if (!title) return '';
+		return title
+			.replace(/\s+/g, '-')
+			.replace(/[^\w\-?.,!@#$%^&*()]/g, '-')
+			.replace(/-+/g, '-')
+			.replace(/^-|-$/g, '');
 	}
 
-	function changeName(e: Event) {
-		const target = e.currentTarget as HTMLInputElement;
-		localName = target?.value ?? '';
-		onChangeLeafName?.(path, localName as any);
+	function getFieldDisplay(fieldId: string): string {
+		const f = fields.find((x) => x.id === fieldId);
+		const label = f?.Title || f?.DisplayCode || '';
+		return formatFieldTitle(label);
 	}
 
-	// Removed prop mutation to avoid ownership_invalid_mutation; parent is updated via explicit callbacks below
+	function currentPathKey() {
+		return path.join('-');
+	}
 
-	// Reactive watchers to notify parent on local changes (no parent->child sync)
+	function getExpression(key: string): string {
+		return expressionsByPath[key] || '';
+	}
+
+	function setExpression(key: string, value: string) {
+		onChangeExpression?.(key, value);
+	}
+
+	// Reactive watchers to notify parent on local changes (copied from validation logic)
 	let prevLocalGroup: 'AND' | 'OR' | undefined;
 	let prevLocalField: string | undefined;
 	let prevLocalOperator: string | undefined;
 	let prevLocalValue: any;
-	let addChoice = $state('');
+	
 	$effect(() => {
 		if (!node) return;
 		if (node.type === 'composite') {
@@ -101,7 +108,7 @@
 			}
 		}
 
-		// Handle add action via dropdown
+		// Handle add action via dropdown (copied from validation logic)
 		if (!readonly && addChoice) {
 			if (addChoice === 'logical') {
 				onAddLogical?.(path);
@@ -111,27 +118,9 @@
 			addChoice = '';
 		}
 	});
-
-	function formatFieldTitle(title: string): string {
-		if (!title) return '';
-		return title
-			.replace(/\s+/g, '-')
-			.replace(/[^\w\-?.,!@#$%^&*()]/g, '-')
-			.replace(/-+/g, '-')
-			.replace(/^-|-$/g, '');
-	}
-
-	function getFieldDisplay(fieldId: string): string {
-		const f = fields.find((x) => x.id === fieldId);
-		const label = f?.Title || f?.DisplayCode || '';
-		return formatFieldTitle(label);
-	}
-
-	function currentPathKey() {
-		return path.join('-');
-	}
 </script>
 
+<!-- Exact copy of validation logic TreeNode structure -->
 {#if node?.type === 'composite'}
 	<div class="relative z-0 space-y-2">
 		<!-- Group header -->
@@ -211,7 +200,7 @@
 							style="pointer-events:none"
 						></div>
 
-						<TreeNode
+						<TreeNodeClean
 							node={child}
 							path={[...path, i]}
 							{fields}
@@ -224,8 +213,14 @@
 							{onChangeLeafOperator}
 							{onChangeLeafValue}
 							{onChangeLeafName}
+							{onChangeExpression}
+							{errorsByPath}
 							{collapsedByPath}
 							{onToggleCollapse}
+							{expressionsByPath}
+							{readonly}
+							{showOnlyConditions}
+							{showOnlyOutcomes}
 						/>
 					</div>
 				{/each}
@@ -233,20 +228,18 @@
 		{/if}
 	</div>
 {:else}
-	<!-- Logical leaf -->
+	<!-- Logical leaf - exactly like validation logic -->
 	<div class="relative z-10 rounded-md border bg-white p-3 shadow-sm">
 		<div class="grid grid-cols-12 gap-3">
 			<!-- Name -->
 			<div class="col-span-12">
-				<Label class="mb-1 block text-xs font-medium text-gray-700">Condition Name (optional)</Label
-				>
+				<Label class="mb-1 block text-xs font-medium text-gray-700">Condition Name (optional)</Label>
 				{#if !readonly}
 					<Input
 						type="text"
 						bind:value={localName}
 						placeholder="Enter a condition name"
 						class="w-full"
-						oninput={changeName}
 					/>
 					{#if errorsByPath[currentPathKey()]?.name}
 						<div class="mt-1 text-xs text-red-600">{errorsByPath[currentPathKey()].name}</div>
@@ -329,6 +322,21 @@
 				{/if}
 			</div>
 		</div>
+	</div>
+{/if}
+
+<!-- Expression builder section - only shown when showOnlyOutcomes is true -->
+{#if showOnlyOutcomes}
+	<div class="space-y-4">
+		<ExpressionBuilder
+			expression={getExpression('global')}
+			onExpressionChange={(value) => setExpression('global', value)}
+			{fields}
+			placeholder="Enter the calculation expression..."
+			size="default"
+			showValidation={true}
+			{readonly}
+		/>
 	</div>
 {/if}
 
