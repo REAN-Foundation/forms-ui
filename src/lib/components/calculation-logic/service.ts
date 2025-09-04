@@ -124,79 +124,6 @@ export function prepareExpressionAndVariables(expr: string, questionList: Questi
 
 // API functions for calculation logic operations and rules
 
-/**
- * Create a logical operation (single condition)
- */
-export async function createLogicalOperation(ruleName: string, ruleDescription: string, condition: any, allFields: any[]) {
-    const selectedField = allFields.find(
-        (f: any) => f.id === condition.field || f.Title === condition.field || f.DisplayCode === condition.field
-    );
-    if (!selectedField) {
-        throw new Error('Selected field not found');
-    }
-    const operatorType = toBackendOperator(condition.operator);
-    let operands: any[] = [];
-    if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
-        operands = [
-            {
-                Type: 'FieldReference',
-                DataType: selectedField?.ResponseType || 'Text',
-                FieldId: selectedField?.id || '',
-                FieldCode: selectedField?.DisplayCode || ''
-            }
-        ];
-    } else {
-        operands = [
-            {
-                Type: 'FieldReference',
-                DataType: selectedField?.ResponseType || 'Text',
-                FieldId: selectedField?.id || '',
-                FieldCode: selectedField?.DisplayCode || ''
-            },
-            { Type: 'Constant', DataType: 'Text', Value: condition.value || '' }
-        ];
-    }
-    const payload = {
-        Name: condition.name && condition.name.trim().length > 0 ? condition.name : `${ruleName} - Logical condition`,
-        Description: `${ruleDescription} - Logical calculation condition`,
-        Operator: operatorType,
-        Operands: JSON.stringify(operands)
-    };
-    const res = await fetch('/api/server/operations/logical-operation', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d?.Message || 'Failed to create logical operation');
-    }
-    const data = await res.json();
-    return data?.Data?.id as string;
-}
-
-/**
- * Create a composite operation (group of conditions)
- */
-export async function createCompositeOperation(ruleName: string, ruleDescription: string, operator: 'AND' | 'OR', childIds: string[]) {
-    const payload = {
-        Name: `${ruleName} - Composite calculation`,
-        Description: `${ruleDescription} - Composite logical calculation`,
-        Operator: operator === 'AND' ? 'And' : 'Or',
-        Children: JSON.stringify(childIds)
-    };
-    const res = await fetch('/api/server/operations/composition-operation', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d?.Message || 'Failed to create composite operation');
-    }
-    const data = await res.json();
-    return data?.Data?.id as string;
-}
 
 /**
  * Create a function expression operation
@@ -247,14 +174,14 @@ export async function updateFunctionExpressionOperation(opId: string, expr: stri
 /**
  * Create a calculation rule
  */
-export async function createCalculationRule(params: { logicId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
-    const { logicId, functionOperationId, ruleName, ruleDescription, settings, ruleOutcome } = params;
+export async function createCalculationRule(params: { logicId: string; conditionOperationId: string; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
+    const { logicId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        OperationType: 'FunctionExpression',
-        BaseOperationId: functionOperationId,
-        OperationId: functionOperationId,
+        OperationType: operationType, // Use the actual operation type (Logical or Composite)
+        BaseOperationId: conditionOperationId, // This is the condition operation (logical/composite)
+        OperationId: conditionOperationId, // This is also the condition operation (logical/composite)
         LogicId: logicId
     };
 
@@ -270,6 +197,9 @@ export async function createCalculationRule(params: { logicId: string; functionO
     if (ruleOutcome) {
         payload.RuleOutcome = ruleOutcome;
     }
+
+    console.log('🔍 Service: Sending payload to API:', payload);
+
     const res = await fetch('/api/server/rules/calculation-rule', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -284,14 +214,14 @@ export async function createCalculationRule(params: { logicId: string; functionO
 /**
  * Update a calculation rule
  */
-export async function updateCalculationRule(params: { ruleId: string; functionOperationId: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
-    const { ruleId, functionOperationId, ruleName, ruleDescription, settings, ruleOutcome } = params;
+export async function updateCalculationRule(params: { ruleId: string; conditionOperationId: string; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
+    const { ruleId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        OperationType: 'FunctionExpression',
-        BaseOperationId: functionOperationId,
-        OperationId: functionOperationId
+        OperationType: operationType, // Use the actual operation type (Logical or Composite)
+        BaseOperationId: conditionOperationId,
+        OperationId: conditionOperationId
     };
 
     // Add Settings if provided

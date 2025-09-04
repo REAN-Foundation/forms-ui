@@ -8,8 +8,6 @@
 	import TreeNodeClean from './TreeNodeClean.svelte';
 	import ExpressionBuilder from './ExpressionBuilder.svelte';
 	import {
-		createLogicalOperation,
-		createCompositeOperation,
 		createFunctionExpressionOperation,
 		updateFunctionExpressionOperation,
 		createCalculationRule,
@@ -29,9 +27,7 @@
 		currentField
 	} = $props();
 
-	// Editing state
-	let isEditingRule = $state(false);
-	let isEditingOperations = $state(false);
+	// Editing state (simplified - all fields are editable)
 	let originalRuleData = $state<any>(null);
 	let originalOperationsData = $state<any>(null);
 
@@ -40,6 +36,7 @@
 	let conditionMode = $state<'logical' | 'composite'>('composite');
 	let outcomeMode = $state<'static' | 'expression'>('expression');
 	let staticValue = $state('');
+	let staticValueDataType = $state('Text');
 	let logicalConditionName = $state('');
 	let logicalConditionField = $state('');
 	let logicalConditionOperator = $state('');
@@ -62,10 +59,10 @@
 	let showFormula = $state(false);
 	let allowManualOverride = $state(false);
 	let numberFormat = $state('');
-	let readonly = false;
 
 	const roundingMethods = ['Round to nearest', 'Round up', 'Round down', 'Truncate'];
 	const numberFormats = ['number', 'currency', 'percentage', 'scientific'];
+	const dataTypes = ['Text', 'Integer', 'Float', 'Boolean', 'Date', 'DateTime'];
 
 	// Logical operators for conditions
 	const operators = [
@@ -118,12 +115,13 @@
 		conditionMode = 'composite';
 		outcomeMode = 'expression';
 		staticValue = '';
+		staticValueDataType = 'Text';
 		logicalConditionName = '';
 		logicalConditionField = '';
 		logicalConditionOperator = '';
 		logicalConditionValue = '';
 		tree = { type: 'composite', operator: 'AND', children: [] };
-		expressions = {};
+		expressions = { global: '0' }; // Default expression to prevent empty FunctionExpression
 		errors = {};
 		decimalPlaces = '2';
 		roundingMethod = 'Round to nearest';
@@ -137,56 +135,77 @@
 	// Initialize editing mode
 	async function initializeEditing() {
 		if (!editingRule) return;
-		
+
 		console.log('🔧 Initializing editing mode with:', editingRule);
-		
+
 		try {
 			const originalRule = editingRule.originalRule || editingRule;
-			
+
 			// Load basic rule data
 			ruleName = originalRule.Name || '';
 			ruleDescription = originalRule.Description || '';
-			
-			// Load settings
+
+			// Load settings - handle both object and JSON string formats
 			const settings = originalRule.Settings || {};
-			decimalPlaces = settings.DecimalPlaces?.toString() || '2';
-			roundingMethod = settings.RoundingMethod || 'Round to nearest';
-			autoUpdate = settings.AutoUpdate || false;
-			showFormula = settings.ShowFormula || false;
-			allowManualOverride = settings.AllowManualOverride || false;
-			numberFormat = settings.NumberFormat || 'number';
+			let parsedSettings = settings;
+			if (typeof settings === 'string') {
+				try {
+					parsedSettings = JSON.parse(settings);
+				} catch (e) {
+					console.warn('Failed to parse Settings string:', e);
+					parsedSettings = {};
+				}
+			}
 			
-			// Load rule outcome
+			decimalPlaces = parsedSettings.DecimalPlaces?.toString() || '2';
+			roundingMethod = parsedSettings.RoundingMethod || 'Round to nearest';
+			autoUpdate = parsedSettings.AutoUpdate || false;
+			showFormula = parsedSettings.ShowFormula || false;
+			allowManualOverride = parsedSettings.AllowManualOverride || false;
+			numberFormat = parsedSettings.NumberFormat || 'number';
+
+			// Determine if this rule has conditional logic based on OperationType
+			const operationType = originalRule.OperationType;
+			console.log('🔍 Rule OperationType:', operationType);
+			
+			if (operationType === 'Logical' || operationType === 'Composition') {
+				useConditionalLogic = true;
+				conditionMode = operationType === 'Logical' ? 'logical' : 'composite';
+				console.log('✅ Detected conditional logic:', { useConditionalLogic, conditionMode });
+				
+				// Load the conditional operations
+				await loadConditionalOperations(originalRule);
+			} else {
+				useConditionalLogic = false;
+				console.log('✅ No conditional logic detected');
+			}
+
+			// Load rule outcome - this is the primary source for expressions
 			const ruleOutcome = originalRule.RuleOutcome;
 			if (ruleOutcome) {
-				if (ruleOutcome.Type === 'StaticValue') {
-					outcomeMode = 'static';
-					staticValue = ruleOutcome.StaticValue || '';
-				} else if (ruleOutcome.Type === 'FunctionExpression') {
-					outcomeMode = 'expression';
-					expressions['global'] = ruleOutcome.FunctionExpression || '';
-				}
-			}
-			
-			// Load operation data
-			const operation = originalRule.Operation;
-			if (operation) {
-				console.log('🔍 Loading operation data:', operation);
-				
-				// Check if this is a function expression (outcome operation)
-				if (operation.Type === 'FunctionExpression') {
-					// Load the expression from the function expression operation
-					if (operation.Expression) {
-						expressions['global'] = operation.Expression;
+				// Parse RuleOutcome if it's a string
+				let parsedRuleOutcome = ruleOutcome;
+				if (typeof ruleOutcome === 'string') {
+					try {
+						parsedRuleOutcome = JSON.parse(ruleOutcome);
+					} catch (e) {
+						console.warn('Failed to parse RuleOutcome string:', e);
 					}
-					
-					// Check if there are conditional operations
-					await loadConditionalOperations(originalRule);
+				}
+				
+				if (parsedRuleOutcome.Type === 'StaticValue') {
+					outcomeMode = 'static';
+					staticValue = parsedRuleOutcome.StaticValue || '';
+					staticValueDataType = parsedRuleOutcome.DataType || 'Text';
+				} else if (parsedRuleOutcome.Type === 'FunctionExpression') {
+					outcomeMode = 'expression';
+					// Use the expression from RuleOutcome, not from Operation
+					expressions['global'] = parsedRuleOutcome.FunctionExpression || '';
+					console.log('✅ Loaded expression from RuleOutcome:', parsedRuleOutcome.FunctionExpression);
 				}
 			}
-			
+
 			console.log('✅ Editing mode initialized successfully');
-			
 		} catch (error) {
 			console.error('❌ Error initializing editing mode:', error);
 			toastMessage({
@@ -199,31 +218,39 @@
 	// Load conditional operations if they exist
 	async function loadConditionalOperations(originalRule: any) {
 		try {
-			console.log('🔍 Checking for conditional operations in rule:', originalRule);
+			console.log('🔍 Loading conditional operations for rule:', originalRule);
+
+			// Use OperationId to load the main operation
+			const operationId = originalRule.OperationId || originalRule.BaseOperationId;
+			if (!operationId) {
+				console.log('⚠️ No operation ID found in rule');
+				return;
+			}
+
+			console.log('🔍 Loading operation with ID:', operationId);
+
+			// Try to fetch the operation based on the operation type
+			const operationType = originalRule.OperationType;
 			
-			// If the rule has a BaseOperationId that's different from OperationId,
-			// it might indicate conditional logic
-			if (originalRule.BaseOperationId && originalRule.BaseOperationId !== originalRule.OperationId) {
-				console.log('🔍 Found potential conditional operation:', originalRule.BaseOperationId);
-				
-				// Try to fetch the base operation
-				const response = await fetch(`/api/server/operations/logical-operation/${originalRule.BaseOperationId}`);
+			if (operationType === 'Logical') {
+				const response = await fetch(`/api/server/operations/logical-operation/${operationId}`);
 				if (response.ok) {
 					const operationData = await response.json();
 					const operation = operationData.Data;
-					
-					console.log('📥 Loaded conditional operation:', operation);
+					console.log('📥 Loaded logical operation:', operation);
 					await parseAndPopulateOperation(operation);
-		} else {
-					// Try composition operation
-					const compResponse = await fetch(`/api/server/operations/composition-operation/${originalRule.BaseOperationId}`);
-					if (compResponse.ok) {
-						const compData = await compResponse.json();
-						const compOperation = compData.Data;
-						
-						console.log('📥 Loaded composition operation:', compOperation);
-						await parseAndPopulateCompositionOperation(compOperation);
-					}
+				} else {
+					console.error('❌ Failed to load logical operation:', response.status);
+				}
+			} else if (operationType === 'Composition') {
+				const response = await fetch(`/api/server/operations/composition-operation/${operationId}`);
+				if (response.ok) {
+					const operationData = await response.json();
+					const operation = operationData.Data;
+					console.log('📥 Loaded composition operation:', operation);
+					await parseAndPopulateCompositionOperation(operation);
+				} else {
+					console.error('❌ Failed to load composition operation:', response.status);
 				}
 			}
 		} catch (error) {
@@ -235,24 +262,24 @@
 	async function parseAndPopulateOperation(operation: any) {
 		useConditionalLogic = true;
 		conditionMode = 'logical';
-		
+
 		// Parse operands to extract field, operator, value
 		if (operation.Operands) {
 			const operands = JSON.parse(operation.Operands);
-			
+
 			// Extract field information
 			if (operands[0] && operands[0].Type === 'FieldReference') {
 				logicalConditionField = operands[0].FieldId || '';
 			}
-			
+
 			// Map operator back to display name
 			logicalConditionOperator = mapBackendOperatorToDisplay(operation.Operator);
-			
+
 			// Extract value
 			if (operands[1] && operands[1].Type === 'Constant') {
 				logicalConditionValue = operands[1].Value || '';
 			}
-			
+
 			// Set condition name
 			logicalConditionName = operation.Name || '';
 		}
@@ -262,40 +289,168 @@
 	async function parseAndPopulateCompositionOperation(operation: any) {
 		useConditionalLogic = true;
 		conditionMode = 'composite';
-		
+
 		// Parse the composition operation and build the tree
 		console.log('🌳 Building tree from composition operation:', operation);
-		
-		// For now, set a basic tree structure
-		// In a full implementation, you'd recursively fetch and parse child operations
+
+		// Parse children from the operation
+		let childrenIds: string[] = [];
+		if (operation.Children) {
+			if (typeof operation.Children === 'string') {
+				try {
+					childrenIds = JSON.parse(operation.Children);
+				} catch (e) {
+					console.warn('Failed to parse Children string:', e);
+					childrenIds = [];
+				}
+			} else if (Array.isArray(operation.Children)) {
+				childrenIds = operation.Children;
+			}
+		}
+
+		console.log('🔍 Children IDs to load:', childrenIds);
+
+		// Recursively load child operations and build the tree
+		const children = [];
+		for (const childId of childrenIds) {
+			try {
+				// Try to load as logical operation first
+				const logicalResponse = await fetch(`/api/server/operations/logical-operation/${childId}`);
+				if (logicalResponse.ok) {
+					const logicalData = await logicalResponse.json();
+					const logicalOp = logicalData.Data;
+					
+					// Parse logical operation into tree node
+					const logicalNode = await parseLogicalOperationToTreeNode(logicalOp);
+					children.push(logicalNode);
+				} else {
+					// Try to load as composition operation
+					const compResponse = await fetch(`/api/server/operations/composition-operation/${childId}`);
+					if (compResponse.ok) {
+						const compData = await compResponse.json();
+						const compOp = compData.Data;
+						
+						// Recursively parse composition operation
+						const compNode = await parseCompositionOperationToTreeNode(compOp);
+						children.push(compNode);
+					}
+				}
+			} catch (error) {
+				console.error(`❌ Error loading child operation ${childId}:`, error);
+			}
+		}
+
+		// Build the tree structure
 		tree = {
 			type: 'composite',
 			operator: operation.Operator === 'And' ? 'AND' : 'OR',
-			children: []
+			children: children
+		};
+
+		console.log('✅ Built tree structure:', tree);
+	}
+
+	// Helper function to parse logical operation into tree node
+	async function parseLogicalOperationToTreeNode(operation: any) {
+		let field = '';
+		let value = '';
+		let operator = 'Equal To';
+
+		// Parse operands to extract field, operator, value
+		if (operation.Operands) {
+			const operands = JSON.parse(operation.Operands);
+
+			// Extract field information
+			if (operands[0] && operands[0].Type === 'FieldReference') {
+				field = operands[0].FieldId || '';
+			}
+
+			// Map operator back to display name
+			operator = mapBackendOperatorToDisplay(operation.Operator);
+
+			// Extract value
+			if (operands[1] && operands[1].Type === 'Constant') {
+				value = operands[1].Value || '';
+			}
+		}
+
+		return {
+			type: 'logical',
+			condition: {
+				field,
+				operator,
+				value,
+				name: operation.Name || ''
+			}
+		};
+	}
+
+	// Helper function to parse composition operation into tree node
+	async function parseCompositionOperationToTreeNode(operation: any) {
+		// Parse children from the operation
+		let childrenIds: string[] = [];
+		if (operation.Children) {
+			if (typeof operation.Children === 'string') {
+				try {
+					childrenIds = JSON.parse(operation.Children);
+				} catch (e) {
+					childrenIds = [];
+				}
+			} else if (Array.isArray(operation.Children)) {
+				childrenIds = operation.Children;
+			}
+		}
+
+		// Recursively load child operations
+		const children = [];
+		for (const childId of childrenIds) {
+			try {
+				// Try to load as logical operation first
+				const logicalResponse = await fetch(`/api/server/operations/logical-operation/${childId}`);
+				if (logicalResponse.ok) {
+					const logicalData = await logicalResponse.json();
+					const logicalOp = logicalData.Data;
+					const logicalNode = await parseLogicalOperationToTreeNode(logicalOp);
+					children.push(logicalNode);
+				} else {
+					// Try to load as composition operation
+					const compResponse = await fetch(`/api/server/operations/composition-operation/${childId}`);
+					if (compResponse.ok) {
+						const compData = await compResponse.json();
+						const compOp = compData.Data;
+						const compNode = await parseCompositionOperationToTreeNode(compOp);
+						children.push(compNode);
+					}
+				}
+			} catch (error) {
+				console.error(`❌ Error loading child operation ${childId}:`, error);
+			}
+		}
+
+		return {
+			type: 'composite',
+			operator: operation.Operator === 'And' ? 'AND' : 'OR',
+			children: children
 		};
 	}
 
 	// Helper function to map backend operators back to display names
 	function mapBackendOperatorToDisplay(backendOp: string): string {
 		const operatorMap: Record<string, string> = {
-			'Equal': 'Equal To',
-			'NotEqual': 'Not Equal To',
-			'GreaterThan': 'Greater Than',
-			'GreaterThanOrEqual': 'Greater Than or Equal',
-			'LessThan': 'Less Than',
-			'LessThanOrEqual': 'Less Than or Equal',
-			'Contains': 'Contains',
-			'DoesNotContain': 'Does Not Contain',
-			'Exists': 'Is Not Empty',
-			'IsTrue': 'Is True',
-			'IsFalse': 'Is False'
+			Equal: 'Equal To',
+			NotEqual: 'Not Equal To',
+			GreaterThan: 'Greater Than',
+			GreaterThanOrEqual: 'Greater Than or Equal',
+			LessThan: 'Less Than',
+			LessThanOrEqual: 'Less Than or Equal',
+			Contains: 'Contains',
+			DoesNotContain: 'Does Not Contain',
+			Exists: 'Is Not Empty',
+			IsTrue: 'Is True',
+			IsFalse: 'Is False'
 		};
 		return operatorMap[backendOp] || backendOp;
 	}
-
-
-
-
 
 	// Tree manipulation functions
 	function addLogical(path: number[]) {
@@ -441,7 +596,7 @@
 	async function handleUpdateRule(event) {
 		event?.preventDefault();
 		event?.stopPropagation();
-
+		
 		// Validate required fields
 		if (!ruleName.trim()) {
 			toastMessage({
@@ -458,7 +613,7 @@
 			});
 			return;
 		}
-
+		
 		try {
 			toastMessage({
 				Message: 'Updating calculation rule...',
@@ -474,7 +629,7 @@
 			// Step 1: Update operations if they have changed
 			if (useConditionalLogic) {
 				console.log('📝 Step 1: Updating conditional operations...');
-				
+
 				if (conditionMode === 'logical') {
 					// Update or create logical operation
 					const condition = {
@@ -486,18 +641,126 @@
 
 					// Check if we need to update existing operation or create new one
 					if (editingRule.conditionsOperationId) {
-						// Update existing logical operation
-						await updateLogicalOperation(editingRule.conditionsOperationId, condition);
+						// Update existing logical operation following validation logic pattern
+						const selectedField = getAllFields().find(
+							(field) =>
+								field.id === condition.field ||
+								field.Title === condition.field ||
+								field.DisplayCode === condition.field
+						);
+						if (!selectedField) {
+							throw new Error('Selected field not found');
+						}
+						
+						const operatorType = toBackendOperator(condition.operator);
+						let operands: any[] = [];
+						
+						if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
+							operands = [
+								{
+									Type: 'FieldReference',
+									DataType: selectedField?.ResponseType || 'Text',
+									FieldId: selectedField?.id || '',
+									FieldCode: selectedField?.DisplayCode || ''
+								}
+							];
+						} else {
+							operands = [
+								{
+									Type: 'FieldReference',
+									DataType: selectedField?.ResponseType || 'Text',
+									FieldId: selectedField?.id || '',
+									FieldCode: selectedField?.DisplayCode || ''
+								},
+								{ Type: 'Constant', DataType: 'Text', Value: condition.value || '' }
+							];
+						}
+
+						const payload = {
+							Name: condition.name && condition.name.trim().length > 0
+								? condition.name
+								: `${ruleName} - Logical condition`,
+							Description: `${ruleDescription} - Logical calculation condition`,
+							Operator: operatorType,
+							Operands: JSON.stringify(operands)
+						};
+
+						const res = await fetch(`/api/server/operations/logical-operation/${editingRule.conditionsOperationId}`, {
+							method: 'PUT',
+							headers: { 'content-type': 'application/json' },
+							body: JSON.stringify(payload)
+						});
+
+						if (!res.ok) {
+							const d = await res.json();
+							throw new Error(d?.Message || 'Failed to update logical operation');
+						}
+						
 						conditionsOperationId = editingRule.conditionsOperationId;
 						console.log('✅ Updated logical operation:', conditionsOperationId);
 					} else {
-						// Create new logical operation
-						conditionsOperationId = await createLogicalOperation(
-							ruleName,
-							ruleDescription,
-							condition,
-							getAllFields()
+						// Create new logical operation following validation logic pattern
+						const selectedField = getAllFields().find(
+							(field) =>
+								field.id === condition.field ||
+								field.Title === condition.field ||
+								field.DisplayCode === condition.field
 						);
+						if (!selectedField) {
+							throw new Error('Selected field not found');
+						}
+						
+						const operatorType = toBackendOperator(condition.operator);
+						let operands: any[] = [];
+						
+						if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
+							operands = [
+								{
+									Type: 'FieldReference',
+									DataType: selectedField?.ResponseType || 'Text',
+									FieldId: selectedField?.id || '',
+									FieldCode: selectedField?.DisplayCode || ''
+								}
+							];
+						} else {
+							operands = [
+								{
+									Type: 'FieldReference',
+									DataType: selectedField?.ResponseType || 'Text',
+									FieldId: selectedField?.id || '',
+									FieldCode: selectedField?.DisplayCode || ''
+								},
+								{
+									Type: 'Constant',
+									DataType: 'Text',
+									Value: condition.value || ''
+								}
+							];
+						}
+
+						const logicalOperation = {
+							Name: condition.name && condition.name.trim().length > 0 
+								? condition.name 
+								: `${ruleName} - Logical condition`,
+							Description: `${ruleDescription} - Logical calculation condition`,
+							Type: 'Logical',
+							Operator: operatorType,
+							Operands: JSON.stringify(operands)
+						};
+
+						const logicalResponse = await fetch('/api/server/operations/logical-operation', {
+							method: 'POST',
+							body: JSON.stringify(logicalOperation),
+							headers: { 'content-type': 'application/json' }
+						});
+						
+						if (!logicalResponse.ok) {
+							const errorData = await logicalResponse.json();
+							throw new Error(errorData.Message || 'Failed to create logical operation');
+						}
+						
+						const logicalData = await logicalResponse.json();
+						conditionsOperationId = logicalData.Data.id as string;
 						console.log('✅ Created new logical operation:', conditionsOperationId);
 					}
 				} else if (conditionMode === 'composite') {
@@ -510,7 +773,7 @@
 
 			// Step 2: Update function expression operation
 			console.log('📊 Step 2: Updating function expression operation...');
-			
+
 			if (outcomeMode === 'expression') {
 				// Check if we need to update existing operation or create new one
 				if (editingRule.outcomeOperationId) {
@@ -536,14 +799,14 @@
 
 			// Step 3: Update the calculation rule
 			console.log('📋 Step 3: Updating calculation rule...');
-			const settings = {
+		const settings = {
 				DecimalPlaces: parseInt(decimalPlaces) || 2,
-				RoundingMethod: roundingMethod,
-				AutoUpdate: autoUpdate,
-				ShowFormula: showFormula,
-				AllowManualOverride: allowManualOverride,
-				NumberFormat: numberFormat
-			};
+			RoundingMethod: roundingMethod,
+			AutoUpdate: autoUpdate,
+			ShowFormula: showFormula,
+			AllowManualOverride: allowManualOverride,
+			NumberFormat: numberFormat
+		};
 
 			// Prepare RuleOutcome based on outcomeMode
 			let ruleOutcome = null;
@@ -551,7 +814,7 @@
 				ruleOutcome = {
 					Type: 'StaticValue',
 					StaticValue: staticValue,
-					DataType: 'Text'
+					DataType: staticValueDataType
 				};
 			} else if (outcomeMode === 'expression' && outcomeOperationId) {
 				ruleOutcome = {
@@ -561,10 +824,16 @@
 				};
 			}
 
+			// Determine the operation type based on user's choice
+			const operationType = useConditionalLogic ? 
+				(conditionMode === 'logical' ? 'Logical' : 'Composition') : 
+				'FunctionExpression';
+
 			// Update the calculation rule
 			await updateCalculationRule({
 				ruleId: editingRule.id,
-				functionOperationId: outcomeOperationId || '',
+				conditionOperationId: conditionsOperationId || '',
+				operationType,
 				ruleName,
 				ruleDescription,
 				settings,
@@ -587,9 +856,9 @@
 					ruleId: editingRule.id,
 					conditionsOperationId,
 					outcomeOperationId,
-					ruleName,
-					ruleDescription,
-					settings,
+			ruleName,
+			ruleDescription,
+			settings,
 					ruleOutcome,
 					isUpdate: true
 				};
@@ -598,7 +867,6 @@
 
 			// Close the modal
 			onCancel?.();
-
 		} catch (e) {
 			console.error('❌ Error updating calculation rule:', e);
 			toastMessage({
@@ -608,57 +876,6 @@
 		}
 	}
 
-	// Helper function to update logical operation
-	async function updateLogicalOperation(operationId: string, condition: any) {
-		const selectedField = getAllFields().find(
-			(f: any) => f.id === condition.field || f.Title === condition.field || f.DisplayCode === condition.field
-		);
-		if (!selectedField) {
-			throw new Error('Selected field not found');
-		}
-
-		const operatorType = toBackendOperator(condition.operator);
-		let operands: any[] = [];
-		
-		if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
-			operands = [
-				{
-					Type: 'FieldReference',
-					DataType: selectedField?.ResponseType || 'Text',
-					FieldId: selectedField?.id || '',
-					FieldCode: selectedField?.DisplayCode || ''
-				}
-			];
-		} else {
-			operands = [
-				{
-					Type: 'FieldReference',
-					DataType: selectedField?.ResponseType || 'Text',
-					FieldId: selectedField?.id || '',
-					FieldCode: selectedField?.DisplayCode || ''
-				},
-				{ Type: 'Constant', DataType: 'Text', Value: condition.value || '' }
-			];
-		}
-
-		const payload = {
-			Name: condition.name && condition.name.trim().length > 0 ? condition.name : `${ruleName} - Logical condition`,
-			Description: `${ruleDescription} - Logical calculation condition`,
-			Operator: operatorType,
-			Operands: JSON.stringify(operands)
-		};
-
-		const res = await fetch(`/api/server/operations/logical-operation/${operationId}`, {
-			method: 'PUT',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
-
-		if (!res.ok) {
-			const d = await res.json();
-			throw new Error(d?.Message || 'Failed to update logical operation');
-		}
-	}
 
 	async function handleSave(event) {
 		event?.preventDefault();
@@ -697,27 +914,12 @@
 			console.log('Use conditional logic:', useConditionalLogic);
 			console.log('Condition mode:', conditionMode);
 
-			// Check if calculation logic already exists
-			let logicId = currentField?.CalculateLogic?.id || '';
-			let isNewLogic = false;
-
-			// Step 1: Create calculation logic only if it doesn't exist
-			if (!logicId) {
-				console.log('🔧 Step 1: Creating new calculation logic...');
-				logicId = await ensureCalculationLogic(currentField);
-				isNewLogic = true;
-				console.log('✅ Created new calculation logic:', logicId);
-				} else {
-				console.log('⏭️ Step 1: Using existing calculation logic:', logicId);
-			}
-
 			let conditionsOperationId: string | null = null;
-			let outcomeOperationId: string | null = null;
 
-			// Step 2: Create operations based on the logic type
+			// Step 1: Create operations based on the logic type
 			if (useConditionalLogic) {
-				console.log('📝 Step 2: Creating conditional operations...');
-				
+				console.log('📝 Step 1: Creating conditional operations...');
+
 				if (conditionMode === 'logical') {
 					console.log(
 						'Creating logical operation for:',
@@ -726,117 +928,178 @@
 						logicalConditionValue
 					);
 
-					// Create logical operation for single condition
-					const condition = {
-						field: logicalConditionField,
-						operator: logicalConditionOperator,
-						value: logicalConditionValue,
-						name: logicalConditionName
+					// Create logical operation for single condition following validation logic pattern
+					const selectedField = getAllFields().find(
+						(field) =>
+							field.id === logicalConditionField ||
+							field.Title === logicalConditionField ||
+							field.DisplayCode === logicalConditionField
+					);
+					if (!selectedField) {
+						throw new Error('Selected field not found');
+					}
+					
+					const operatorType = toBackendOperator(logicalConditionOperator);
+					let operands: any[] = [];
+					
+					if (logicalConditionOperator === 'Is Empty' || logicalConditionOperator === 'Is Not Empty') {
+						operands = [
+							{
+								Type: 'FieldReference',
+								DataType: selectedField?.ResponseType || 'Text',
+								FieldId: selectedField?.id || '',
+								FieldCode: selectedField?.DisplayCode || ''
+							}
+						];
+					} else {
+						operands = [
+							{
+								Type: 'FieldReference',
+								DataType: selectedField?.ResponseType || 'Text',
+								FieldId: selectedField?.id || '',
+								FieldCode: selectedField?.DisplayCode || ''
+							},
+							{
+								Type: 'Constant',
+								DataType: 'Text',
+								Value: logicalConditionValue || ''
+							}
+						];
+					}
+
+					const logicalOperation = {
+						Name: logicalConditionName && logicalConditionName.trim().length > 0 
+							? logicalConditionName 
+							: `${ruleName} - Logical condition`,
+						Description: `${ruleDescription} - Logical calculation condition`,
+						Type: 'Logical',
+						Operator: operatorType,
+						Operands: JSON.stringify(operands)
 					};
 
-					conditionsOperationId = await createLogicalOperation(
-						ruleName,
-						ruleDescription,
-						condition,
-						getAllFields()
-					);
-
-					console.log('✅ Created logical operation:', conditionsOperationId);
+					const logicalResponse = await fetch('/api/server/operations/logical-operation', {
+						method: 'POST',
+						body: JSON.stringify(logicalOperation),
+						headers: { 'content-type': 'application/json' }
+					});
+					
+					if (!logicalResponse.ok) {
+						const errorData = await logicalResponse.json();
+						throw new Error(errorData.Message || 'Failed to create logical operation');
+					}
+					
+					const logicalData = await logicalResponse.json();
+					conditionsOperationId = logicalData.Data.id as string;
+					
+					console.log('✅ Created logical operation with ID:', conditionsOperationId);
 				} else if (conditionMode === 'composite') {
 					console.log('Creating composite operation from tree:', tree);
 
 					// Create composite operation for tree structure
+					// This will create multiple operations for the complete tree
 					conditionsOperationId = await createOperationsFromTree(tree);
-
-					console.log('✅ Created composite operation:', conditionsOperationId);
+					
+					console.log('✅ Created composite operation tree with ID:', conditionsOperationId);
 				}
 			} else {
 				console.log('⏭️ Skipping conditional operations (useConditionalLogic is false)');
 			}
+			
+			// Debug: Show what operation ID we have
+			console.log('🔍 Final conditionsOperationId:', conditionsOperationId);
+			
+			// Validate that we have a condition operation if conditional logic is enabled
+			if (useConditionalLogic && !conditionsOperationId) {
+				throw new Error('Failed to create condition operation. Please check your condition settings.');
+			}
 
-			// Step 3: Create function expression operation for outcome
-			console.log('📊 Step 3: Creating function expression operation...');
+			// Step 2: Create function expression operation (but don't use it in the rule)
+			console.log('📊 Step 2: Creating function expression operation...');
 			console.log('Expression:', expressions['global']);
 
 			if (outcomeMode === 'expression') {
-				outcomeOperationId = await createFunctionExpressionOperation(
+				// Create function expression operation (but don't use it in the rule)
+				const expressionResult = await createFunctionExpressionOperation(
 					expressions['global'] || '',
 					ruleName,
 					questionList
 				);
-
-				console.log('✅ Created function expression operation:', outcomeOperationId);
-				} else {
+				console.log('✅ Created function expression operation:', expressionResult);
+				
+				// Note: We don't store this in the rule, just create it for reference
+			} else {
 				console.log('⏭️ Skipping function expression (outcomeMode is static)');
 			}
 
-			// Step 4: Create the calculation rule
-			console.log('📋 Step 4: Creating calculation rule...');
-			const settings = {
-				DecimalPlaces: parseInt(decimalPlaces) || 2,
-				RoundingMethod: roundingMethod,
-				AutoUpdate: autoUpdate,
-				ShowFormula: showFormula,
-				AllowManualOverride: allowManualOverride,
-				NumberFormat: numberFormat
-			};
-			console.log('Settings:', settings);
-
-			// Prepare RuleOutcome based on outcomeMode
-			let ruleOutcome = null;
-			if (outcomeMode === 'static') {
-				ruleOutcome = {
-					Type: 'StaticValue',
-					StaticValue: staticValue,
-					DataType: 'Text' // Default to Text for static values
-				};
-			} else if (outcomeMode === 'expression' && outcomeOperationId) {
-				ruleOutcome = {
-					Type: 'FunctionExpression',
-					FunctionExpression: expressions['global'] || '',
-					FunctionExpressionId: outcomeOperationId
-				};
+			// Step 3: Create the calculation rule with ONLY logical/composite operations
+			console.log('📋 Step 3: Creating calculation rule...');
+			
+			// First create a calculation logic if it doesn't exist
+			let logicId = currentField?.CalculateLogic?.id || '';
+			if (!logicId) {
+				logicId = await ensureCalculationLogic(currentField);
 			}
-			console.log('RuleOutcome:', ruleOutcome);
-
-			// Create the calculation rule and get the rule ID
-			const ruleData = {
-				Name: ruleName,
-				Description: ruleDescription,
-				OperationType: 'FunctionExpression',
-				BaseOperationId: outcomeOperationId || '',
-				OperationId: outcomeOperationId || '',
-				LogicId: logicId,
-				Settings: settings,
-				RuleOutcome: ruleOutcome
-			};
-
-			const ruleResponse = await fetch('/api/server/rules/calculation-rule', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(ruleData)
+			
+			// Debug the outcome values
+			console.log('🔍 Debug outcome values:', {
+				outcomeMode,
+				staticValue,
+				expressionsGlobal: expressions['global'],
+				hasExpressions: !!expressions['global']
 			});
-
-			if (!ruleResponse.ok) {
-				const errorData = await ruleResponse.json();
-				throw new Error(errorData?.Message || 'Failed to create calculation rule');
+			
+			// Validate that we have content for the outcome
+			if (outcomeMode === 'static' && !staticValue.trim()) {
+				throw new Error('Static value is required when outcome mode is static');
 			}
-
-			const ruleResult = await ruleResponse.json();
-			const ruleId = ruleResult.Data?.id;
-			console.log('✅ Created calculation rule:', ruleId);
-
-			// Step 5: Update form field with calculation logic ID (only if we created new logic)
-			if (isNewLogic && logicId && ruleId) {
-				console.log('🔗 Step 5: Linking new logic to form field...');
-				await linkLogicToField(currentField, logicId);
-				console.log('✅ Linked new logic to field');
-			} else {
-				console.log('⏭️ Skipping field update - using existing logic or missing ruleId');
+			
+			if (outcomeMode === 'expression' && (!expressions['global'] || !expressions['global'].trim())) {
+				throw new Error('Function expression is required when outcome mode is expression');
 			}
+			
+			const ruleOutcome = outcomeMode === 'static' ? {
+				Type: 'StaticValue',
+				StaticValue: staticValue,
+				DataType: staticValueDataType
+			} : {
+				Type: 'FunctionExpression',
+				FunctionExpression: expressions['global'] || '',
+				DataType: 'Float'
+			};
+			
+			console.log('🔍 Created ruleOutcome:', ruleOutcome);
+			
+			// Determine the operation type based on user's choice
+			const operationType = useConditionalLogic ? 
+				(conditionMode === 'logical' ? 'Logical' : 'Composition') : 
+				'FunctionExpression';
 
-			console.log('🎉 All steps completed successfully!');
-			console.log('Final results:', { logicId, ruleId, conditionsOperationId, outcomeOperationId, isNewLogic });
+			const ruleData = {
+				logicId,
+				conditionOperationId: conditionsOperationId || '', // Use the logical/composite operation ID as the main operation
+				operationType, // Pass the correct operation type
+				ruleName,
+				ruleDescription,
+				settings: {
+					DecimalPlaces: parseInt(decimalPlaces) || 2,
+					RoundingMethod: roundingMethod,
+					AutoUpdate: autoUpdate,
+					ShowFormula: showFormula,
+					AllowManualOverride: allowManualOverride,
+					NumberFormat: numberFormat
+				},
+				ruleOutcome
+			};
+
+			console.log('🔍 Rule data being sent to API:', ruleData);
+			console.log('🔍 Using condition operation ID as main operation:', conditionsOperationId);
+			console.log('🔍 Operation type:', operationType);
+			const ruleResult = await createCalculationRule(ruleData);
+			console.log('✅ Created calculation rule:', ruleResult);
+
+			// Step 4: Update the form field with the logic ID
+			await linkLogicToField(currentField, logicId);
+			console.log('✅ Updated field with logic ID');
 
 			// Success!
 			toastMessage({
@@ -844,36 +1107,16 @@
 				type: 'success'
 			});
 
-			// Call the onSave callback with the complete result data
+			// Call the onSave callback with the result
 			if (onSave) {
-				const resultData = {
-					logicId,
-					ruleId,
-					conditionsOperationId,
-					outcomeOperationId,
-					ruleName,
-					ruleDescription,
-					useConditionalLogic,
-					conditionMode,
-					outcomeMode,
-					settings,
-					ruleOutcome,
-					isNewLogic
-				};
-				onSave(resultData);
+				onSave(ruleResult);
 			}
 
 			// Close the modal
 			onCancel?.();
 
 		} catch (e) {
-			console.error('❌ Error in calculation logic workflow:', e);
-			console.error('Error details:', {
-				message: (e as Error)?.message,
-				stack: (e as Error)?.stack,
-				error: e
-			});
-
+			console.error('Error saving calculation logic:', e);
 			toastMessage({
 				Message: (e as Error)?.message || 'Failed to save calculation rule',
 				HttpCode: 500
@@ -881,29 +1124,108 @@
 		}
 	}
 
-	// Helper function to recursively create operations from tree structure
+
+
+	// Helper function to recursively create operations from tree structure (following validation logic pattern)
 	async function createOperationsFromTree(node: any): Promise<string> {
 		if (node.type === 'logical') {
-			// Create logical operation
-			const condition = {
-				field: node.condition.field,
-				operator: node.condition.operator,
-				value: node.condition.value,
-				name: node.condition.name
+			// Create logical operation following validation logic pattern
+			const condition = node.condition;
+			
+			// Find selected field
+			const selectedField = getAllFields().find(
+				(field) =>
+					field.id === condition.field ||
+					field.Title === condition.field ||
+					field.DisplayCode === condition.field
+			);
+			if (!selectedField) {
+				throw new Error('Selected field not found');
+			}
+			
+			const operatorType = toBackendOperator(condition.operator);
+			let operands: any[] = [];
+			
+			if (condition.operator === 'Is Empty' || condition.operator === 'Is Not Empty') {
+				operands = [
+					{
+						Type: 'FieldReference',
+						DataType: selectedField?.ResponseType || 'Text',
+						FieldId: selectedField?.id || '',
+						FieldCode: selectedField?.DisplayCode || ''
+					}
+				];
+			} else {
+				operands = [
+					{
+						Type: 'FieldReference',
+						DataType: selectedField?.ResponseType || 'Text',
+						FieldId: selectedField?.id || '',
+						FieldCode: selectedField?.DisplayCode || ''
+					},
+					{
+						Type: 'Constant',
+						DataType: 'Text',
+						Value: condition.value || ''
+					}
+				];
+			}
+
+			const logicalOperation = {
+				Name: condition.name && condition.name.trim().length > 0 
+					? condition.name 
+					: `${ruleName} - Logical condition`,
+				Description: `${ruleDescription} - Logical calculation condition`,
+				Type: 'Logical',
+				Operator: operatorType,
+				Operands: JSON.stringify(operands)
 			};
 
-			return await createLogicalOperation(ruleName, ruleDescription, condition, getAllFields());
+			const logicalResponse = await fetch('/api/server/operations/logical-operation', {
+				method: 'POST',
+				body: JSON.stringify(logicalOperation),
+				headers: { 'content-type': 'application/json' }
+			});
+			
+			if (!logicalResponse.ok) {
+				const errorData = await logicalResponse.json();
+				throw new Error(errorData.Message || 'Failed to create logical operation');
+			}
+			
+			const logicalData = await logicalResponse.json();
+			return logicalData.Data.id as string;
+			
 		} else if (node.type === 'composite') {
-			// Create composite operation
-			const childIds = [];
-
+			// Create composite operation following validation logic pattern
+			const childIds: string[] = [];
+			
 			// Recursively create operations for all children
 			for (const child of node.children || []) {
 				const childId = await createOperationsFromTree(child);
 				childIds.push(childId);
 			}
-
-			return await createCompositeOperation(ruleName, ruleDescription, node.operator, childIds);
+			
+			const compositeOperation = {
+				Name: `${ruleName} - Composite calculation`,
+				Description: `${ruleDescription} - Composite logical calculation`,
+				Type: 'Composition',
+				Operator: node.operator === 'AND' ? 'And' : 'Or',
+				Children: JSON.stringify(childIds)
+			};
+			
+			const compositeResponse = await fetch('/api/server/operations/composition-operation', {
+				method: 'POST',
+				body: JSON.stringify(compositeOperation),
+				headers: { 'content-type': 'application/json' }
+			});
+			
+			if (!compositeResponse.ok) {
+				const errorData = await compositeResponse.json();
+				throw new Error(errorData.Message || 'Failed to create composite operation');
+			}
+			
+			const compositeData = await compositeResponse.json();
+			return compositeData.Data.id as string;
 		}
 
 		throw new Error(`Unknown node type: ${node.type}`);
@@ -931,8 +1253,6 @@
 
 			<!-- Modal Body -->
 			<div class="p-8">
-
-
 				<!-- 1. Rule Name -->
 				<div class="mb-6">
 					<Label class="mb-2 block font-semibold text-slate-700">Rule Name</Label>
@@ -954,7 +1274,6 @@
 						bind:value={ruleDescription}
 						placeholder="Enter rule description (optional)"
 						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm focus:border-blue-500"
-						readonly={editingRule && !isEditingRule}
 					/>
 					<div class="mt-1 text-xs text-gray-500">(Optional: Describe what this rule does)</div>
 				</div>
@@ -967,11 +1286,9 @@
 								type="checkbox"
 								bind:checked={useConditionalLogic}
 								class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-								disabled={editingRule && !isEditingRule}
 							/>
 							Conditional
-						</label>
-
+					</label>
 					</div>
 				</div>
 
@@ -991,7 +1308,6 @@
 									value="logical"
 									bind:group={conditionMode}
 									class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-									disabled={editingRule && !isEditingOperations}
 								/>
 								<span class="text-base">Logical</span>
 							</label>
@@ -1002,7 +1318,6 @@
 									value="composite"
 									bind:group={conditionMode}
 									class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-									disabled={editingRule && !isEditingOperations}
 								/>
 								<span class="text-base">Composite</span>
 							</label>
@@ -1020,7 +1335,6 @@
 											bind:value={logicalConditionName}
 											placeholder="Enter condition name"
 											class="w-full"
-											readonly={editingRule && !isEditingOperations}
 										/>
 									</div>
 									<div class="space-y-2">
@@ -1028,20 +1342,19 @@
 										<Select.Root
 											type="single"
 											bind:value={logicalConditionField}
-											disabled={editingRule && !isEditingOperations}
 										>
 											<Select.Trigger class="w-full">
 												{logicalConditionField
 													? getFieldDisplay(logicalConditionField)
 													: 'Select field'}
-						</Select.Trigger>
-						<Select.Content>
+											</Select.Trigger>
+											<Select.Content>
 												{#each getAllFields() as field}
 													<Select.Item value={field.id} label={field.Title || field.DisplayCode} />
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
+												{/each}
+											</Select.Content>
+										</Select.Root>
+									</div>
 								</div>
 								<div class="grid grid-cols-2 gap-4">
 									<div class="space-y-2">
@@ -1049,18 +1362,17 @@
 										<Select.Root
 											type="single"
 											bind:value={logicalConditionOperator}
-											disabled={editingRule && !isEditingOperations}
 										>
 											<Select.Trigger class="w-full">
 												{logicalConditionOperator || 'Select operator'}
-							</Select.Trigger>
-							<Select.Content>
+											</Select.Trigger>
+											<Select.Content>
 												{#each operators as operator}
 													<Select.Item value={operator} label={operator} />
 												{/each}
-							</Select.Content>
-						</Select.Root>
-					</div>
+											</Select.Content>
+										</Select.Root>
+									</div>
 									<div class="space-y-2">
 										<Label class="text-sm font-medium text-gray-700">Value</Label>
 										<Input
@@ -1068,7 +1380,6 @@
 											bind:value={logicalConditionValue}
 											placeholder="Enter value"
 											class="w-full"
-											readonly={editingRule && !isEditingOperations}
 										/>
 									</div>
 								</div>
@@ -1093,11 +1404,11 @@
 								collapsedByPath={collapsed}
 								onToggleCollapse={toggleCollapse}
 								expressionsByPath={expressions}
-								readonly={editingRule && !isEditingOperations}
+								readonly={false}
 								showOnlyConditions={true}
 							/>
-					{/if}
-				</div>
+						{/if}
+					</div>
 				{/if}
 
 				<!-- 5. Outcome Section -->
@@ -1113,7 +1424,6 @@
 								value="static"
 								bind:group={outcomeMode}
 								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-								disabled={editingRule && !isEditingRule}
 							/>
 							<span class="text-base">Static Value</span>
 						</label>
@@ -1124,7 +1434,6 @@
 								value="expression"
 								bind:group={outcomeMode}
 								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-								disabled={editingRule && !isEditingRule}
 							/>
 							<span class="text-base">Calculation Expression</span>
 						</label>
@@ -1132,15 +1441,35 @@
 
 					<!-- Outcome Content -->
 					{#if outcomeMode === 'static'}
-						<div class="space-y-3">
-							<Label class="text-sm font-medium text-gray-700">Static Value</Label>
-							<Input
-								type="text"
-								bind:value={staticValue}
-								placeholder="Enter static value"
-								class="w-full"
-								readonly={editingRule && !isEditingRule}
-							/>
+						<div class="space-y-4">
+							<div class="space-y-2">
+								<Label class="text-sm font-medium text-gray-700">Static Value</Label>
+								<Input
+									type="text"
+									bind:value={staticValue}
+									placeholder="Enter static value"
+									class="w-full"
+								/>
+							</div>
+							<div class="space-y-2">
+								<Label class="text-sm font-medium text-gray-700">Data Type</Label>
+								<Select.Root
+									type="single"
+									bind:value={staticValueDataType}
+								>
+									<Select.Trigger class="w-full">
+										{staticValueDataType}
+									</Select.Trigger>
+									<Select.Content>
+										{#each dataTypes as dataType}
+											<Select.Item value={dataType}>{dataType}</Select.Item>
+										{/each}
+									</Select.Content>
+								</Select.Root>
+								<div class="text-xs text-gray-500">
+									Select the data type for the static value (Text, Integer, Float, Boolean, Date, DateTime)
+								</div>
+							</div>
 						</div>
 					{:else}
 						<div class="space-y-3">
@@ -1151,10 +1480,10 @@
 								placeholder="Enter the calculation expression..."
 								size="default"
 								showValidation={true}
-								readonly={editingRule && !isEditingRule}
+								readonly={false}
 							/>
 						</div>
-				{/if}
+					{/if}
 				</div>
 
 				<!-- Calculation Settings -->
@@ -1170,7 +1499,6 @@
 								type="single"
 								name="DecimalPlaces"
 								bind:value={decimalPlaces}
-								disabled={editingRule && !isEditingRule}
 							>
 								<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
 									{decimalPlaces}
@@ -1188,7 +1516,6 @@
 								type="single"
 								name="RoundingMethod"
 								bind:value={roundingMethod}
-								disabled={editingRule && !isEditingRule}
 							>
 								<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
 									{roundingMethod}
@@ -1209,7 +1536,6 @@
 								id="autoUpdate"
 								bind:checked={autoUpdate}
 								class="h-4 w-4"
-								disabled={editingRule && !isEditingRule}
 							/>
 							<Label for="autoUpdate">Auto-update when dependent fields change</Label>
 						</div>
@@ -1219,7 +1545,6 @@
 								id="showFormula"
 								bind:checked={showFormula}
 								class="h-4 w-4"
-								disabled={editingRule && !isEditingRule}
 							/>
 							<Label for="showFormula">Show formula to users</Label>
 						</div>
@@ -1229,7 +1554,6 @@
 								id="allowManualOverride"
 								bind:checked={allowManualOverride}
 								class="h-4 w-4"
-								disabled={editingRule && !isEditingRule}
 							/>
 							<Label for="allowManualOverride">Allow manual override</Label>
 						</div>
@@ -1245,7 +1569,7 @@
 									size="sm"
 									onclick={() => (numberFormat = format)}
 									class="text-xs"
-									disabled={editingRule && !isEditingRule}
+									disabled={false}
 								>
 									{format === 'number'
 										? '1,234.56'
