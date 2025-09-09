@@ -14,13 +14,37 @@ interface ApiResponse {
     Message: string;
 }
 
+// Logging styles for different HTTP methods
+const logStyles = {
+    GET: {
+        request: chalk.bgBlue.white.bold(' GET '),
+        response: chalk.blue.bold('📥 GET Response'),
+        color: chalk.blue
+    },
+    POST: {
+        request: chalk.bgGreen.white.bold(' POST '),
+        response: chalk.green.bold('📤 POST Response'),
+        color: chalk.green
+    },
+    PUT: {
+        request: chalk.bgYellow.black.bold(' PUT '),
+        response: chalk.yellow.bold('🔄 PUT Response'),
+        color: chalk.yellow
+    },
+    DELETE: {
+        request: chalk.bgRed.white.bold(' DELETE '),
+        response: chalk.red.bold('🗑️ DELETE Response'),
+        color: chalk.red
+    }
+};
+
 export const get_ = async (url: string) => {
-    // const methodStyled = chalk.bgMagenta.white.bold(`GET`);
     try {
         const headers = await setHeaders();
-        // console.log(headers);
-        // console.log((`GET Request URL: ${url}`));
-        console.log(chalk.hex('#FFA500')(`GET Request URL: ${url}`));
+        const style = logStyles.GET;
+
+        // Request logging
+        console.log(style.request + ' ' + style.color(`Request URL: ${url}`));
 
         const res = await fetch(url, { method: 'GET', headers });
         const response = await res.json();
@@ -37,8 +61,11 @@ export const get_ = async (url: string) => {
 export const post_ = async (url: string, bodyObj: unknown) => {
     try {
         const headers = await setHeaders();
-        console.log(chalk.hex('#FFA500')(`POST Request URL: ${url}`));
-        console.log(chalk.hex('#FFA504')(`POST Request Body: ${JSON.stringify(bodyObj)}`));
+        const style = logStyles.POST;
+
+        // Request logging
+        console.log(style.request + ' ' + style.color(`Request URL: ${url}`));
+        console.log(style.color('📦 Request Body:'), JSON.stringify(bodyObj, null, 2));
 
         const res = await fetch(url, {
             method: 'POST',
@@ -57,11 +84,13 @@ export const post_ = async (url: string, bodyObj: unknown) => {
 };
 
 export const put_ = async (url: string, bodyObj: unknown) => {
-    // const methodStyled = chalk.bgGreen.white.bold(`PUT`);
     try {
         const headers = await setHeaders();
-        console.log(chalk.hex('#FFA500')(`PUT Request URL: ${url}`));
-        console.log(chalk.hex('#e1ff00')(`PUT Request Body: ${JSON.stringify(bodyObj)}`));
+        const style = logStyles.PUT;
+
+        // Request logging
+        console.log(style.request + ' ' + style.color(`Request URL: ${url}`));
+        console.log(style.color('📦 Request Body:'), JSON.stringify(bodyObj, null, 2));
 
         const res = await fetch(url, {
             method: 'PUT',
@@ -80,10 +109,12 @@ export const put_ = async (url: string, bodyObj: unknown) => {
 };
 
 export const delete_ = async (url: string) => {
-    // const methodStyled = chalk.bgRed.white.bold('DELETE');
     try {
         const headers = await setHeaders();
-        console.log(chalk.red(`DELETE Request URL: ${url}`));
+        const style = logStyles.DELETE;
+
+        // Request logging
+        console.log(style.request + ' ' + style.color(`Request URL: ${url}`));
 
         const res = await fetch(url, {
             method: 'DELETE',
@@ -101,6 +132,18 @@ export const delete_ = async (url: string) => {
 };
 
 const handleResponse = (response: ApiResponse, url: string, method: string): void | null => {
+    const style = logStyles[method as keyof typeof logStyles];
+
+    // Detailed response logging
+    console.log(style.response + ' ' + style.color(`from ${url}`));
+
+    // Skip logging full response for form-templates details endpoint (too large)
+    if (!url.includes('/form-templates/') || !url.includes('/details')) {
+        console.log(style.color('📄 Full Response:'), JSON.stringify(response, null, 2));
+    } else {
+        console.log(style.color('📄 Response: [Large response - skipped logging]'));
+    }
+
     if (response.Status === 'failure') {
         if (response.HttpCode === 404) {
             console.log(chalk.red(`${method} ${url} -  ${chalk.bgRed.white.bold(' 404 ')}: ${response.Message}`));
@@ -113,10 +156,10 @@ const handleResponse = (response: ApiResponse, url: string, method: string): voi
 };
 
 const handleError = (err: unknown, url: string, method: string): void => {
-    // const methodStyled = chalk.bgBlue.white.bold(` ${method} `); // Consistent method styling
+    const style = logStyles[method as keyof typeof logStyles];
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
 
-    console.error(chalk.red(`${method} ${url} - ${chalk.bgRed.white.bold(' Error ')}: ${errorMessage}`));
+    console.error(style.color('❌') + ' ' + chalk.red(`${method} ${url} - ${chalk.bgRed.white.bold(' Error ')}: ${errorMessage}`));
 };
 
 
@@ -127,12 +170,7 @@ const setHeaders = async () => {
         };
 
         headers['Content-Type'] = 'application/json';
-
-        // if (authorizeUser && sessionId) {
-        //     const session = await SessionManager.getSession(sessionId);
-        //     const accessToken = session?.accessToken;
-            headers['Authorization'] = `Bearer ${TOKEN}`;
-        // }
+        headers['Authorization'] = `Bearer ${TOKEN}`;
 
         return headers;
     } catch (err) {

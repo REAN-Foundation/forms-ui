@@ -106,12 +106,21 @@ export class FormRuleExecutor {
         const errors = new Map<string, string[]>();
         let isValid = true;
 
+        console.log('🔍 Validating form with fields:', this.form.Fields.map(f => ({ id: f.FieldId, hasValidateLogic: !!f.ValidateLogic })));
+
         for (const field of this.form.Fields) {
+            console.log(`🔍 Validating field ${field.FieldId}:`, {
+                hasValidateLogic: !!field.ValidateLogic,
+                validateLogic: field.ValidateLogic
+            });
+
             const result = this.executeFieldLogics(field.FieldId);
+            console.log(`🔍 Field ${field.FieldId} validation result:`, result);
 
             if (result.validationErrors.length > 0) {
                 errors.set(field.FieldId, result.validationErrors);
                 isValid = false;
+                console.log(`🔍 Field ${field.FieldId} has validation errors:`, result.validationErrors);
             }
 
             // Check required fields

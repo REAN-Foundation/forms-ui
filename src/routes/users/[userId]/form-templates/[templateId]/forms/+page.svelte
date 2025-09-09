@@ -18,8 +18,6 @@
 
 	let { data }: { data: PageServerData } = $props();
 
-	$inspect('data FROM FORM TEMPLATE PAGE', data);
-
 	let errors: Record<string, string> = $state({});
 
 	let typeOfQuestion: 'Basic' | 'HealthCare' = $state('Basic');

@@ -32,7 +32,8 @@ export const PUT = async (event: RequestEvent) => {
             // data.ConditionForOperationId,
             data.OperationId,
             data.LogicId,
-            data.Settings || {}
+            data.Settings || {},
+            data.RuleOutcome || {}
         );
         return new Response(JSON.stringify(response));
     } catch (err) {

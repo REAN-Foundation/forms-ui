@@ -283,9 +283,13 @@ export class RuleEvaluator {
 
         // Support regex expression encoded as JSON: { source: string, flags?: string }
         const expr = operation.Expression;
+        console.log('🔍 Evaluating function expression:', { expr, resolvedVariables });
+
         if (typeof expr === 'string') {
             try {
                 const maybeRegex = JSON.parse(expr);
+                console.log('🔍 Parsed JSON expression:', maybeRegex);
+
                 if (maybeRegex && typeof maybeRegex.source === 'string') {
                     const pattern: string = maybeRegex.source;
                     const flags: string = typeof maybeRegex.flags === 'string' ? maybeRegex.flags : '';
@@ -294,14 +298,20 @@ export class RuleEvaluator {
                     const inputValue = resolvedVariables.input ?? this.context.FieldValues.get(this.context.CurrentFieldId);
                     const text = inputValue == null ? '' : String(inputValue);
 
+                    console.log('🔍 Regex validation:', { pattern, flags, text, inputValue });
+
                     try {
                         const re = new RegExp(pattern, flags);
-                        return re.test(text);
+                        const result = re.test(text);
+                        console.log('🔍 Regex test result:', result);
+                        return result;
                     } catch (e: any) {
+                        console.error('🔍 Invalid regex:', e.message);
                         throw new Error(`Invalid regex: ${e.message}`);
                     }
                 }
-            } catch {
+            } catch (e) {
+                console.log('🔍 Not a JSON regex expression, continuing with default evaluator:', e);
                 // Not a JSON regex expression; continue with default evaluator
             }
         }

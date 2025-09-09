@@ -25,7 +25,7 @@
 		closeSheet
 	} = $props();
 
-	$inspect('uiSections FROM SECTIONS.SVELTE', uiSections);
+	// $inspect('uiSections', uiSections);
 
 	let cardToDelete = $state('');
 

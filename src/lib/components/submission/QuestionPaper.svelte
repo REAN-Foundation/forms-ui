@@ -104,10 +104,14 @@
 						ValidateLogic: f.ValidateLogic
 							? {
 									...f.ValidateLogic,
-									Rules: f.ValidateLogic.Rules?.map((r) => ({
-										...r,
-										Operation: normalizeOperation(r.Operation)
-									}))
+									Rules: f.ValidateLogic.Rules?.map((r) => {
+										const normalizedOp = normalizeOperation(r.Operation);
+										console.log('🔍 Normalizing validation rule:', { original: r.Operation, normalized: normalizedOp });
+										return {
+											...r,
+											Operation: normalizedOp
+										};
+									})
 								}
 							: null
 					});
@@ -150,23 +154,21 @@
 
 		// Validation: only show for touched fields with non-empty values
 		const { errors: formErrors } = executor.validateForm();
+		console.log('🔍 Form validation errors:', formErrors);
+		console.log('🔍 Touched fields:', touched);
+		console.log('🔍 Current answers:', answers);
+		
 		const nextErrors: Record<string, string> = {};
 		for (const [fid, msgs] of formErrors.entries()) {
 			const val = answers[fid];
-			if (touched.has(fid) && val !== null && val !== undefined && val !== '') {
-				if (Array.isArray(msgs) && msgs.length > 0) {
-					nextErrors[fid] = msgs[0];
-					// console.log('nextErrors', nextErrors);
-					// console.log('fid', fid);
-					// console.log('msgs', msgs);
-					// console.log('val', val);
-					console.log('touched', touched);
-					// console.log('answers', answers);
-					// console.log('formErrors', formErrors);
-					// console.log('errors', errors);
-				}
+			console.log(`🔍 Field ${fid}:`, { val, touched: touched.has(fid), msgs });
+			// Temporarily show all validation errors regardless of touched state for debugging
+			if (Array.isArray(msgs) && msgs.length > 0) {
+				nextErrors[fid] = msgs[0];
+				console.log(`🔍 Adding error for field ${fid}:`, msgs[0]);
 			}
 		}
+		console.log('🔍 Final errors:', nextErrors);
 		errors = nextErrors;
 	}
 
