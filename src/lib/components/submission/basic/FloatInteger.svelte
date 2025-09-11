@@ -27,8 +27,7 @@
 		<Label for="title" class="ml-2">{q.Description}</Label>
 	{/if}
 	<Input
-		type="number"
-		step="any"
+		type="text"
 		class="w-full"
 		bind:value={answers[q.id]}
 		name={q.id}

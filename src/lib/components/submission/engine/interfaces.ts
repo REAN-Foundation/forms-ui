@@ -76,7 +76,8 @@ export interface SkipRule extends BaseRule {
 
 export interface CalculationRule extends BaseRule {
     ConditionForOperation?: Operation;         // Optional: When should this calculation apply?
-    Operation: Operation;         // What value should be calculated?
+    Operation: Operation;
+    RuleOutcome?: any;  // What value should be calculated?
 }
 
 export interface ValidationRule extends BaseRule {

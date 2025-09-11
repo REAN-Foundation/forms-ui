@@ -96,17 +96,65 @@ export class RuleEvaluator {
     evaluateCalculationLogic(logic: CalculationLogic): CalculationEvaluationResult {
         for (const rule of logic.Rules) {
             try {
-                // Check condition if it exists
-                if (rule.ConditionForOperation) {
-                    const conditionResult = this.evaluateOperation(rule.ConditionForOperation);
-                    if (!conditionResult) {
-                        continue; // Condition not met, try next rule
-                    }
+                // First evaluate the conditions (Operation contains the composite/logical conditions)
+                const conditionResult = this.evaluateOperation(rule.Operation);
+                if (!conditionResult) {
+                    continue; // Conditions not met, try next rule
                 }
 
-                // Condition met (or no condition), evaluate the value expression
-                const value = this.evaluateOperation(rule.Operation);
-                return { Success: true, Value: value, MatchedRule: rule };
+                // Conditions met, now evaluate the outcome
+                let outcomeValue: any;
+
+                if (rule.RuleOutcome) {
+                    // Parse RuleOutcome - it can be a static value or function expression
+                    let outcomeData: any;
+                    try {
+                        outcomeData = JSON.parse(rule.RuleOutcome);
+                    } catch {
+                        // If not JSON, treat as static value
+                        outcomeValue = rule.RuleOutcome;
+                    }
+
+                    if (outcomeData && typeof outcomeData === 'object') {
+                        if (outcomeData.Type === 'FunctionExpression' && outcomeData.FunctionExpression) {
+                            // Evaluate function expression
+                            const expression = outcomeData.FunctionExpression;
+                            // Replace field references in the expression with actual values
+                            let processedExpression = expression;
+
+                            // Replace {formfield-xxx} patterns with actual field values
+                            const fieldRefPattern = /\{formfield-([^}]+)\}/gi;
+                            processedExpression = processedExpression.replace(fieldRefPattern, (match, fieldCode) => {
+                                // Find field by code and get its value
+                                for (const [fieldId, value] of this.context.FieldValues.entries()) {
+                                    // You might need to map field codes to field IDs here
+                                    // For now, we'll use a simple approach
+                                    if (fieldId.includes(fieldCode.toLowerCase())) {
+                                        return value ?? 0; // Default to 0 for missing values
+                                    }
+                                }
+                                return 0; // Default fallback
+                            });
+
+                            // Evaluate the mathematical expression
+                            outcomeValue = this.evaluateMathematicalExpression(processedExpression);
+                        } else if (outcomeData.Value !== undefined) {
+                            // Static value
+                            outcomeValue = outcomeData.Value;
+                        } else {
+                            // Fallback to the raw string
+                            outcomeValue = rule.RuleOutcome;
+                        }
+                    } else {
+                        // Static value
+                        outcomeValue = rule.RuleOutcome;
+                    }
+                } else {
+                    // No outcome defined, use fallback
+                    outcomeValue = logic.FallbackValue;
+                }
+
+                return { Success: true, Value: outcomeValue, MatchedRule: rule };
 
             } catch (error: any) {
                 return { Success: false, Error: error.message, MatchedRule: rule };
@@ -272,6 +320,33 @@ export class RuleEvaluator {
             const tempEvaluator = new RuleEvaluator(tempContext);
             return tempEvaluator.evaluateOperation(operation.Operation);
         });
+    }
+
+    private evaluateMathematicalExpression(expression: string): number {
+        // Clean and validate the expression
+        const cleanExpression = expression.replace(/[^0-9+\-*/().\s]/g, '');
+
+        if (!cleanExpression.trim()) {
+            return 0;
+        }
+
+        // Blacklist dangerous functions
+        const dangerousFunctions = ['eval', 'Function', 'setTimeout', 'setInterval', 'require', 'import'];
+        for (const dangerous of dangerousFunctions) {
+            if (expression.includes(dangerous)) {
+                throw new Error(`Dangerous function '${dangerous}' not allowed in expressions`);
+            }
+        }
+
+        try {
+            // Use Function constructor to evaluate mathematical expressions safely
+            const func = new Function('Math', 'Date', `return ${cleanExpression}`);
+            const result = func(Math, Date);
+            return typeof result === 'number' ? result : 0;
+        } catch (error: any) {
+            console.warn(`Invalid mathematical expression: ${expression}`, error);
+            return 0;
+        }
     }
 
     private evaluateFunctionExpression(operation: FunctionExpressionOperation): any {

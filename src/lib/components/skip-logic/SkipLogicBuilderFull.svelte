@@ -4,82 +4,182 @@
     import { Label } from '../ui/label/index.js';
     import * as Select from '../ui/select/index.js';
     import Icon from '@iconify/svelte';
+    import TreeNodeClean from '../calculation-logic/TreeNodeClean.svelte';
+    import {
+        getAllFields,
+        getCurrentOperators,
+        addLogicalToTree as addLogical,
+        addGroupToTree as addGroup,
+        removeNodeFromTree as removeNode,
+        updateGroupOperatorInTree as updateGroupOperator,
+        updateLeafFieldInTree as updateLeafField,
+        updateLeafOperatorInTree as updateLeafOperator,
+        updateLeafValueInTree as updateLeafValue,
+        updateLeafNameInTree as updateLeafName,
+        toggleCollapseForPath as toggleCollapse,
+        createOperationsFromTree,
+        updateLogicalOperation
+    } from '../calculation-logic/service.js';
+    import { toastMessage } from '../toast/toast.store.js';
 
     // Props
-    let { isOpen = $bindable(false), onSave, onCancel, editingRule = null, questionList } = $props();
+    let {
+        isOpen = $bindable(false),
+        onSave,
+        onCancel,
+        editingRule = null,
+        questionList,
+        currentField
+    } = $props();
 
-    // State for form data
-    let ruleName = $state('Skip to checkout');
-    
-    // IF conditions
-    let conditions = $state([
-        { field: 'Customer Type', operator: 'Is', value: 'Premium', connector: 'AND' },
-        { field: 'Age', operator: 'Greater Than', value: '18', connector: 'OR' }
-    ]);
+    // State - config
+    let ruleName = $state('');
+    let ruleDescription = $state('');
+    let useConditionalLogic = $state(true);
+    let conditionMode = $state<'logical' | 'composite'>('composite');
+    let defaultSkip = $state(false);
 
-    // THEN actions
-    let actions = $state([
-        { actionType: 'Skip to Field', target: 'Payment Section' },
-        { actionType: 'Hide Fields', target: 'Billing Address,Shipping Address' }
-    ]);
-
-    // Fallback action
-    let fallbackAction = $state('Show All Fields');
-    let fallbackTarget = $state('Default Behavior');
-
-    // Available fields and operators
-    const fields = ['Customer Type', 'Age', 'Country', 'Email', 'Phone', 'Income', 'Postal Code'];
-    const operators = [
-        'Is', 'Is Not', 'Contains', 'Does Not Contain', 'Greater Than', 'Less Than',
-        'Greater Than or Equal', 'Less Than or Equal', 'Is Empty', 'Is Not Empty'
-    ];
-    const connectors = ['AND', 'OR'];
+    // THEN actions UI parity (visual only)
+    let actions = $state<Array<{ actionType: string; target: string }>>([]);
     const actionTypes = ['Skip to Field', 'Skip to Page', 'Skip to End', 'Hide Fields', 'Show Fields'];
     const targets = ['Payment Section', 'Contact Details', 'Address Information', 'Additional Questions', 'Thank You Page'];
     const fieldTargets = ['Billing Address', 'Shipping Address', 'Company Information', 'Tax Details', 'Emergency Contact'];
-    const fallbackOptions = ['Show All Fields', 'Skip to Field', 'Skip to Page', 'Hide Fields'];
-
-    // Initialize form data when editing an existing rule
-    $effect(() => {
-        if (editingRule) {
-            ruleName = editingRule.ruleName || '';
-            conditions = editingRule.conditions || [];
-            actions = editingRule.actions || [];
-            fallbackAction = editingRule.fallbackAction || 'Show All Fields';
-            fallbackTarget = editingRule.fallbackTarget || 'Default Behavior';
-        }
-    });
-
-    function addCondition() {
-        conditions.push({ field: 'Select Field', operator: 'Is', value: '', connector: 'AND' });
-    }
-
-    function removeCondition(index: number) {
-        conditions.splice(index, 1);
-    }
-
     function addAction() {
         actions.push({ actionType: 'Skip to Field', target: 'Payment Section' });
     }
-
     function removeAction(index: number) {
         actions.splice(index, 1);
     }
 
-    function handleSave(event) {
-        event?.preventDefault();
-        event?.stopPropagation();
-        const skipLogicData = {
-            ruleName,
-            conditions,
-            actions,
-            fallbackAction,
-            fallbackTarget
-        };
-        onSave?.(skipLogicData);
+    // Fallback UI selection (mapped to DefaultSkip internally)
+    let fallbackAction = $state('Show All Fields');
+    let fallbackTarget = $state('Default Behavior');
+
+    // State - logical mode
+    let logicalConditionName = $state('');
+    let logicalConditionField = $state('');
+    let logicalConditionOperator = $state('Equal To');
+    let logicalConditionValue = $state('');
+
+    // State - composite mode
+    let tree = $state<any>({ type: 'composite', operator: 'AND', children: [] });
+    let collapsed = $state({} as Record<string, boolean>);
+
+    // Editing init (kept minimal for now)
+    $effect(() => {
+        if (editingRule) {
+            ruleName = editingRule?.Name || '';
+            ruleDescription = editingRule?.Description || '';
+        }
+    });
+
+    // Helpers
+    function validate(): string | null {
+        if (!ruleName.trim()) return 'Rule name is required';
+        if (!useConditionalLogic) return null;
+        if (conditionMode === 'logical') {
+            if (!logicalConditionField || !logicalConditionOperator) return 'Condition is incomplete';
+        } else {
+            if (!tree?.children || tree.children.length === 0) return 'Please add at least one condition';
+        }
+        return null;
     }
 
-    function handleCancel(event) {
+    // API helpers
+    async function ensureSkipLogic(): Promise<string> {
+        if (!currentField?.id) throw new Error('Missing field id');
+        const res = await fetch('/api/server/logic/skip-logic', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ FieldId: currentField.id, Enabled: true, DefaultSkip: defaultSkip })
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.Data?.id) throw new Error(data?.Message || 'Failed to create skip logic');
+        const logicId = data.Data.id as string;
+
+        // Link to field
+        await fetch('/api/server/form-fields', {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id: currentField.id, SkipLogicId: logicId })
+        });
+        return logicId;
+    }
+
+    async function createSkipRule(params: { logicId: string; operationType: string; operationId: string; }) {
+        const payload = {
+            Name: ruleName || 'Skip Rule',
+            Description: ruleDescription || 'Skip rule',
+            Priority: 1,
+            IsActive: true,
+            OperationType: params.operationType,
+            OperationId: params.operationId,
+            SkipWhenTrue: true,
+            LogicId: params.logicId
+        };
+        const res = await fetch('/api/server/rules/skip-rule', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const d = await res.json();
+            throw new Error(d?.Message || 'Failed to create skip rule');
+        }
+    }
+
+    async function handleSave(e?: Event) {
+        e?.preventDefault();
+        e?.stopPropagation();
+        const err = validate();
+        if (err) {
+            toastMessage({ Message: err, HttpCode: 400 });
+            return;
+        }
+
+        try {
+            // Map fallback UI to DefaultSkip flag
+            defaultSkip = fallbackAction !== 'Show All Fields';
+
+            // Step 1: ensure skip logic and link
+            const logicId = await ensureSkipLogic();
+
+            // Step 2: create or update condition operation
+            let operationType = 'Logical';
+            let operationId = '';
+            if (useConditionalLogic) {
+                if (conditionMode === 'logical') {
+                    operationType = 'Logical';
+                    operationId = await updateLogicalOperation(
+                        null,
+                        {
+                            field: logicalConditionField,
+                            operator: logicalConditionOperator,
+                            value: logicalConditionValue,
+                            name: logicalConditionName
+                        },
+                        ruleName,
+                        ruleDescription,
+                        questionList
+                    );
+                } else {
+                    operationType = 'Composition';
+                    operationId = await createOperationsFromTree(tree, ruleName, ruleDescription, questionList);
+                }
+            }
+
+            // Step 3: create skip rule
+            await createSkipRule({ logicId, operationType, operationId });
+
+            toastMessage({ Message: 'Skip rule created', HttpCode: 200 });
+            onSave?.({ created: true });
+            isOpen = false;
+        } catch (error: any) {
+            toastMessage({ Message: error.message || 'Failed to save skip rule', HttpCode: 400 });
+        }
+    }
+
+    function handleCancel(event?: Event) {
         event?.preventDefault();
         event?.stopPropagation();
         onCancel?.();
@@ -87,11 +187,8 @@
 </script>
 
 {#if isOpen}
-    <!-- Modal Overlay -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-        <!-- Modal -->
-        <div class="bg-white rounded-lg w-[90%] max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <!-- Modal Header -->
+    <div class="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+        <div class="bg-white rounded-lg w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="bg-slate-700 text-white p-5 rounded-t-lg flex justify-between items-center">
                 <h2 class="text-lg font-semibold">Skip Logic Builder</h2>
                 <button type="button" class="text-white text-2xl p-1 hover:bg-slate-600 rounded" onclick={handleCancel}>
@@ -99,228 +196,187 @@
                 </button>
             </div>
             
-            <!-- Modal Body -->
-            <div class="p-8">
-                <!-- Rule Name -->
-                <div class="mb-6">
-                    <Label class="block mb-2 font-semibold text-slate-700">Rule Name</Label>
-                    <Input 
-                        bind:value={ruleName}
-                        placeholder="Enter rule name"
-                        class="w-full p-3 border-2 border-gray-200 rounded-md text-sm focus:border-blue-500"
-                    />
-                    <div class="text-xs text-gray-500 mt-1">(Maximum 100 characters)</div>
+            <div class="p-6 space-y-6">
+                <!-- Rule Meta -->
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <Label class="mb-1 block text-sm font-medium text-slate-700">Rule name</Label>
+                        <Input bind:value={ruleName} placeholder="Enter rule name" class="w-full" />
+                        <div class="text-[12px] text-gray-500 mt-1">(Maximum 100 characters)</div>
+                    </div>
+                    <div>
+                        <Label class="mb-1 block text-sm font-medium text-slate-700">Description (optional)</Label>
+                        <Input bind:value={ruleDescription} placeholder="Description" class="w-full" />
+                    </div>
                 </div>
 
                 <!-- IF Section -->
-                <div class="bg-gray-50 rounded-lg p-5 mb-5">
-                    <div class="flex items-center mb-5">
-                        <div class="bg-gray-600 text-white px-4 py-2 rounded font-semibold mr-4 min-w-[60px] text-center">
-                            IF
+                <div class="rounded-lg border border-gray-200 p-4">
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-gray-700 text-white px-3 py-1 rounded text-xs font-semibold">IF</div>
+                            <span class="text-sm text-slate-700">Define when to skip this field</span>
                         </div>
-                        <span>Define conditions to skip fields</span>
+                        <div class="flex items-center gap-6">
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="radio" name="condMode" value="logical" bind:group={conditionMode} />
+                                Logical
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="radio" name="condMode" value="composite" bind:group={conditionMode} />
+                                Composite
+                            </label>
+                        </div>
                     </div>
 
-                    <!-- Grouping Controls -->
-                    <div class="mb-4">
-                        <Button type="button" variant="outline" size="sm" class="mr-2">
-                            <Icon icon="lucide:layers" class="h-3 w-3 mr-1" />
-                            Group Conditions
+                    <!-- Grouping Controls (visual parity) -->
+                    <div class="mb-4 flex items-center gap-2">
+                        <Button type="button" variant="outline" size="sm">
+                            <Icon icon="lucide:layers" class="h-3 w-3 mr-1" /> Group Conditions
                         </Button>
                         <Button type="button" variant="outline" size="sm">
-                            <Icon icon="lucide:plus" class="h-3 w-3 mr-1" />
-                            Add Group
+                            <Icon icon="lucide:plus" class="h-3 w-3 mr-1" /> Add Group
                         </Button>
                     </div>
 
-                    <!-- Conditions -->
-                    <div class="border-2 border-gray-200 rounded-md p-4 mb-4 bg-white">
-                        {#each conditions as condition, index}
-                            <div class="flex items-center gap-2 mb-4">
-                                <Select.Root type="single" name="FieldToValidate" bind:value={condition.field}>
-                                    <Select.Trigger class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                        {condition.field || 'Select Field'}
-                                    </Select.Trigger>
-                                    <Select.Content>
-                                        <Select.Item value="Select Field">Select Field</Select.Item>
-                                        {#each fields as field}
-                                            <Select.Item value={field}>{field}</Select.Item>
-                                        {/each}
-                                    </Select.Content>
-                                </Select.Root>
-                                
-                                <Select.Root type="single" name="Operator" bind:value={condition.operator}>
-                                    <Select.Trigger class="min-w-[120px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                        {condition.operator}
-                                    </Select.Trigger>
-                                    <Select.Content>
-                                        {#each operators as operator}
-                                            <Select.Item value={operator}>{operator}</Select.Item>
-                                        {/each}
-                                    </Select.Content>
-                                </Select.Root>
-                                
-                                <Input 
-                                    bind:value={condition.value}
-                                    placeholder="Enter value"
-                                    class="min-w-[150px] px-3 py-2 border border-gray-300 rounded text-sm"
-                                />
-                                
-                                <Button 
-                                    type="button"
-                                    onclick={() => removeCondition(index)}
-                                    variant="destructive"
-                                    size="sm"
-                                    class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                                >
-                                    Remove
-                                </Button>
+                    {#if conditionMode === 'logical'}
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12">
+                                <Label class="mb-1 block text-xs font-medium text-gray-700">Condition Name (optional)</Label>
+                                <Input bind:value={logicalConditionName} placeholder="Enter a condition name" />
                             </div>
-
-                            {#if index < conditions.length - 1}
-                                <div class="flex items-center justify-center my-2">
-                                    <Select.Root type="single" name="Connector" bind:value={condition.connector}>
-                                        <Select.Trigger class="px-3 py-1 border border-gray-300 rounded bg-gray-200 font-semibold">
-                                            {condition.connector}
-                                        </Select.Trigger>
-                                        <Select.Content>
-                                            {#each connectors as connector}
-                                                <Select.Item value={connector}>{connector}</Select.Item>
-                                            {/each}
-                                        </Select.Content>
-                                    </Select.Root>
+                            <div class="col-span-5">
+                                <Label class="mb-1 block text-xs font-medium text-gray-700">Field</Label>
+                                <Select.Root type="single" bind:value={logicalConditionField}>
+                                    <Select.Trigger class="w-full">
+                                        {logicalConditionField ? getAllFields(questionList).find(f => f.id === logicalConditionField)?.Title || 'Select a field' : 'Select a field'}
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                        {#each getAllFields(questionList) as f}
+                                            <Select.Item value={f.id} label={f.Title || f.DisplayCode} />
+                                        {/each}
+                                    </Select.Content>
+                                </Select.Root>
+                            </div>
+                            <div class="col-span-3">
+                                <Label class="mb-1 block text-xs font-medium text-gray-700">Operator</Label>
+                                <Select.Root type="single" bind:value={logicalConditionOperator}>
+                                    <Select.Trigger class="w-full">{logicalConditionOperator}</Select.Trigger>
+                                    <Select.Content>
+                                        {#each getCurrentOperators(logicalConditionField, questionList) as op}
+                                            <Select.Item value={op} label={op} />
+                                        {/each}
+                                    </Select.Content>
+                                </Select.Root>
+                            </div>
+                            {#if logicalConditionOperator !== 'Is Empty' && logicalConditionOperator !== 'Is Not Empty'}
+                                <div class="col-span-3">
+                                    <Label class="mb-1 block text-xs font-medium text-gray-700">Value</Label>
+                                    <Input bind:value={logicalConditionValue} placeholder="Enter value" />
                                 </div>
                             {/if}
-                        {/each}
-
-                        <Button 
-                            type="button"
-                            onclick={addCondition}
-                            class="bg-green-600 text-white px-4 py-2 rounded text-sm flex items-center gap-1 hover:bg-green-700"
-                        >
-                            <Icon icon="lucide:plus" class="h-4 w-4" />
-                            Add Condition
-                        </Button>
-                    </div>
+                        </div>
+                    {:else}
+                        <TreeNodeClean
+                            node={tree}
+                            path={[]}
+                            fields={getAllFields(questionList)}
+                            operators={getCurrentOperators('', questionList)}
+                            onAddLogical={(p) => { tree = addLogical(tree, p); }}
+                            onAddGroup={(p, op) => { tree = addGroup(tree, p, op); }}
+                            onRemove={(p) => { tree = removeNode(tree, p); }}
+                            onChangeGroupOperator={(p, op) => { tree = updateGroupOperator(tree, p, op); }}
+                            onChangeLeafField={(p, v) => { tree = updateLeafField(tree, p, v); }}
+                            onChangeLeafOperator={(p, v) => { tree = updateLeafOperator(tree, p, v); }}
+                            onChangeLeafValue={(p, v) => { tree = updateLeafValue(tree, p, v); }}
+                            onChangeLeafName={(p, v) => { tree = updateLeafName(tree, p, v); }}
+                            onChangeExpression={() => {}}
+                            errorsByPath={{}}
+                            collapsedByPath={collapsed}
+                            onToggleCollapse={(p) => { collapsed = toggleCollapse(collapsed, p); }}
+                            expressionsByPath={{}}
+                            readonly={false}
+                            showOnlyConditions={true}
+                        />
+                    {/if}
                 </div>
 
-                <!-- THEN Section -->
-                <div class="bg-gray-50 rounded-lg p-5 mb-5">
-                    <div class="flex items-center mb-5">
-                        <div class="bg-gray-600 text-white px-4 py-2 rounded font-semibold mr-4 min-w-[60px] text-center">
-                            THEN
-                        </div>
-                        <span>Define skip actions</span>
+                <!-- THEN Section (visual parity) -->
+                <div class="rounded-lg border border-gray-200 p-4">
+                    <div class="mb-4 flex items-center gap-2">
+                        <div class="bg-gray-700 text-white px-3 py-1 rounded text-xs font-semibold">THEN</div>
+                        <span class="text-sm text-slate-700">Define skip actions</span>
                     </div>
-
-                    <div class="border-2 border-gray-200 rounded-md p-4 mb-4 bg-white">
+                    <div class="space-y-3">
                         {#each actions as action, index}
-                            <div class="flex items-center gap-2 mb-4">
-                                <Select.Root type="single" name="ActionType" bind:value={action.actionType}>
-                                    <Select.Trigger class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                        {action.actionType}
-                                    </Select.Trigger>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <Select.Root type="single" bind:value={action.actionType}>
+                                    <Select.Trigger class="min-w-[200px]">{action.actionType}</Select.Trigger>
                                     <Select.Content>
-                                        {#each actionTypes as actionType}
-                                            <Select.Item value={actionType}>{actionType}</Select.Item>
+                                        {#each actionTypes as t}
+                                            <Select.Item value={t} label={t} />
                                         {/each}
                                     </Select.Content>
                                 </Select.Root>
-                                
                                 {#if action.actionType === 'Hide Fields' || action.actionType === 'Show Fields'}
-                                    <Select.Root type="single" name="FieldTargets" bind:value={action.target}>
-                                        <Select.Trigger class="min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm" style="height: 100px;">
-                                            {action.target || 'Select Fields'}
-                                        </Select.Trigger>
+                                    <Select.Root type="single" bind:value={action.target}>
+                                        <Select.Trigger class="min-w-[200px]">{action.target || 'Select Fields'}</Select.Trigger>
                                         <Select.Content>
-                                            {#each fieldTargets as fieldTarget}
-                                                <Select.Item value={fieldTarget}>{fieldTarget}</Select.Item>
+                                            {#each fieldTargets as t}
+                                                <Select.Item value={t} label={t} />
                                             {/each}
                                         </Select.Content>
                                     </Select.Root>
                                 {:else}
-                                    <Select.Root type="single" name="Target" bind:value={action.target}>
-                                        <Select.Trigger class="min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                            {action.target}
-                                        </Select.Trigger>
+                                    <Select.Root type="single" bind:value={action.target}>
+                                        <Select.Trigger class="min-w-[200px]">{action.target}</Select.Trigger>
                                         <Select.Content>
-                                            {#each targets as target}
-                                                <Select.Item value={target}>{target}</Select.Item>
+                                            {#each targets as t}
+                                                <Select.Item value={t} label={t} />
                                             {/each}
                                         </Select.Content>
                                     </Select.Root>
                                 {/if}
-                                
-                                <Button 
-                                    type="button"
-                                    onclick={() => removeAction(index)}
-                                    variant="destructive"
-                                    size="sm"
-                                    class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                                >
+                                <Button type="button" variant="destructive" size="sm" onclick={() => removeAction(index)}>
                                     Remove
                                 </Button>
                             </div>
                         {/each}
-
-                        <Button 
-                            type="button"
-                            onclick={addAction}
-                            class="bg-green-600 text-white px-4 py-2 rounded text-sm flex items-center gap-1 hover:bg-green-700"
-                        >
-                            <Icon icon="lucide:plus" class="h-4 w-4" />
-                            Add Action
+                        <Button type="button" onclick={addAction} class="bg-green-600 text-white">
+                            <Icon icon="lucide:plus" class="h-4 w-4 mr-1" /> Add Action
                         </Button>
                     </div>
                 </div>
 
-                <!-- Fallback Section -->
-                <div class="bg-yellow-50 border border-yellow-300 rounded-md p-4 mt-5">
-                    <div class="font-semibold text-yellow-800 mb-2">Fallback Rule (Optional)</div>
-                    <div class="flex items-center gap-2">
-                        <Select.Root type="single" name="FallbackAction" bind:value={fallbackAction}>
-                            <Select.Trigger class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                {fallbackAction}
-                            </Select.Trigger>
+                <!-- Fallback Section (visual parity) -->
+                <div class="rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+                    <div class="mb-2 font-medium text-yellow-900">Fallback Rule (Optional)</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Select.Root type="single" bind:value={fallbackAction}>
+                            <Select.Trigger class="min-w-[200px]">{fallbackAction}</Select.Trigger>
                             <Select.Content>
-                                {#each fallbackOptions as option}
-                                    <Select.Item value={option}>{option}</Select.Item>
-                                {/each}
+                                <Select.Item value="Show All Fields" label="Show All Fields" />
+                                <Select.Item value="Skip to Field" label="Skip to Field" />
+                                <Select.Item value="Skip to Page" label="Skip to Page" />
+                                <Select.Item value="Hide Fields" label="Hide Fields" />
                             </Select.Content>
                         </Select.Root>
-                        
-                        <Select.Root type="single" name="FallbackTarget" bind:value={fallbackTarget}>
-                            <Select.Trigger class="min-w-[200px] px-3 py-2 border border-gray-300 rounded text-sm">
-                                {fallbackTarget}
-                            </Select.Trigger>
+                        <Select.Root type="single" bind:value={fallbackTarget}>
+                            <Select.Trigger class="min-w-[200px]">{fallbackTarget}</Select.Trigger>
                             <Select.Content>
-                                <Select.Item value="Default Behavior">Default Behavior</Select.Item>
-                                {#each targets as target}
-                                    <Select.Item value={target}>{target}</Select.Item>
+                                <Select.Item value="Default Behavior" label="Default Behavior" />
+                                {#each targets as t}
+                                    <Select.Item value={t} label={t} />
                                 {/each}
                             </Select.Content>
                         </Select.Root>
                     </div>
                 </div>
-            </div>
 
-            <!-- Modal Footer -->
-            <div class="px-8 py-5 border-t border-gray-200 flex justify-end gap-2">
-                <Button 
-                    type="button"
-                    onclick={handleCancel}
-                    variant="outline"
-                    class="px-6 py-3 bg-gray-50 text-gray-600 border border-gray-300 rounded-md text-sm font-semibold hover:bg-gray-100"
-                >
-                    Cancel
-                </Button>
-                <Button 
-                    type="button"
-                    onclick={handleSave}
-                    class="px-6 py-3 bg-slate-700 text-white rounded-md text-sm font-semibold hover:bg-slate-800"
-                >
-                    Save Rule
-                </Button>
+                <div class="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onclick={handleCancel}>Cancel</Button>
+                    <Button type="button" onclick={handleSave} class="bg-slate-700 text-white">Save Rule</Button>
+                </div>
             </div>
         </div>
     </div>

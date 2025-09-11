@@ -148,32 +148,40 @@
 
 	function runAllLogics() {
 		if (!executor) return;
-		executor.executeAllFieldLogics();
+		
+		// Execute all field logics (skip, calculation, validation)
+		const results = executor.executeAllFieldLogics();
 		const visibleFields = executor.getVisibleFields();
 		visibleSet = new Set(visibleFields.map((f) => f.FieldId));
 
+		// Apply calculated values to answers
+		for (const [fieldId, result] of results.entries()) {
+			if (result.calculatedValue !== undefined) {
+				answers[fieldId] = result.calculatedValue;
+			}
+		}
+
 		// Validation: only show for touched fields with non-empty values
 		const { errors: formErrors } = executor.validateForm();
-		console.log('🔍 Form validation errors:', formErrors);
-		console.log('🔍 Touched fields:', touched);
-		console.log('🔍 Current answers:', answers);
 		
 		const nextErrors: Record<string, string> = {};
 		for (const [fid, msgs] of formErrors.entries()) {
 			const val = answers[fid];
-			console.log(`🔍 Field ${fid}:`, { val, touched: touched.has(fid), msgs });
-			// Temporarily show all validation errors regardless of touched state for debugging
-			if (Array.isArray(msgs) && msgs.length > 0) {
-				nextErrors[fid] = msgs[0];
-				console.log(`🔍 Adding error for field ${fid}:`, msgs[0]);
+			// Show validation errors for touched fields with non-empty values
+			if (touched.has(fid) && val !== null && val !== undefined && val !== '') {
+				if (Array.isArray(msgs) && msgs.length > 0) {
+					nextErrors[fid] = msgs[0];
+				}
 			}
 		}
-		console.log('🔍 Final errors:', nextErrors);
 		errors = nextErrors;
 	}
 
 	// Track which field changed to enable error display post-input
+	let isRunningLogics = $state(false);
 	$effect(() => {
+		if (isRunningLogics) return; // Prevent recursive calls
+		
 		const current = answers || {};
 		let anyChanged = false;
 		for (const fid of Object.keys(current)) {
@@ -185,8 +193,9 @@
 		}
 		prevAnswers = { ...current };
 		if (anyChanged) {
-			// executor.setFieldValue(fid, answers[fid]);
+			isRunningLogics = true;
 			runAllLogics();
+			isRunningLogics = false;
 		}
 	});
 

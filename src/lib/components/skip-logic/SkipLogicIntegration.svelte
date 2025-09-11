@@ -42,35 +42,10 @@
         editingRule = null;
     }
 
-    async function handleSave(skipLogicData) {
-        if (editingRule) {
-            // Update existing rule
-            const index = skipLogicRules.findIndex(rule => rule.id === editingRule.id);
-            if (index !== -1) {
-                skipLogicRules[index] = {
-                    ...skipLogicRules[index],
-                    ...skipLogicData,
-                    id: editingRule.id,
-                    createdAt: editingRule.createdAt
-                };
-            }
-        } else {
-            // Add the new rule to our list
-            const response = await fetch(`/api/server/logic/skip-logic`, {
-					method: 'POST',
-					body: JSON.stringify({
-						FieldId: questionCard.id,
-						Enabled: true
-					}),
-					headers: { 'content-type': 'application/json' }
-				});
-				const skipLogicData = await response.json();
-				toastMessage(skipLogicData);
-				console.log('SkipLogicData: ', skipLogicData);
-        }
-
-        // Close the builder
-        closeBuilder(null);
+    async function handleSave() {
+        toastMessage({ Message: 'Skip rule saved', HttpCode: 200 });
+        showBuilder = false;
+        editingRule = null;
     }
 
     function removeRule(index, event) {
@@ -164,4 +139,5 @@
     onCancel={closeBuilder}
     editingRule={editingRule}
     {questionList}
+    currentField={questionCard}
 /> 

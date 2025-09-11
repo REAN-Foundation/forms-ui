@@ -59,8 +59,40 @@ export class FormRuleExecutor {
         if (field.CalculateLogic) {
             const result = evaluator.evaluateCalculationLogic(field.CalculateLogic);
             if (result.Success && result.Value !== undefined) {
-                calculatedValue = result.Value;
-                this.setFieldValue(fieldId, calculatedValue);
+                // Decide whether to apply calculated value based on settings
+                let autoUpdate = false;
+                let allowManualOverride = true;
+                try {
+                    type MaybeHasSettings = { Settings?: unknown };
+                    const matchedRuleWithSettings = result.MatchedRule as unknown as MaybeHasSettings | undefined;
+                    const logicWithSettings = field.CalculateLogic as unknown as MaybeHasSettings | undefined;
+                    const ruleSettingsRaw = matchedRuleWithSettings?.Settings ?? logicWithSettings?.Settings;
+                    if (typeof ruleSettingsRaw === 'string') {
+                        const parsed = JSON.parse(ruleSettingsRaw);
+                        autoUpdate = parsed?.AutoUpdate === true;
+                        allowManualOverride = parsed?.AllowManualOverride !== false;
+                    } else if (typeof ruleSettingsRaw === 'object' && ruleSettingsRaw !== null) {
+                        autoUpdate = (ruleSettingsRaw as any).AutoUpdate === true;
+                        allowManualOverride = (ruleSettingsRaw as any).AllowManualOverride !== false;
+                    }
+                } catch { }
+
+                const currentValue = this.getFieldValue(fieldId);
+                const isEmpty = currentValue === null || currentValue === undefined || currentValue === '';
+
+                // Apply rules:
+                // - If AutoUpdate true:
+                //   - If AllowManualOverride true: only set when current is empty
+                //   - If AllowManualOverride false: always set
+                // - If AutoUpdate false: set only when current is empty
+                const shouldSet = autoUpdate
+                    ? (allowManualOverride ? isEmpty : true)
+                    : isEmpty;
+
+                if (shouldSet) {
+                    calculatedValue = result.Value;
+                    this.setFieldValue(fieldId, calculatedValue);
+                }
             }
         }
 
