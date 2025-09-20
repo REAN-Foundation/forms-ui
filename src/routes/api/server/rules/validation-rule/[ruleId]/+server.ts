@@ -46,9 +46,11 @@ export const PUT = async (event: RequestEvent) => {
             data.IsActive,
             data.OperationType,
             data.OperationId,
+            data.BaseOperationId,
             data.ErrorWhenFalse,
             data.ErrorMessage,
-            data.LogicId
+            data.LogicId,
+            data.FallbackRuleId
         );
         // return json({
         //     status: 'success',

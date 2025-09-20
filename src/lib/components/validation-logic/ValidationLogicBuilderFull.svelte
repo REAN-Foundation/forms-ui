@@ -7,6 +7,8 @@
 	import { Textarea } from '../ui/textarea/index.js';
 	import RegexValidationRule from './RegexValidationRule.svelte';
 	import LogicalValidationRule from './LogicalValidationRule.svelte';
+	import FallbackRuleInput from '../fallback-logic/FallbackRuleInput.svelte';
+	import { FallbackActionType, OperationType } from '$lib/components/submission/engine/types/fallback-rule';
 	import { invalidateAll } from '$app/navigation';
 	import { toastMessage } from '../toast/toast.store.js';
 
@@ -27,6 +29,49 @@
 	let viewOnlyEditing = $derived(!!editingRule);
 	let shouldTriggerSave = $state(false);
 	let errors = $state({} as Record<string, string>);
+	let serverErrors = $state({} as Record<string, string>);
+
+	// Function to parse server validation errors
+	function parseServerErrors(errorMessage: string): Record<string, string> {
+		const errors: Record<string, string> = {};
+		
+		try {
+			// Parse the error message array
+			const errorArray = JSON.parse(errorMessage);
+			
+			errorArray.forEach((error: string) => {
+				// Extract field name and error message
+				const match = error.match(/"([^"]+)"\s+(.+)/);
+				if (match) {
+					const fieldPath = match[1];
+					const errorMsg = match[2];
+					
+					// Map server field paths to UI field names
+					if (fieldPath.includes('ActionParameters.redirectUrl')) {
+						errors.redirectUrl = errorMsg;
+					} else if (fieldPath.includes('ActionParameters.timeout')) {
+						errors.timeout = errorMsg;
+					} else if (fieldPath.includes('ActionParameters.maxRetries')) {
+						errors.maxRetries = errorMsg;
+					} else if (fieldPath.includes('ActionParameters.showDuration')) {
+						errors.showDuration = errorMsg;
+					} else if (fieldPath.includes('ActionMessage')) {
+						errors.actionMessage = errorMsg;
+					} else if (fieldPath.includes('Action')) {
+						errors.action = errorMsg;
+					} else {
+						// Generic error for unknown fields
+						errors.general = errorMsg;
+					}
+				}
+			});
+		} catch (e) {
+			// If parsing fails, show the raw error message
+			errors.general = errorMessage;
+		}
+		
+		return errors;
+	}
 
 	// Form fields
 	let ruleName = $state('');
@@ -40,7 +85,21 @@
 	let testResult = $state('');
 	let testResultClass = $state('');
 	let errorMessage = $state('');
-	let fallbackAction = $state('');
+	
+	// Fallback rule state
+	let fallbackAction = $state(FallbackActionType.SHOW_MESSAGE);
+	let fallbackActionMessage = $state('');
+	let fallbackActionParameters = $state({
+		timeout: 0,
+		maxRetries: 0,
+		redirectUrl: '',
+		customHandler: '',
+		fieldValue: '',
+		fieldState: '',
+		messageType: 'info' as 'info' | 'warning' | 'error' | 'success',
+		showDuration: 0,
+		validationRules: []
+	});
 
 	// Logical validation fields
 	let conditions = $state([
@@ -125,7 +184,8 @@
 		ruleDescription = '';
 		rulePriority = 1;
 		errorMessage = '';
-		fallbackAction = '';
+		fallbackAction = FallbackActionType.SHOW_MESSAGE;
+		fallbackActionMessage = 'Validation failed, please check your input';
 		// Reset type-specific fields
 		selectedValidationType = 'regex';
 		activeTab = 'regex';
@@ -288,8 +348,15 @@
 	}
 
 	// Handler functions for child component callbacks
-	function handleRegexOperationCreated(event: CustomEvent) {
+	async function handleRegexOperationCreated(event: CustomEvent) {
 		resetTriggerFlag();
+
+		// Create fallback rule first for both new and edit operations
+		let fallbackRuleId = null;
+		fallbackRuleId = await createOrUpdateFallbackRule(event.detail?.operationId, OperationType.Logical);
+		if (!fallbackRuleId) {
+			console.warn('Failed to create fallback rule, proceeding without it');
+		}
 
 		// If this is an edit operation, close modal directly
 		if (event.detail.isEdit) {
@@ -297,13 +364,21 @@
 			onSave?.();
 			invalidateAll();
 		} else {
-			// Call parent's onSave with the operation data for creation
-			handleSubmit(event.detail);
+			// Create main rule with fallback rule ID
+			await handleSubmit(event.detail, fallbackRuleId);
 		}
 	}
 
-	function handleLogicalOperationsCreated(event: CustomEvent) {
+	async function handleLogicalOperationsCreated(event: CustomEvent) {
 		shouldTriggerSave = false;
+		
+		// Create fallback rule first for both new and edit operations
+		let fallbackRuleId = null;
+		fallbackRuleId = await createOrUpdateFallbackRule(event.detail?.operationId, OperationType.Composition);
+		if (!fallbackRuleId) {
+			console.warn('Failed to create fallback rule, proceeding without it');
+		}
+
 		// If this came from an edit flow, do not create a new rule
 		if (event.detail?.isEdit) {
 			isOpen = false;
@@ -311,24 +386,192 @@
 			invalidateAll();
 			return;
 		}
-		handleSubmit(event.detail);
+		// Create main rule with fallback rule ID
+		await handleSubmit(event.detail, fallbackRuleId);
 	}
 
-	function handleCompositeCompositionCreated(event: CustomEvent) {
-		resetTriggerFlag();
 
-		// If this is an edit operation, close modal directly
-		if (event.detail.isEdit) {
-			isOpen = false;
-			onSave?.();
-			invalidateAll();
+	// Function to create or update fallback rule
+	async function createOrUpdateFallbackRule(operationId?: string, operationType?: string): Promise<string | null> {
+		// Check if we're editing an existing fallback rule
+		if (editingRule?.FallbackRuleId) {
+			return await updateFallbackRule(editingRule.FallbackRuleId, operationId, operationType);
 		} else {
-			// Call parent's onSave with the operation data for creation
-			handleSubmit(event.detail);
+			return await createFallbackRule(operationId, operationType);
 		}
 	}
 
-	async function handleSubmit(operationData: any) {
+	// Function to filter out empty ActionParameters
+	function filterEmptyActionParameters(params: any): any {
+		const filtered: any = {};
+		
+		Object.keys(params).forEach(key => {
+			const value = params[key];
+			// Only include non-empty values
+			if (value !== null && value !== undefined && value !== '' && value !== 0) {
+				// For strings, also check if they're not just whitespace
+				if (typeof value === 'string' && value.trim() !== '') {
+					filtered[key] = value;
+				} else if (typeof value !== 'string') {
+					filtered[key] = value;
+				}
+			}
+		});
+		
+		return filtered;
+	}
+
+	// Create a new fallback rule
+	async function createFallbackRule(operationId?: string, operationType?: string): Promise<string | null> {
+		// Determine operation type based on validation type or use passed parameter
+		const finalOperationType = operationType || (selectedValidationType === 'regex' ? OperationType.Logical : OperationType.Composition);
+		
+		const fallbackRule = {
+			Name: `${ruleName} - Fallback Rule`,
+			Description: `Fallback rule for ${ruleName}`,
+			Priority: 1,
+			IsActive: true,
+			OperationType: finalOperationType,
+			BaseOperationId: operationId || '',
+			Action: fallbackAction,
+			ActionMessage: fallbackActionMessage,
+			ActionParameters: filterEmptyActionParameters(fallbackActionParameters)
+		};
+
+		try {
+			const response = await fetch('/api/server/rules/fallback-rule', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(fallbackRule)
+			});
+
+			const result = await response.json();
+			if (response.ok && result.Data?.id) {
+				// Clear any previous server errors on success
+				serverErrors = {};
+				return result.Data.id;
+			} else {
+				console.error('Failed to create fallback rule:', result.Message);
+				
+				// Parse and display server validation errors
+				if (result.Message) {
+					serverErrors = parseServerErrors(result.Message);
+					console.error('Server validation errors:', serverErrors);
+				}
+			}
+		} catch (error) {
+			console.error('Error creating fallback rule:', error);
+			serverErrors = { general: 'Network error occurred while creating fallback rule' };
+		}
+
+		return null;
+	}
+
+	// Update an existing fallback rule
+	async function updateFallbackRule(fallbackRuleId: string, operationId?: string, operationType?: string): Promise<string | null> {
+		// Determine operation type based on validation type or use passed parameter
+		const finalOperationType = operationType || (selectedValidationType === 'regex' ? OperationType.Logical : OperationType.Composition);
+		
+		const fallbackRule = {
+			Name: `${ruleName} - Fallback Rule`,
+			Description: `Fallback rule for ${ruleName}`,
+			Priority: 1,
+			IsActive: true,
+			OperationType: finalOperationType,
+			BaseOperationId: operationId || '',
+			Action: fallbackAction,
+			ActionMessage: fallbackActionMessage,
+			ActionParameters: filterEmptyActionParameters(fallbackActionParameters)
+		};
+
+		try {
+			const response = await fetch(`/api/server/rules/fallback-rule/${fallbackRuleId}`, {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(fallbackRule)
+			});
+
+			const result = await response.json();
+			if (response.ok) {
+				// Clear any previous server errors on success
+				serverErrors = {};
+				return fallbackRuleId; // Return the same ID since we're updating
+			} else {
+				console.error('Failed to update fallback rule:', result.Message);
+				
+				// Parse and display server validation errors
+				if (result.Message) {
+					serverErrors = parseServerErrors(result.Message);
+					console.error('Server validation errors:', serverErrors);
+				}
+			}
+		} catch (error) {
+			console.error('Error updating fallback rule:', error);
+			serverErrors = { general: 'Network error occurred while updating fallback rule' };
+		}
+
+		return null;
+	}
+
+	// Load fallback rule data for editing
+	async function loadFallbackRuleData() {
+		// First check if fallback rule data is already available in editingRule.originalRule
+		if (editingRule?.originalRule?.FallbackRule) {
+			fallbackAction = editingRule.originalRule.FallbackRule.Action || FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = editingRule.originalRule.FallbackRule.ActionMessage || 'Validation failed, please check your input';
+			return;
+		}
+
+		// If not available, try to fetch it
+		if (!editingRule?.originalRule?.FallbackRuleId) {
+			// No fallback rule, use defaults
+			fallbackAction = FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = 'Validation failed, please check your input';
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/server/rules/fallback-rule/${editingRule.originalRule.FallbackRuleId}`);
+			if (response.ok) {
+				const result = await response.json();
+				const fallbackRule = result.Data;
+				
+				if (fallbackRule) {
+					fallbackAction = fallbackRule.Action || FallbackActionType.SHOW_MESSAGE;
+					fallbackActionMessage = fallbackRule.ActionMessage || 'Validation failed, please check your input';
+				}
+			} else {
+				fallbackAction = FallbackActionType.SHOW_MESSAGE;
+				fallbackActionMessage = 'Validation failed, please check your input';
+			}
+		} catch (error) {
+			fallbackAction = FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = 'Validation failed, please check your input';
+		}
+	}
+
+	// Initialize editing mode
+	$effect(() => {
+		if (editingRule && isOpen) {
+			loadFallbackRuleData();
+		}
+	});
+
+	// New function that creates fallback rule first, then main rule
+	async function handleSubmitWithFallback(operationData: any) {
+		// Step 0: Create fallback rule first (always create one)
+		let fallbackRuleId = null;
+		const operationType = selectedValidationType === 'regex' ? OperationType.Logical : OperationType.Composition;
+		fallbackRuleId = await createOrUpdateFallbackRule(operationData?.operationId, operationType);
+		if (!fallbackRuleId) {
+			console.warn('Failed to create fallback rule, proceeding without it');
+		}
+
+		// Now call the original handleSubmit with the fallback rule ID
+		await handleSubmit(operationData, fallbackRuleId);
+	}
+
+	async function handleSubmit(operationData: any, fallbackRuleId: string | null = null) {
 		try {
 			// Reset errors
 			errors = {};
@@ -349,6 +592,9 @@
 			if (Object.keys(errors).length > 0) {
 				return;
 			}
+
+			// Use the passed fallbackRuleId
+			let finalFallbackRuleId = fallbackRuleId;
 
 			if (!logicId) {
 				// Step 1: Create new validation logic if it doesn't exist
@@ -389,9 +635,11 @@
 					IsActive: true,
 					OperationType: operationData.operationType,
 					OperationId: operationData.operationId,
+					BaseOperationId: operationData.operationId, // Add BaseOperationId same as OperationId
 					ErrorWhenFalse: true,
 					ErrorMessage: errorMessage,
-					LogicId: logicId
+					LogicId: logicId,
+					FallbackRuleId: finalFallbackRuleId || undefined
 				};
 
 				const ruleResponse = await fetch('/api/server/rules/validation-rule', {
@@ -586,27 +834,35 @@
 					</div>
 				</div>
 
-				<!-- Fallback Section -->
-				<div class="mb-5 rounded-md border border-yellow-200 bg-yellow-50 p-4">
-					<div class="mb-2 font-semibold text-yellow-800">Fallback Rule (Optional)</div>
-					<div class="mb-4">
-						<Select.Root type="single" bind:value={fallbackAction}>
-							<Select.Trigger class="w-full rounded-md border-2 border-gray-200 p-3 text-sm">
-								{fallbackAction || 'Select fallback action'}
-							</Select.Trigger>
-							<Select.Content portalProps={{}}>
-								<Select.Item value="Allow submission with warning" label="Allow submission with warning" />
-								<Select.Item value="Block submission" label="Block submission" />
-								<Select.Item value="Skip validation" label="Skip validation" />
-								<Select.Item value="Apply default value" label="Apply default value" />
-							</Select.Content>
-						</Select.Root>
+				<!-- Fallback Rules Section -->
+				<div class="mb-6 rounded-lg border-2 border-gray-200 bg-white p-5">
+					<div class="mb-4 flex items-center gap-2">
+						<Icon icon="lucide:shield-alert" class="h-5 w-5" />
+						<h3 class="text-base font-medium text-gray-900">Fallback Rules</h3>
+					</div>
+					
+					<!-- Server Error Display -->
+					{#if serverErrors.general}
+						<div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+							<p class="text-sm text-red-600">{serverErrors.general}</p>
+						</div>
+					{/if}
+					
+					<div class="space-y-4">
+						<p class="text-sm text-gray-600">
+							Define what should happen when this validation rule fails or encounters an error.
+						</p>
+						<FallbackRuleInput
+							bind:action={fallbackAction}
+							bind:actionMessage={fallbackActionMessage}
+							bind:actionParameters={fallbackActionParameters}
+						/>
 					</div>
 				</div>
 			</div>
 
 			<!-- Modal Footer -->
-			<div class="flex justify-end gap-3 border-t border-gray-200 p-5">
+			<div class="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-8 py-5">
 				<Button
 					variant="outline"
 					onclick={handleCancel}

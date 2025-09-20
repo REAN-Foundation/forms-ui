@@ -29,7 +29,8 @@ export const POST = async (event: RequestEvent) => {
             data.OperationId,
             data.LogicId,
             data.Settings || {},
-            data.RuleOutcome || {}
+            data.RuleOutcome || {},
+            data.FallbackRuleId
         );
         return new Response(JSON.stringify(response));
     } catch (err) {

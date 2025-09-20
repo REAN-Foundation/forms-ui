@@ -5,9 +5,13 @@
 		OperationType
 	} from './schemas/logical-operation-schema.js';
 	import { Button } from '../ui/button/index.js';
+	import { Input } from '../ui/input/index.js';
+	import { Label } from '../ui/label/index.js';
+	import * as Select from '../ui/select/index.js';
 	import Icon from '@iconify/svelte';
 	import TreeNode from './TreeNode.svelte';
 	import { toBackendOperator, toDisplayOperator } from './utils/operators.js';
+	import { getAllFields, getFieldDisplay, getCurrentOperators } from '../calculation-logic/service.js';
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +52,9 @@
 		conditions = [],
 		shouldTriggerSave = $bindable(false),
 		handleLogicalOperationsCreated,
-		editedOperationId = null
+		editedOperationId = null,
+		// Mode selection for logical vs composite
+		conditionMode = 'logical' as 'logical' | 'composite'
 	} = $props();
 
 	// State
@@ -59,6 +65,12 @@
 
 	// Store created logical operation IDs
 	let createdLogicalOperationIds = $state([] as string[]);
+
+	// Logical condition form variables
+	let logicalConditionName = $state('');
+	let logicalConditionField = $state('');
+	let logicalConditionOperator = $state('');
+	let logicalConditionValue = $state('');
 
 	// -------------------------------
 	// AST types and helpers
@@ -415,7 +427,7 @@
 		if (node.type === 'logical') {
 			const condition = node.condition;
 			// Find selected field
-			const selectedField = getAllFields().find(
+			const selectedField = getAllFieldsFromQuestionList().find(
 				(field) =>
 					field.id === condition.field ||
 					field.Title === condition.field ||
@@ -509,7 +521,7 @@
 	}
 
 	// Helper function to get all available fields from questionList
-	function getAllFields() {
+	function getAllFieldsFromQuestionList() {
 		const allFields = [];
 		for (const section of questionList) {
 			for (const field of section.FormFields) {
@@ -522,16 +534,9 @@
 	function getFieldByAny(value: string) {
 		if (!value) return null;
 		return (
-			getAllFields().find((f) => f.id === value || f.Title === value || f.DisplayCode === value) ||
+			getAllFieldsFromQuestionList().find((f) => f.id === value || f.Title === value || f.DisplayCode === value) ||
 			null
 		);
-	}
-
-	function getFieldDisplay(value: string): string {
-		const f = getFieldByAny(value);
-		if (!f) return value || '';
-		const label = f.Title || f.DisplayCode || '';
-		return formatFieldTitle(label);
 	}
 
 	// Helper function to format field title with hyphens
@@ -624,56 +629,144 @@
 		// Reset errors
 		errors = {} as Record<string, string>;
 
-		// Helper: does operator require a value?
-		function operatorRequiresValue(op: string): boolean {
-			return op !== 'Is Empty' && op !== 'Is Not Empty';
-		}
-
-		// Prune incomplete logical leaves and empty groups
-		function pruneTree(node: LogicalNode | CompositeNode): LogicalNode | CompositeNode | null {
-			if (node.type === 'logical') {
-				const c = node.condition;
-				const hasField = !!c.field;
-				const hasOperator = !!c.operator;
-				const hasValue =
-					!operatorRequiresValue(c.operator) ||
-					(c.value !== undefined && c.value !== null && `${c.value}`.trim() !== '');
-				return hasField && hasOperator && hasValue ? node : null;
+		if (conditionMode === 'logical') {
+			// Handle simple logical condition
+			if (!logicalConditionField || !logicalConditionOperator) {
+				errors.general = 'Please fill in all required fields for the logical condition.';
+				return;
 			}
-			// composite
-			const prunedChildren: Array<LogicalNode | CompositeNode> = [];
-			for (const child of node.children) {
-				const pruned = pruneTree(child);
-				if (pruned) prunedChildren.push(pruned);
+
+			try {
+				// Create a simple logical operation
+				const selectedField = getAllFieldsFromQuestionList().find(
+					(field) =>
+						field.id === logicalConditionField ||
+						field.Title === logicalConditionField ||
+						field.DisplayCode === logicalConditionField
+				);
+				if (!selectedField) {
+					throw new Error('Selected field not found');
+				}
+
+				const operatorType = toBackendOperator(logicalConditionOperator);
+				let operands: any[] = [];
+
+				if (logicalConditionOperator === 'Is Empty' || logicalConditionOperator === 'Is Not Empty') {
+					operands = [
+						{
+							Type: 'FieldReference',
+							DataType: selectedField?.ResponseType || 'Text',
+							FieldId: selectedField?.id || '',
+							FieldCode: selectedField?.DisplayCode || ''
+						}
+					];
+				} else {
+					operands = [
+						{
+							Type: 'FieldReference',
+							DataType: selectedField?.ResponseType || 'Text',
+							FieldId: selectedField?.id || '',
+							FieldCode: selectedField?.DisplayCode || ''
+						},
+						{
+							Type: 'Constant',
+							DataType: 'Text',
+							Value: logicalConditionValue || ''
+						}
+					];
+				}
+
+				const logicalOperation = {
+					Name: logicalConditionName && logicalConditionName.trim().length > 0
+						? logicalConditionName
+						: `${ruleName} - Logical condition`,
+					Description: `${ruleDescription} - Logical validation condition`,
+					Type: OperationType.Logical,
+					Operator: operatorType,
+					Operands: JSON.stringify(operands)
+				};
+
+				const result = await logicalOperationSchema.safeParseAsync(logicalOperation);
+				if (!result.success) {
+					throw new Error('Invalid logical operation structure');
+				}
+
+				const logicalResponse = await fetch('/api/server/operations/logical-operation', {
+					method: 'POST',
+					body: JSON.stringify(logicalOperation),
+					headers: { 'content-type': 'application/json' }
+				});
+				if (!logicalResponse.ok) {
+					const errorData = await logicalResponse.json();
+					throw new Error(errorData.Message || 'Failed to create logical operation');
+				}
+				const logicalData = await logicalResponse.json();
+				const opId = logicalData.Data.id as string;
+
+				const dispatchData = {
+					operationId: opId,
+					operationType: 'Logical',
+					operation: { id: opId },
+					logicalOperationIds: [opId]
+				};
+				handleLogicalOperationsCreated({ detail: dispatchData });
+			} catch (error) {
+				console.error('Error creating logical validation workflow:', error);
+				errors.general = (error as any).message;
 			}
-			if (prunedChildren.length === 0) return null;
-			return { ...node, children: prunedChildren } as CompositeNode;
-		}
+		} else {
+			// Handle composite condition (existing tree logic)
+			// Helper: does operator require a value?
+			function operatorRequiresValue(op: string): boolean {
+				return op !== 'Is Empty' && op !== 'Is Not Empty';
+			}
 
-		// Validate pruned tree
-		const prunedRoot = pruneTree(treeRoot);
-		if (!prunedRoot) {
-			errors.general = 'Please add at least one complete condition.';
-			return;
-		}
+			// Prune incomplete logical leaves and empty groups
+			function pruneTree(node: LogicalNode | CompositeNode): LogicalNode | CompositeNode | null {
+				if (node.type === 'logical') {
+					const c = node.condition;
+					const hasField = !!c.field;
+					const hasOperator = !!c.operator;
+					const hasValue =
+						!operatorRequiresValue(c.operator) ||
+						(c.value !== undefined && c.value !== null && `${c.value}`.trim() !== '');
+					return hasField && hasOperator && hasValue ? node : null;
+				}
+				// composite
+				const prunedChildren: Array<LogicalNode | CompositeNode> = [];
+				for (const child of node.children) {
+					const pruned = pruneTree(child);
+					if (pruned) prunedChildren.push(pruned);
+				}
+				if (prunedChildren.length === 0) return null;
+				return { ...node, children: prunedChildren } as CompositeNode;
+			}
 
-		try {
-			createdLogicalOperationIds = [];
-			// Create operations bottom-up directly from pruned tree
-			const rootOpId = await createOperationsForNode(prunedRoot);
+			// Validate pruned tree
+			const prunedRoot = pruneTree(treeRoot);
+			if (!prunedRoot) {
+				errors.general = 'Please add at least one complete condition.';
+				return;
+			}
 
-			// Determine correct operation type for the created root
-			const isCompositeRoot = (prunedRoot as any).type === 'composite';
-			const dispatchData = {
-				operationId: rootOpId,
-				operationType: isCompositeRoot ? 'Composition' : 'Logical',
-				operation: { id: rootOpId },
-				logicalOperationIds: createdLogicalOperationIds
-			};
-			handleLogicalOperationsCreated({ detail: dispatchData });
-		} catch (error) {
-			console.error('Error creating logical validation workflow:', error);
-			errors.general = (error as any).message;
+			try {
+				createdLogicalOperationIds = [];
+				// Create operations bottom-up directly from pruned tree
+				const rootOpId = await createOperationsForNode(prunedRoot);
+
+				// Determine correct operation type for the created root
+				const isCompositeRoot = (prunedRoot as any).type === 'composite';
+				const dispatchData = {
+					operationId: rootOpId,
+					operationType: isCompositeRoot ? 'Composition' : 'Logical',
+					operation: { id: rootOpId },
+					logicalOperationIds: createdLogicalOperationIds
+				};
+				handleLogicalOperationsCreated({ detail: dispatchData });
+			} catch (error) {
+				console.error('Error creating logical validation workflow:', error);
+				errors.general = (error as any).message;
+			}
 		}
 	}
 
@@ -705,7 +798,7 @@
 				const hasNameChanged = (cur.condition.name || '') !== (orig.condition.name || '');
 				if (hasFieldChanged || hasOpChanged || hasValChanged || hasNameChanged) {
 					// Build new operands for PUT
-					const selectedField = getAllFields().find(
+					const selectedField = getAllFieldsFromQuestionList().find(
 						(f) =>
 							f.id === cur.condition.field ||
 							f.Title === cur.condition.field ||
@@ -805,44 +898,127 @@
 
 <!-- Logical Validation UI -->
 <div class="space-y-6">
+	<!-- Mode Selection: Logical vs Composite -->
+	<div class="mb-4 flex items-center gap-8">
+		<label class="flex items-center gap-2">
+			<input
+				type="radio"
+				name="conditionMode"
+				value="logical"
+				bind:group={conditionMode}
+				class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+			/>
+			<span class="text-base">Logical</span>
+		</label>
+		<label class="flex items-center gap-2">
+			<input
+				type="radio"
+				name="conditionMode"
+				value="composite"
+				bind:group={conditionMode}
+				class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+			/>
+			<span class="text-base">Composite</span>
+		</label>
+	</div>
+
 	<div class="mb-2 rounded-lg border-2 border-gray-200 bg-gray-50 p-4">
 		<div class="mb-3 flex items-center justify-between">
 			<div>
-				<h3 class="text-lg font-semibold text-gray-800">Condition Tree</h3>
-				<p class="text-sm text-gray-600">Compose nested groups (AND/OR) and logical leaves</p>
+				<h3 class="text-lg font-semibold text-gray-800">
+					{conditionMode === 'logical' ? 'Simple Logical Condition' : 'Composite Condition Tree'}
+				</h3>
+				<p class="text-sm text-gray-600">
+					{conditionMode === 'logical' 
+						? 'Create a single logical condition for validation'
+						: 'Compose nested groups (AND/OR) and logical leaves'
+					}
+				</p>
 			</div>
-			<!-- <div class="flex items-center gap-2">
-				<Button type="button" variant="outline" onclick={() => addLogicalAt([])}>
-					<Icon icon="mdi:plus" class="mr-2 h-4 w-4" /> Add Logical at Root
-				</Button>
-				<Button type="button" variant="outline" onclick={() => addGroupAt([])}>
-					<Icon icon="mdi:plus" class="mr-2 h-4 w-4" /> Add Group at Root
-				</Button>
-				<Button type="button" variant="outline" onclick={() => toggleGroupOperator([])}>
-					Toggle Root: {treeRoot.operator}
-				</Button>
-			</div> -->
 		</div>
 
 		<!-- Tree visual (interactive) -->
 		<div class="space-y-2">
-			<TreeNode
-				node={treeRoot}
-				path={[]}
-				fields={getAllFields()}
-				{operators}
-				onAddLogical={(p) => addLogicalAt(p)}
-				onAddGroup={(p, op) => addGroupAtWithOperator(p, op)}
-				onRemove={(p) => removeAt(p)}
-				onChangeGroupOperator={(p, op) => onChangeGroupOperator(p, op)}
-				onChangeLeafField={(p, v) => onChangeLeafField(p, v)}
-				onChangeLeafOperator={(p, v) => onChangeLeafOperator(p, v)}
-				onChangeLeafValue={(p, v) => onChangeLeafValue(p, v)}
-				onChangeLeafName={(p, v) => onChangeLeafName(p, v)}
-				{collapsedByPath}
-				onToggleCollapse={(p) => toggleCollapse(p)}
-				readonly={false}
-			/>
+			{#if conditionMode === 'logical'}
+				<!-- Simple logical condition form -->
+				<div class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+					<div class="grid grid-cols-2 gap-4">
+						<div class="space-y-2">
+							<Label class="text-sm font-medium text-gray-700">Name of Condition</Label>
+							<Input
+								type="text"
+								bind:value={logicalConditionName}
+								placeholder="Enter condition name"
+								class="w-full"
+							/>
+						</div>
+						<div class="space-y-2">
+							<Label class="text-sm font-medium text-gray-700">Field</Label>
+							<Select.Root
+								type="single"
+								bind:value={logicalConditionField}
+							>
+								<Select.Trigger class="w-full">
+									{logicalConditionField
+										? getFieldDisplay(logicalConditionField, questionList)
+										: 'Select field'}
+								</Select.Trigger>
+								<Select.Content>
+									{#each getAllFieldsFromQuestionList() as field}
+										<Select.Item value={field.id} label={field.Title || field.DisplayCode} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+					</div>
+					<div class="grid grid-cols-2 gap-4">
+						<div class="space-y-2">
+							<Label class="text-sm font-medium text-gray-700">Operator</Label>
+							<Select.Root
+								type="single"
+								bind:value={logicalConditionOperator}
+							>
+								<Select.Trigger class="w-full">
+									{logicalConditionOperator || 'Select operator'}
+								</Select.Trigger>
+								<Select.Content>
+									{#each getCurrentOperators(logicalConditionField, questionList) as operator}
+										<Select.Item value={operator} label={operator} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+						<div class="space-y-2">
+							<Label class="text-sm font-medium text-gray-700">Value</Label>
+							<Input
+								type="text"
+								bind:value={logicalConditionValue}
+								placeholder="Enter value"
+								class="w-full"
+							/>
+						</div>
+					</div>
+				</div>
+			{:else}
+				<!-- Composite tree structure -->
+				<TreeNode
+					node={treeRoot}
+					path={[]}
+					fields={getAllFieldsFromQuestionList()}
+					{operators}
+					onAddLogical={(p) => addLogicalAt(p)}
+					onAddGroup={(p, op) => addGroupAtWithOperator(p, op)}
+					onRemove={(p) => removeAt(p)}
+					onChangeGroupOperator={(p, op) => onChangeGroupOperator(p, op)}
+					onChangeLeafField={(p, v) => onChangeLeafField(p, v)}
+					onChangeLeafOperator={(p, v) => onChangeLeafOperator(p, v)}
+					onChangeLeafValue={(p, v) => onChangeLeafValue(p, v)}
+					onChangeLeafName={(p, v) => onChangeLeafName(p, v)}
+					{collapsedByPath}
+					onToggleCollapse={(p) => toggleCollapse(p)}
+					readonly={false}
+				/>
+			{/if}
 		</div>
 	</div>
 

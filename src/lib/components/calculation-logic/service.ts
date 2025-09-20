@@ -405,16 +405,20 @@ export async function updateFunctionExpressionOperation(opId: string, expr: stri
 /**
  * Create a calculation rule
  */
-export async function createCalculationRule(params: { logicId: string; conditionOperationId: string; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
-    const { logicId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome } = params;
+export async function createCalculationRule(params: { logicId: string; conditionOperationId: string | null; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; fallbackRuleId?: string; }) {
+	const { logicId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome, fallbackRuleId } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        OperationType: operationType, // Use the actual operation type (Logical or Composite)
-        BaseOperationId: conditionOperationId, // This is the condition operation (logical/composite)
-        OperationId: conditionOperationId, // This is also the condition operation (logical/composite)
+		OperationType: operationType, // Use the actual operation type (Logical or Composite)
         LogicId: logicId
     };
+
+	// Only add BaseOperationId and OperationId if we have a condition operation
+	if (conditionOperationId) {
+		payload.BaseOperationId = conditionOperationId; // This is the condition operation (logical/composite)
+		payload.OperationId = conditionOperationId; // This is also the condition operation (logical/composite)
+	}
 
     // Add Settings if provided
     if (settings) {
@@ -429,6 +433,12 @@ export async function createCalculationRule(params: { logicId: string; condition
         payload.RuleOutcome = ruleOutcome;
     }
 
+	// Add FallbackRuleId if provided
+	if (fallbackRuleId) {
+		payload.FallbackRuleId = fallbackRuleId;
+	}
+
+	console.log('Creating calculation rule with payload:', JSON.stringify(payload, null, 2));
 
     const res = await fetch('/api/server/rules/calculation-rule', {
         method: 'POST',
@@ -444,15 +454,19 @@ export async function createCalculationRule(params: { logicId: string; condition
 /**
  * Update a calculation rule
  */
-export async function updateCalculationRule(params: { ruleId: string; conditionOperationId: string; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; }) {
-    const { ruleId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome } = params;
+export async function updateCalculationRule(params: { ruleId: string; conditionOperationId: string | null; operationType: string; ruleName?: string; ruleDescription?: string; settings?: any; ruleOutcome?: any; fallbackRuleId?: string; }) {
+	const { ruleId, conditionOperationId, operationType, ruleName, ruleDescription, settings, ruleOutcome, fallbackRuleId } = params;
     const payload: any = {
         Name: ruleName || 'Calculation Rule',
         Description: ruleDescription || 'Field Calculation-rule Description',
-        OperationType: operationType, // Use the actual operation type (Logical or Composite)
-		BaseOperationId: conditionOperationId || null,
-		OperationId: conditionOperationId || null
+		OperationType: operationType // Use the actual operation type (Logical or Composite)
     };
+
+	// Only add BaseOperationId and OperationId if we have a condition operation
+	if (conditionOperationId) {
+		payload.BaseOperationId = conditionOperationId; // This is the condition operation (logical/composite)
+		payload.OperationId = conditionOperationId; // This is also the condition operation (logical/composite)
+	}
 
     // Add Settings if provided
     if (settings) {
@@ -465,6 +479,13 @@ export async function updateCalculationRule(params: { ruleId: string; conditionO
 	// Always add RuleOutcome (can be null to clear it)
 	payload.RuleOutcome = ruleOutcome;
 
+	// Add FallbackRuleId if provided
+	if (fallbackRuleId) {
+		payload.FallbackRuleId = fallbackRuleId;
+	}
+
+	console.log('Updating calculation rule with payload:', JSON.stringify(payload, null, 2));
+
     const res = await fetch(`/api/server/rules/calculation-rule/${ruleId}`, {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
@@ -474,6 +495,86 @@ export async function updateCalculationRule(params: { ruleId: string; conditionO
         const data = await res.json();
         throw new Error(data?.Message || 'Failed to update calculation rule');
     }
+}
+
+/**
+ * Get fallback rules for a specific operation
+ */
+export async function getFallbackRulesForOperation(baseOperationId: string) {
+	try {
+		const res = await fetch(`/api/server/rules/fallback-rule?BaseOperationId=${baseOperationId}`);
+		if (!res.ok) {
+			throw new Error('Failed to fetch fallback rules');
+		}
+		const data = await res.json();
+		return data.Data || [];
+	} catch (error) {
+		console.error('Error fetching fallback rules:', error);
+		return [];
+	}
+}
+
+/**
+ * Create a fallback rule
+ */
+export async function createFallbackRule(ruleData: any) {
+	try {
+		const res = await fetch('/api/server/rules/fallback-rule', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify(ruleData)
+		});
+		if (!res.ok) {
+			const data = await res.json();
+			throw new Error(data?.Message || 'Failed to create fallback rule');
+		}
+		const data = await res.json();
+		return data.Data;
+	} catch (error) {
+		console.error('Error creating fallback rule:', error);
+		throw error;
+	}
+}
+
+/**
+ * Update a fallback rule
+ */
+export async function updateFallbackRule(ruleId: string, ruleData: any) {
+	try {
+		const res = await fetch(`/api/server/rules/fallback-rule/${ruleId}`, {
+			method: 'PUT',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify(ruleData)
+		});
+		if (!res.ok) {
+			const data = await res.json();
+			throw new Error(data?.Message || 'Failed to update fallback rule');
+		}
+		const data = await res.json();
+		return data.Data;
+	} catch (error) {
+		console.error('Error updating fallback rule:', error);
+		throw error;
+	}
+}
+
+/**
+ * Delete a fallback rule
+ */
+export async function deleteFallbackRule(ruleId: string) {
+	try {
+		const res = await fetch(`/api/server/rules/fallback-rule/${ruleId}`, {
+			method: 'DELETE'
+		});
+		if (!res.ok) {
+			const data = await res.json();
+			throw new Error(data?.Message || 'Failed to delete fallback rule');
+		}
+		return true;
+	} catch (error) {
+		console.error('Error deleting fallback rule:', error);
+		throw error;
+	}
 }
 
 /**
@@ -519,7 +620,7 @@ export function getResetForCreateState() {
 		conditionMode: 'composite' as 'logical' | 'composite',
 		outcomeMode: 'expression' as 'static' | 'expression',
 		staticValue: '',
-		staticValueDataType: 'Text',
+		staticValueDataType: 'Float',
 		logicalConditionName: '',
 		logicalConditionField: '',
 		logicalConditionOperator: '',
@@ -550,7 +651,7 @@ export function getResetFormState() {
 		logicalConditionName: '',
 		outcomeMode: 'expression' as 'static' | 'expression',
 		staticValue: '',
-		staticValueDataType: 'Text',
+		staticValueDataType: 'Float',
 		decimalPlaces: '2',
 		roundingMethod: 'Round to nearest',
 		autoUpdate: false,
@@ -1191,7 +1292,7 @@ export function initializeEditingData(editingRule: any, questionList: QuestionSe
 		const ruleOutcome = originalRule.RuleOutcome;
 		let outcomeMode: 'static' | 'expression' = 'expression';
 		let staticValue = '';
-		let staticValueDataType = 'Text';
+		let staticValueDataType = 'Float';
 		let expressions = { global: '0' };
 
 		if (ruleOutcome) {
@@ -1208,7 +1309,7 @@ export function initializeEditingData(editingRule: any, questionList: QuestionSe
 			if (parsedRuleOutcome.Type === 'StaticValue') {
 				outcomeMode = 'static';
 				staticValue = parsedRuleOutcome.StaticValue || '';
-				staticValueDataType = parsedRuleOutcome.DataType || 'Text';
+				staticValueDataType = parsedRuleOutcome.DataType || 'Float';
 			} else if (parsedRuleOutcome.Type === 'FunctionExpression') {
 				outcomeMode = 'expression';
 				// Use the expression from RuleOutcome, not from Operation

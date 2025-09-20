@@ -56,6 +56,11 @@ export const validationRuleSchema = z.object({
         .string()
         .uuid({ message: "OperationId must be a valid UUID." }),
 
+    BaseOperationId: z
+        .string()
+        .uuid({ message: "BaseOperationId must be a valid UUID." })
+        .optional(),
+
     ErrorWhenFalse: z
         .boolean(),
 

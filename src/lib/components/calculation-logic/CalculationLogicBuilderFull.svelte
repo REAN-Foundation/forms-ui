@@ -7,6 +7,8 @@
 	import { toastMessage } from '../toast/toast.store.js';
 	import TreeNodeClean from './TreeNodeClean.svelte';
 	import ExpressionBuilder from './ExpressionBuilder.svelte';
+	import FallbackRuleInput from '../fallback-logic/FallbackRuleInput.svelte';
+	import { FallbackActionType, OperationType } from '$lib/components/submission/engine/types/fallback-rule';
 	import {
 		createFunctionExpressionOperation,
 		updateFunctionExpressionOperation,
@@ -46,11 +48,12 @@
 	} = $props();
 
 	// State variables - Rule configuration
+	let errors = $state({} as Record<string, string>);
 	let useConditionalLogic = $state(false);
 	let conditionMode = $state<'logical' | 'composite'>('composite');
 	let outcomeMode = $state<'static' | 'expression'>('expression');
 	let staticValue = $state('');
-	let staticValueDataType = $state('Text');
+	let staticValueDataType = $state('Float');
 	let logicalConditionName = $state('');
 	let logicalConditionField = $state('');
 	let logicalConditionOperator = $state('');
@@ -74,6 +77,10 @@
 	let allowManualOverride = $state(false);
 	let numberFormat = $state('number');
 	let lastInitializedRuleId = $state(null);
+	
+	// Fallback rule state
+	let fallbackAction = $state(FallbackActionType.SHOW_MESSAGE);
+	let fallbackActionMessage = $state('');
 
 	// Constants
 	const roundingMethods = ['Round to nearest', 'Round up', 'Round down', 'Truncate'];
@@ -83,17 +90,8 @@
 		'Float', 
 		'Integer', 
 		'Boolean', 
-		'Object', 
-		'TextArray', 
-		'SingleChoiceSelection', 
-		'MultiChoiceSelection', 
-		'File', 
-		'Date', 
 		'DateTime', 
-		'Rating', 
-		'Location', 
-		'Url', 
-		'Range'
+		'Location'
 	];
 	// Reset operator when field changes to ensure valid operator is selected
 	function resetOperatorForCurrentField() {
@@ -209,6 +207,9 @@
 				staticValue = editingData.staticValue;
 				staticValueDataType = editingData.staticValueDataType;
 				expressions = editingData.expressions;
+				
+				// Load fallback rule data if it exists
+				await loadFallbackRuleData();
 			}
 		} catch (error) {
 			toastMessage({
@@ -217,6 +218,44 @@
 			});
 		}
 	}
+
+	// Load fallback rule data for editing
+	async function loadFallbackRuleData() {
+		// First check if fallback rule data is already available in editingRule
+		if (editingRule.originalRule?.FallbackRule) {
+			fallbackAction = editingRule.originalRule.FallbackRule.Action || FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = editingRule.originalRule.FallbackRule.ActionMessage || 'Validation failed, please check your input';
+			return;
+		}
+
+		// If not available, try to fetch it
+		if (!editingRule?.originalRule?.FallbackRuleId) {
+			// No fallback rule, use defaults
+			fallbackAction = FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = 'Validation failed, please check your input';
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/server/rules/fallback-rule/${editingRule.originalRule.FallbackRuleId}`);
+			if (response.ok) {
+				const result = await response.json();
+				const fallbackRule = result.Data;
+				
+				if (fallbackRule) {
+					fallbackAction = fallbackRule.Action || FallbackActionType.SHOW_MESSAGE;
+					fallbackActionMessage = fallbackRule.ActionMessage || 'Validation failed, please check your input';
+				}
+			} else {
+				fallbackAction = FallbackActionType.SHOW_MESSAGE;
+				fallbackActionMessage = 'Validation failed, please check your input';
+			}
+		} catch (error) {
+			fallbackAction = FallbackActionType.SHOW_MESSAGE;
+			fallbackActionMessage = 'Validation failed, please check your input';
+		}
+	}
+
 	// Tree Manipulation Functions
 	function addLogical(path: number[]) { tree = addLogicalToTree(tree, path); }
 	function addGroup(path: number[], operator: 'AND' | 'OR' = 'AND') { tree = addGroupToTree(tree, path, operator); }
@@ -414,16 +453,32 @@
 
 			// Determine operation type based on current UI state
 			const operationType = useConditionalLogic ? 
-				(conditionMode === 'logical' ? 'Logical' : 'Composition') : 
-				(editingRule.originalRule?.OperationType || 'FunctionExpression');
+				(conditionMode === 'logical' ? OperationType.Logical : OperationType.Composition) : 
+				(editingRule.originalRule?.OperationType || OperationType.FunctionExpression);
+
+			// Create or update fallback rule with operation ID
+			let fallbackRuleId = null;
+			fallbackRuleId = await createOrUpdateFallbackRule(conditionsOperationId, operationType);
+			if (!fallbackRuleId) {
+				console.warn('Failed to create/update fallback rule, proceeding without it');
+			}
+
+			// Ensure we have a valid operation ID for update
+			const finalOperationId = conditionsOperationId || editingRule.conditionsOperationId;
+			if (!finalOperationId) {
+				throw new Error('No valid operation ID found for update. Please check your condition configuration.');
+			}
+
+			console.log('Updating calculation rule with BaseOperationId:', finalOperationId);
 
 			// Update the calculation rule with all current values
 			await updateCalculationRule({
 				ruleId: editingRule.id,
-				conditionOperationId: conditionsOperationId || editingRule.conditionsOperationId || null,
+				conditionOperationId: finalOperationId,
 				operationType,
 				ruleName,
 				ruleDescription,
+				fallbackRuleId,
 				settings,
 				ruleOutcome
 			});
@@ -458,6 +513,81 @@
 			});
 		}
 	}
+
+	// Function to create or update fallback rule
+	async function createOrUpdateFallbackRule(operationId?: string, operationType?: string): Promise<string | null> {
+		// Check if we're editing an existing fallback rule
+		if (editingRule?.FallbackRuleId) {
+			return await updateFallbackRule(editingRule.FallbackRuleId, operationId, operationType);
+		} else {
+			return await createFallbackRule(operationId, operationType);
+		}
+	}
+
+	// Create a new fallback rule
+	async function createFallbackRule(operationId?: string, operationType?: string): Promise<string | null> {
+		const fallbackRule = {
+			Name: `${ruleName} - Fallback Rule`,
+			Description: `Fallback rule for ${ruleName}`,
+			Priority: 1,
+			IsActive: true,
+			OperationType: operationType || OperationType.FunctionExpression,
+			BaseOperationId: operationId || '',
+			Action: fallbackAction,
+			ActionMessage: fallbackActionMessage,
+			ActionParameters: {}
+		};
+
+		try {
+			const response = await fetch('/api/server/rules/fallback-rule', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(fallbackRule)
+			});
+
+			const result = await response.json();
+			if (response.ok && result.Data?.id) {
+				return result.Data.id;
+			}
+		} catch (error) {
+			console.error('Error creating fallback rule:', error);
+		}
+
+		return null;
+	}
+
+	// Update an existing fallback rule
+	async function updateFallbackRule(fallbackRuleId: string, operationId?: string, operationType?: string): Promise<string | null> {
+		const fallbackRule = {
+			Name: `${ruleName} - Fallback Rule`,
+			Description: `Fallback rule for ${ruleName}`,
+			Priority: 1,
+			IsActive: true,
+			OperationType: operationType || OperationType.FunctionExpression,
+			BaseOperationId: operationId || '',
+			Action: fallbackAction,
+			ActionMessage: fallbackActionMessage,
+			ActionParameters: {}
+		};
+
+		try {
+			const response = await fetch(`/api/server/rules/fallback-rule/${fallbackRuleId}`, {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(fallbackRule)
+			});
+
+			const result = await response.json();
+			if (response.ok) {
+				return fallbackRuleId; // Return the same ID since we're updating
+			}
+		} catch (error) {
+			console.error('Error updating fallback rule:', error);
+		}
+
+		return null;
+	}
+
 	async function handleSave(event) {
 		event?.preventDefault();
 		event?.stopPropagation();
@@ -466,6 +596,8 @@
 		if (editingRule) {
 			return await handleUpdateRule(event);
 		}
+
+		let finalFallbackRuleId = null;
 
 		// Validate required fields
 		if (!ruleName.trim()) {
@@ -514,28 +646,57 @@
 				}
 					// If tree is empty, conditionsOperationId remains null
 				}
-			}
-			
-			// Validate that we have a condition operation if conditional logic is enabled
-			if (useConditionalLogic && !conditionsOperationId) {
-				throw new Error('Failed to create condition operation. Please check your condition settings.');
+				
+				// Validate that we have a condition operation if conditional logic is enabled
+				if (!conditionsOperationId) {
+					throw new Error('Failed to create condition operation. Please check your condition settings.');
+				}
 			}
 
-			// Step 2: Create function expression operation (but don't use it in the rule)
+			// Step 2: Create function expression operation
+			let outcomeOperationId: string | null = null;
 			if (outcomeMode === 'expression') {
-				// Create function expression operation (but don't use it in the rule)
-				await createFunctionExpressionOperation(
+				// Create function expression operation
+				outcomeOperationId = await createFunctionExpressionOperation(
 					expressions['global'] || '',
 					ruleName,
 					questionList
 				);
 			}
+			
+			// If no conditional logic is used, we need to handle the case where there's no operation
+			if (!useConditionalLogic) {
+				if (outcomeOperationId) {
+					// Use the outcome operation as the base operation
+					conditionsOperationId = outcomeOperationId;
+				} else {
+					// For static mode without conditional logic, we don't have an operation
+					// This is a valid case - the calculation rule will work without a BaseOperationId
+					conditionsOperationId = null;
+				}
+			}
 
-			// Step 3: Create the calculation rule with ONLY logical/composite operations
+			// Determine the operation type based on user's choice
+			const operationType = useConditionalLogic ? 
+				(conditionMode === 'logical' ? OperationType.Logical : OperationType.Composition) : 
+				OperationType.FunctionExpression;
+
+			// Step 2.5: Create or update fallback rule with operation ID
+			finalFallbackRuleId = await createOrUpdateFallbackRule(conditionsOperationId, operationType);
+			if (!finalFallbackRuleId) {
+				console.warn('Failed to create/update fallback rule, proceeding without it');
+			}
+
+			// Step 3: Create the calculation rule
 			// First create a calculation logic if it doesn't exist
 			let logicId = currentField?.CalculateLogic?.id || '';
 			if (!logicId) {
 				logicId = await ensureCalculationLogic(currentField);
+			}
+			
+			// Validate that we have a valid operation ID
+			if (!conditionsOperationId) {
+				throw new Error('No valid operation ID found. Please check your configuration.');
 			}
 			
 			// Validate that we have content for the outcome
@@ -557,14 +718,16 @@
 				DataType: 'Float'
 			};
 			
-			// Determine the operation type based on user's choice
-			const operationType = useConditionalLogic ? 
-				(conditionMode === 'logical' ? 'Logical' : 'Composition') : 
-				'FunctionExpression';
+			// Ensure we have a valid operation ID (unless it's static mode without conditional logic)
+			if (!conditionsOperationId && (useConditionalLogic || outcomeMode === 'expression')) {
+				throw new Error('No valid operation ID found. Please check your condition configuration.');
+			}
+
+			console.log('Creating calculation rule with BaseOperationId:', conditionsOperationId);
 
 			const ruleData = {
 				logicId,
-				conditionOperationId: conditionsOperationId || '', // Use the logical/composite operation ID as the main operation
+				conditionOperationId: conditionsOperationId, // Use the logical/composite/function expression operation ID as the main operation
 				operationType, // Pass the correct operation type
 				ruleName,
 				ruleDescription,
@@ -576,7 +739,8 @@
 					AllowManualOverride: allowManualOverride,
 					NumberFormat: numberFormat
 				},
-				ruleOutcome
+				ruleOutcome,
+				fallbackRuleId: finalFallbackRuleId || undefined
 			};
 
 			const ruleResult = await createCalculationRule(ruleData);
@@ -611,46 +775,64 @@
 </script>
 
 {#if isOpen}
-	<!-- Modal Overlay -->
 	<div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
 		<!-- Modal -->
-		<div class="max-h-[90vh] w-[95%] max-w-6xl overflow-y-auto rounded-lg bg-white shadow-2xl">
+		<div class="flex max-h-[90vh] w-[90%] max-w-4xl flex-col rounded-lg bg-white shadow-2xl">
 			<!-- Modal Header -->
-			<div class="flex items-center justify-between rounded-t-lg bg-slate-700 p-5 text-white">
-				<div>
-				<h2 class="text-lg font-semibold">Field Calculation Logic Builder</h2>
-				</div>
+			<div
+				class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-8 py-5"
+			>
+				<h2 class="text-xl font-semibold text-slate-700">
+					{editingRule ? 'Edit Calculation Rule' : 'Create Calculation Rule'}
+				</h2>
 				<button
 					type="button"
-					class="rounded p-1 text-2xl text-white hover:bg-slate-600"
 					onclick={handleCancel}
+					class="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
-					×
+					<Icon icon="mdi:close" class="h-5 w-5" />
 				</button>
 			</div>
 
 			<!-- Modal Body -->
-			<div class="p-8">
-				<!-- 1. Rule Name -->
-				<div class="mb-6">
+			<div class="flex-1 overflow-y-auto p-8">
+				<!-- General Error Display -->
+				{#if errors.general}
+					<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
+						<p class="text-sm text-red-600">{errors.general}</p>
+					</div>
+				{/if}
+
+				<!-- Rule Validation Errors -->
+				{#if errors.ruleName || errors.ruleDescription}
+					<div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4">
+						{#if errors.ruleName}
+							<p class="text-sm text-red-600">• {errors.ruleName}</p>
+						{/if}
+						{#if errors.ruleDescription}
+							<p class="text-sm text-red-600">• {errors.ruleDescription}</p>
+						{/if}
+					</div>
+				{/if}
+
+				<!-- Rule Name -->
+				<div class="mb-4">
 					<Label class="mb-2 block font-semibold text-slate-700">Rule Name</Label>
 					<Input
 						bind:value={ruleName}
-						placeholder="Enter rule name"
-						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm focus:border-blue-500"
+						placeholder="Enter calculation rule name"
+						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 					/>
-					<div class="mt-1 text-xs text-gray-500">(Maximum 100 characters)</div>
 				</div>
 
-				<!-- 2. Rule Description -->
+				<!-- Rule Description -->
 				<div class="mb-6">
 					<Label class="mb-2 block font-semibold text-slate-700">Rule Description</Label>
 					<Input
 						bind:value={ruleDescription}
-						placeholder="Enter rule description (optional)"
-						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm focus:border-blue-500"
+						placeholder="Enter calculation rule description"
+						class="w-full rounded-md border-2 border-gray-200 p-3 text-sm"
 					/>
-					<div class="mt-1 text-xs text-gray-500">(Optional: Describe what this rule does)</div>
 				</div>
 
 				<!-- 2.5. Update Operations Checkbox (Edit Mode Only) -->
@@ -990,26 +1172,41 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- Fallback Rules Section -->
+				<div class="mb-6 rounded-lg border-2 border-gray-200 bg-white p-5">
+					<div class="mb-4 flex items-center gap-2">
+						<Icon icon="lucide:shield-alert" class="h-5 w-5" />
+						<h3 class="text-base font-medium text-gray-900">Fallback Rules</h3>
+					</div>
+					
+					<div class="space-y-4">
+						<p class="text-sm text-gray-600">
+							Define what should happen when this calculation rule fails or encounters an error.
+						</p>
+						<FallbackRuleInput
+							bind:action={fallbackAction}
+							bind:actionMessage={fallbackActionMessage}
+						/>
+					</div>
+				</div>
 			</div>
 
 			<!-- Modal Footer -->
 			<div class="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-8 py-5">
 				<Button
-					type="button"
-					onclick={handleCancel}
 					variant="outline"
-					class="rounded-md border-2 border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100"
+					onclick={handleCancel}
+					class="rounded-md border border-gray-300 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50"
 				>
-					<Icon icon="lucide:x" class="mr-2 h-4 w-4" />
 					Cancel
 				</Button>
 				<Button
-					type="button"
+					variant="default"
 					onclick={handleSave}
-					class="rounded-md bg-slate-700 px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-slate-800"
+					class="rounded-md bg-slate-700 px-6 py-3 font-semibold text-white hover:bg-slate-800"
 				>
-					<Icon icon="lucide:save" class="mr-2 h-4 w-4" />
-					Save Rule
+					Save Calculation Rule
 				</Button>
 			</div>
 		</div>

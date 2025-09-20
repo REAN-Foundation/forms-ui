@@ -72,18 +72,21 @@ export interface BaseRule {
 export interface SkipRule extends BaseRule {
     Operation: Operation;           // When should we consider skipping?
     SkipWhenTrue: boolean;         // Skip field if condition evaluates to true (or false)
+    FallbackRuleId?: string;       // Reference to fallback rule
 }
 
 export interface CalculationRule extends BaseRule {
     ConditionForOperation?: Operation;         // Optional: When should this calculation apply?
     Operation: Operation;
     RuleOutcome?: any;  // What value should be calculated?
+    FallbackRuleId?: string;       // Reference to fallback rule
 }
 
 export interface ValidationRule extends BaseRule {
     Operation: Operation;           // What should be validated?
     ErrorWhenFalse: boolean;         // Show error when expression is false (typical) or true
     ErrorMessage: string;            // Error message to show when validation fails
+    FallbackRuleId?: string;       // Reference to fallback rule
 }
 
 // Legacy Rule interface for backward compatibility
